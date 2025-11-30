@@ -1,6 +1,12 @@
 
 #include "MC6803E_ALU.h"
 
+// Cheeky overload to debug easier
+#define ALU_MC6803E_SetCurrentMneunomicWithPayload(p, instr, x) _Generic((x), \
+    uint8_t:  ALU_MC6803E_SetCurrentMneunomicWithPayload8, \
+    uint16_t: ALU_MC6803E_SetCurrentMneunomicWithPayload16 \
+)(p, instr, x)
+
 /*
 	Debug Instructions
 */
@@ -16,31 +22,49 @@ char * ALU_MC6803E_SetCurrentMneunomic(MC6803E_MPU * p, char * instruction)
 {
 	ALU_MC6803E_FreeCurrentMneunomic(p);
 	p->lastCommandMneunomic = calloc(128, sizeof(char));
-	sprintf(p->lastCommandMneunomic, "%04X:(%02x %02x %02x)\t%s", p->pc, 
-		(uint32_t)p->MemoryMap[p->pc],
-		(uint32_t)p->MemoryMap[p->pc+1],
-		(uint32_t)p->MemoryMap[p->pc+2],
+	sprintf(p->lastCommandMneunomic, "%04X:(%02x)\t%s", p->pc, 
+		(uint8_t)p->MemoryMap[p->pc],
 		 instruction);
+	p->lastCommandMneunomicLen = 0;
 	return p->lastCommandMneunomic;
 }
-char * ALU_MC6803E_SetCurrentMneunomicWithPayload(MC6803E_MPU * p, char * instruction, unsigned int payload)
+
+char * ALU_MC6803E_SetCurrentMneunomicWithPayload8(MC6803E_MPU * p, char * instruction, uint8_t payload)
 {
 	ALU_MC6803E_FreeCurrentMneunomic(p);
 	p->lastCommandMneunomic = calloc(128, sizeof(char));
 	
 	char * format_string = calloc(sizeof(char), strlen(instruction) + 0xff);
-	sprintf(format_string, "%04X:(%02x %02x %02x)\t", p->pc,
-		(uint32_t)p->MemoryMap[p->pc],
-		(uint32_t)p->MemoryMap[p->pc+1],
-		(uint32_t)p->MemoryMap[p->pc+2]);
-	strcat(format_string, instruction);
+	sprintf(format_string, "%04X:(%02x %02x)\t%s", p->pc,
+		(uint8_t)p->MemoryMap[p->pc],
+		(uint8_t)p->MemoryMap[p->pc+1],
+		instruction);
 	
 	sprintf(p->lastCommandMneunomic, format_string, payload);
-	
+
 	free(format_string);
+	p->lastCommandMneunomicLen = 1;
 	return p->lastCommandMneunomic;
 }
 
+char * ALU_MC6803E_SetCurrentMneunomicWithPayload16(MC6803E_MPU * p, char * instruction, uint16_t payload)
+{
+	ALU_MC6803E_FreeCurrentMneunomic(p);
+	p->lastCommandMneunomic = calloc(128, sizeof(char));
+	
+	char * format_string = calloc(sizeof(char), strlen(instruction) + 0xff);
+	sprintf(format_string, "%04X:(%02x %02x %02x)\t%s", p->pc,
+		(uint8_t)p->MemoryMap[p->pc],
+		(uint8_t)p->MemoryMap[p->pc+1], 
+		(uint8_t)p->MemoryMap[p->pc+2], 
+		instruction);
+	
+	sprintf(p->lastCommandMneunomic, format_string, payload);
+
+	free(format_string);
+	p->lastCommandMneunomicLen = 2;
+	return p->lastCommandMneunomic;
+}
 /*
 	Convenience Functions.
 */
@@ -2219,9 +2243,9 @@ void ALU_MC6803E_LDD(MC6803E_MPU * p)
 
 	switch (instruction) {
 		case 0xCC: // LDD Immediate
-			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "LDD #$%02X", unsigned_payload);
-			*(p->accumulatorD) = (uint16_t)unsigned_payload;
-			ALU_MC6803E_IncrementPC(p, 1);
+			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "LDD #$%04X", unsigned_payload_double);
+			*(p->accumulatorD) = (uint16_t)unsigned_payload_double;
+			ALU_MC6803E_IncrementPC(p, 2);
 			break;
 		case 0xDC: // LDD Direct
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "LDD %02X", unsigned_payload);
