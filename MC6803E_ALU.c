@@ -584,6 +584,7 @@ void ALU_MC6803E_CPX(MC6803E_MPU * p)
 
 	uint16_t result;
 
+
 	switch (instruction) {
 		case 0x8C: // CPX Immediate
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "CPX #$%02X", unsigned_payload);
@@ -608,11 +609,11 @@ void ALU_MC6803E_CPX(MC6803E_MPU * p)
 		default:
 			break;
 	}
-	
+	//SUB C = X7'M7+M7R7+R7X7'
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (result & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, (result & 0xff));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (result & 0x100));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
 }
 
 /*
@@ -981,7 +982,7 @@ void ALU_MC6803E_ABA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (result & 0x100));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
 }
 
 /*
@@ -1015,40 +1016,40 @@ void ALU_MC6803E_ADCA(MC6803E_MPU * p)
 	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
 	uint16_t direct_address = (uint16_t)unsigned_payload;
 
-	uint16_t new_value; // We use uint16_t to see if we overflow in a uint8_t.
+	uint16_t result; // We use uint16_t to see if we overflow in a uint8_t.
 
 	switch (instruction) {
 		case 0x89: // ADCA Immediate
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADCA #$%02X", unsigned_payload);
-			new_value = (p->accumulatorA + unsigned_payload + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
+			result = (p->accumulatorA + unsigned_payload + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0x99: // ADCA Direct
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADCA %02X", unsigned_payload);
-			new_value = (p->accumulatorA + MemoryRead(p, direct_address) + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
+			result = (p->accumulatorA + MemoryRead(p, direct_address) + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xA9: // ADCA Index
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADCA %02X(x)", unsigned_payload);
-			new_value = (p->accumulatorA + MemoryRead(p, p->indexRegister + unsigned_payload) + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
+			result = (p->accumulatorA + MemoryRead(p, p->indexRegister + unsigned_payload) + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xB9: // ADCA Extended
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADCA %04X", unsigned_payload_double);
-			new_value = (p->accumulatorA + MemoryRead(p, unsigned_payload_double) + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
+			result = (p->accumulatorA + MemoryRead(p, unsigned_payload_double) + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
 			ALU_MC6803E_IncrementPC(p, 2);
 			break;
 		default:
 			break;
 	}
 	
-	p->accumulatorA = (uint8_t)new_value;
+	p->accumulatorA = (uint8_t)result;
 
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_H, (p->accumulatorA & 0x10));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (new_value > 0xff));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (p->accumulatorA & 0x100));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
 }
 
 /*
@@ -1063,40 +1064,40 @@ void ALU_MC6803E_ADCB(MC6803E_MPU * p)
 	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
 	uint16_t direct_address = (uint16_t)unsigned_payload;
 
-	uint16_t new_value; // We use uint16_t to see if we overflow in a uint8_t.
+	uint16_t result; // We use uint16_t to see if we overflow in a uint8_t.
 	
 	switch (instruction) {
 		case 0xC9: // ADCB Immediate
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADCB #$%02X", unsigned_payload);
-			new_value = (p->accumulatorB + unsigned_payload + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
+			result = (p->accumulatorB + unsigned_payload + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xD9: // ADCB Direct
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADCB %02X", unsigned_payload);
-			new_value = (p->accumulatorB + MemoryRead(p, direct_address) + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
+			result = (p->accumulatorB + MemoryRead(p, direct_address) + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xE9: // ADCB Index
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADCB %02X(x)", unsigned_payload);
-			new_value = (p->accumulatorB + MemoryRead(p, p->indexRegister + unsigned_payload) + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
+			result = (p->accumulatorB + MemoryRead(p, p->indexRegister + unsigned_payload) + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xF9: // ADCB Extended
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADCB %04X", unsigned_payload_double);
-			new_value = (p->accumulatorB + MemoryRead(p, unsigned_payload_double) + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
+			result = (p->accumulatorB + MemoryRead(p, unsigned_payload_double) + ALU_MC6803E_GetFlag(p, MC6803E_FLAG_C));
 			ALU_MC6803E_IncrementPC(p, 2);
 			break;
 		default:
 			break;
 	}
 	
-	p->accumulatorB = (uint8_t)new_value;
+	p->accumulatorB = (uint8_t)result;
 
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_H, (p->accumulatorB & 0x10));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorB & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (new_value > 0xff)); // new_value is a uint16_t.
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (p->accumulatorB & 0x100));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff)); // result is a uint16_t.
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
 }
 
 /*
@@ -1112,40 +1113,40 @@ void ALU_MC6803E_ADDA(MC6803E_MPU * p)
 	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
 	uint16_t direct_address = (uint16_t)unsigned_payload;
 
-	uint16_t new_value;
+	uint16_t result;
 
 	switch (instruction) {
 		case 0x8B: // ADDA Immediate
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDA #$%02X", unsigned_payload);
-			new_value = (p->accumulatorA + unsigned_payload);
+			result = (p->accumulatorA + unsigned_payload);
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0x9B: // ADDA Direct
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDA %02X", unsigned_payload);
-			new_value = (p->accumulatorA + MemoryRead(p, direct_address));
+			result = (p->accumulatorA + MemoryRead(p, direct_address));
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xAB: // ADDA Index
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDA %02X(x)", unsigned_payload);
-			new_value = (p->accumulatorA + MemoryRead(p, p->indexRegister + unsigned_payload));
+			result = (p->accumulatorA + MemoryRead(p, p->indexRegister + unsigned_payload));
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xBB: // ADDA Extended
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDA %04X", unsigned_payload_double);
-			new_value = (p->accumulatorA + MemoryRead(p, unsigned_payload_double));
+			result = (p->accumulatorA + MemoryRead(p, unsigned_payload_double));
 			ALU_MC6803E_IncrementPC(p, 2);
 			break;
 		default:
 			break;
 	}
 	
-	p->accumulatorA = (uint8_t)new_value;
+	p->accumulatorA = (uint8_t)result;
 
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_H, (p->accumulatorA & 0x10));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (new_value > 0xff));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (p->accumulatorA & 0x100));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
 }
 
 /*
@@ -1161,40 +1162,40 @@ void ALU_MC6803E_ADDB(MC6803E_MPU * p)
 	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
 	uint16_t direct_address = (uint16_t)unsigned_payload;
 
-	uint16_t new_value;
+	uint16_t result;
 
 	switch (instruction) {
 		case 0xCB: // ADDB Immediate
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDB #$%02X", unsigned_payload);
-			new_value = (p->accumulatorB + unsigned_payload);
+			result = (p->accumulatorB + unsigned_payload);
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xDB: // ADDB Direct
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDB %02X", unsigned_payload);
-			new_value = (p->accumulatorB + MemoryRead(p, direct_address));
+			result = (p->accumulatorB + MemoryRead(p, direct_address));
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xEB: // ADDB Index
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDB %02X(x)", unsigned_payload);
-			new_value = (p->accumulatorB + MemoryReadIndexValue(p, unsigned_payload));
+			result = (p->accumulatorB + MemoryReadIndexValue(p, unsigned_payload));
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xFB: // ADDB Extended
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDB %04X", unsigned_payload_double);
-			new_value = (p->accumulatorB + MemoryRead(p, unsigned_payload_double));
+			result = (p->accumulatorB + MemoryRead(p, unsigned_payload_double));
 			ALU_MC6803E_IncrementPC(p, 2);
 			break;
 		default:
 			break;
 	}
 	
-	p->accumulatorB = (uint8_t)new_value;
+	p->accumulatorB = (uint8_t)result;
 
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_H, (p->accumulatorB & 0x10));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorB & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (new_value > 0xff));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (p->accumulatorB & 0x100));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
 }
 
 /*
@@ -1210,39 +1211,39 @@ void ALU_MC6803E_ADDD(MC6803E_MPU * p)
 	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
 	uint16_t direct_address = (uint16_t)unsigned_payload;
 
-	uint32_t new_value;
+	uint32_t result;
 
 	switch (instruction) {
 		case 0xC3: // ADDD Immediate
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDD #$%02X", unsigned_payload);
-			new_value = (*(p->accumulatorD) + unsigned_payload);
+			result = (*(p->accumulatorD) + unsigned_payload);
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xD3: // ADDD Direct
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDD %02X", unsigned_payload);
-			new_value = (*(p->accumulatorD) + MemoryRead(p, direct_address));
+			result = (*(p->accumulatorD) + MemoryRead(p, direct_address));
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xE3: // ADDD Index
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDD %02X(x)", unsigned_payload);
-			new_value = (*(p->accumulatorD) + MemoryReadIndexValue(p, unsigned_payload));
+			result = (*(p->accumulatorD) + MemoryReadIndexValue(p, unsigned_payload));
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xF3: // ADDD Extended
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDD %04X", unsigned_payload_double);
-			new_value = (*(p->accumulatorD) + MemoryRead(p, unsigned_payload_double));
+			result = (*(p->accumulatorD) + MemoryRead(p, unsigned_payload_double));
 			ALU_MC6803E_IncrementPC(p, 2);
 			break;
 		default:
 			break;
 	}
 	
-	*(p->accumulatorD) = (uint16_t)new_value;
+	*(p->accumulatorD) = (uint16_t)result;
 
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (*(p->accumulatorD) & 0x8000));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, *(p->accumulatorD));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (new_value > 0xffff));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (*(p->accumulatorD) & 0x10000));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xffff));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint32_t)0x10000)>>16));
 }
 
 /*
@@ -1286,7 +1287,7 @@ void ALU_MC6803E_ANDA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	// @CC Why do you carry with and? surely 0xff & 0xff is just 0xff.... (no carry?)
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_C);
+	// ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_C); NOT AFFECTED, DO NOT MODIFY
 }
 
 /*
@@ -1330,7 +1331,7 @@ void ALU_MC6803E_ANDB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	// @CC see ANDA re carry
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_C);
+	// ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_C); NOT AFFECTED DO NOT MODIFY
 }
 
 /*
@@ -1745,7 +1746,7 @@ void ALU_MC6803E_CMPA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (result & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, result);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (result & 0x100));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
 }
 
 // NOT IMPLEMENTED
@@ -1792,7 +1793,7 @@ void ALU_MC6803E_CMPB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (result & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, result);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (result & 0x100));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
 }
 
 /*
