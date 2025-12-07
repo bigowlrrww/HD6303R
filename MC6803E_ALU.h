@@ -35,6 +35,7 @@ uint8_t 	ALU_MC6803E_SetFlagIfZero(MC6803E_MPU *, uint8_t, uint8_t);
 #define MC6803E_FLAG_N	(uint8_t)(0x1 << 3)
 #define MC6803E_FLAG_I	(uint8_t)(0x1 << 4)
 #define MC6803E_FLAG_H	(uint8_t)(0x1 << 5)
+#define MC6803E_FLAG_VERIFIED (uint8_t)(0x1 << 6)
 #define MC6803E_FLAG_IMP (uint8_t)(0x1 << 7)
 
 /*

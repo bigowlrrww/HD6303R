@@ -614,7 +614,8 @@ void ALU_MC6803E_CPX(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, (result & 0xff));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
-	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP); //Flag this as a implemented Mnuenomic
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -636,6 +637,8 @@ void ALU_MC6803E_DEX(MC6803E_MPU * p)
 	}
 	
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->indexRegister);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -655,6 +658,8 @@ void ALU_MC6803E_DES(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -676,6 +681,8 @@ void ALU_MC6803E_INX(MC6803E_MPU * p)
 	}
 	
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->indexRegister);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -695,6 +702,8 @@ void ALU_MC6803E_INS(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -737,6 +746,8 @@ void ALU_MC6803E_LDX(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->indexRegister & 0x8000));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->indexRegister);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -779,6 +790,8 @@ void ALU_MC6803E_LDS(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->stackPointer & 0x8000));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->stackPointer);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -825,6 +838,8 @@ void ALU_MC6803E_STX(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->indexRegister & 0x8000));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->indexRegister);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -870,6 +885,8 @@ void ALU_MC6803E_STS(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->indexRegister & 0x8000));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->indexRegister);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -889,6 +906,8 @@ void ALU_MC6803E_TXS(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -908,6 +927,8 @@ void ALU_MC6803E_TSX(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -929,6 +950,8 @@ void ALU_MC6803E_PSHX(MC6803E_MPU * p)
 	}
 	
 	p->stackPointer--;
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -956,6 +979,8 @@ void ALU_MC6803E_PULX(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 	
 }
 
@@ -984,6 +1009,8 @@ void ALU_MC6803E_ABA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1003,6 +1030,8 @@ void ALU_MC6803E_ABX(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1051,6 +1080,8 @@ void ALU_MC6803E_ADCA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1099,6 +1130,8 @@ void ALU_MC6803E_ADCB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff)); // result is a uint16_t.
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1148,6 +1181,8 @@ void ALU_MC6803E_ADDA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1197,6 +1232,8 @@ void ALU_MC6803E_ADDB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1245,6 +1282,8 @@ void ALU_MC6803E_ADDD(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, *(p->accumulatorD));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xffff));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint32_t)0x10000)>>16));
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1287,8 +1326,8 @@ void ALU_MC6803E_ANDA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
-	// @CC Why do you carry with and? surely 0xff & 0xff is just 0xff.... (no carry?)
-	// ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_C); NOT AFFECTED, DO NOT MODIFY
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1331,8 +1370,8 @@ void ALU_MC6803E_ANDB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorB & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
-	// @CC see ANDA re carry
-	// ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_C); NOT AFFECTED DO NOT MODIFY
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1375,6 +1414,8 @@ void ALU_MC6803E_ASL(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, value);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, overflow);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, carry);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -1398,6 +1439,8 @@ void ALU_MC6803E_ASLA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -1421,6 +1464,8 @@ void ALU_MC6803E_ASLB(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -1444,6 +1489,8 @@ void ALU_MC6803E_ASLD(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -1472,6 +1519,8 @@ void ALU_MC6803E_ASR(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -1495,6 +1544,8 @@ void ALU_MC6803E_ASRA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -1518,6 +1569,8 @@ void ALU_MC6803E_ASRB(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -1554,6 +1607,8 @@ void ALU_MC6803E_BITA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -1590,6 +1645,8 @@ void ALU_MC6803E_BITB(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -1613,6 +1670,8 @@ void ALU_MC6803E_CBA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1647,6 +1706,8 @@ void ALU_MC6803E_CLR(MC6803E_MPU * p)
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_Z);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_C);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1675,6 +1736,8 @@ void ALU_MC6803E_CLRA(MC6803E_MPU * p)
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_Z);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_C);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1703,6 +1766,8 @@ void ALU_MC6803E_CLRB(MC6803E_MPU * p)
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_Z);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_C);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1748,6 +1813,8 @@ void ALU_MC6803E_CMPA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, result);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -1795,6 +1862,8 @@ void ALU_MC6803E_CMPB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, result);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1830,6 +1899,8 @@ void ALU_MC6803E_COM(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, result);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_C);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1854,6 +1925,8 @@ void ALU_MC6803E_COMA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_C);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1878,6 +1951,8 @@ void ALU_MC6803E_COMB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_C);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -1901,6 +1976,8 @@ void ALU_MC6803E_DAA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1937,6 +2014,8 @@ void ALU_MC6803E_DEC(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, (result & 0xff));
 	// @CC how can this overflow...
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1960,6 +2039,8 @@ void ALU_MC6803E_DECA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
 	// @CC how can this overlow... see dec
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -1983,6 +2064,8 @@ void ALU_MC6803E_DECB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorB & 0x80));
 	// @CC how can this overflow... (see deca)
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2026,6 +2109,8 @@ void ALU_MC6803E_EORA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2069,6 +2154,8 @@ void ALU_MC6803E_EORB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorB & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2097,6 +2184,8 @@ void ALU_MC6803E_INC(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2120,6 +2209,8 @@ void ALU_MC6803E_INCA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, p->accumulatorA);
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_V, p->accumulatorA);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2143,6 +2234,8 @@ void ALU_MC6803E_INCB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, p->accumulatorB);
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_V, p->accumulatorB);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2186,6 +2279,8 @@ void ALU_MC6803E_LDAA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2229,6 +2324,8 @@ void ALU_MC6803E_LDAB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorB & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2274,6 +2371,8 @@ void ALU_MC6803E_LDD(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, *(p->accumulatorD));
 	// @CC why set V?
 	// @CC why set C?
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // The same as ASL.
@@ -2308,6 +2407,8 @@ void ALU_MC6803E_LSR(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2331,6 +2432,8 @@ void ALU_MC6803E_LSRA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2354,6 +2457,8 @@ void ALU_MC6803E_LSRB(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2377,6 +2482,8 @@ void ALU_MC6803E_LSRD(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2401,6 +2508,8 @@ void ALU_MC6803E_MUL(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2429,6 +2538,8 @@ void ALU_MC6803E_NEG(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2452,6 +2563,8 @@ void ALU_MC6803E_NEGA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2475,6 +2588,8 @@ void ALU_MC6803E_NEGB(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2493,6 +2608,8 @@ void ALU_MC6803E_NOP(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2535,6 +2652,8 @@ void ALU_MC6803E_ORAA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2578,6 +2697,8 @@ void ALU_MC6803E_ORAB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorB & 0x80));
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2598,6 +2719,8 @@ void ALU_MC6803E_PSHA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2618,6 +2741,8 @@ void ALU_MC6803E_PSHB(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2642,6 +2767,8 @@ void ALU_MC6803E_PULA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2662,6 +2789,8 @@ void ALU_MC6803E_PULB(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2699,6 +2828,8 @@ void ALU_MC6803E_ROL(MC6803E_MPU * p)
 	
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, oldBit7);
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, result);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2724,6 +2855,8 @@ void ALU_MC6803E_ROLA(MC6803E_MPU * p)
 	
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, oldBit7);
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2751,6 +2884,8 @@ void ALU_MC6803E_ROLB(MC6803E_MPU * p)
 	
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, oldBit7);
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2779,6 +2914,8 @@ void ALU_MC6803E_ROR(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2802,6 +2939,8 @@ void ALU_MC6803E_RORA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2825,6 +2964,8 @@ void ALU_MC6803E_RORB(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2847,6 +2988,8 @@ void ALU_MC6803E_SBA(MC6803E_MPU * p)
 	
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2883,6 +3026,8 @@ void ALU_MC6803E_SBCA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2919,6 +3064,8 @@ void ALU_MC6803E_SBCB(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2956,6 +3103,8 @@ void ALU_MC6803E_STAA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, p->accumulatorA);
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -2995,6 +3144,8 @@ void ALU_MC6803E_STAB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, p->accumulatorB);
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3030,6 +3181,8 @@ void ALU_MC6803E_STD(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3066,6 +3219,8 @@ void ALU_MC6803E_SUBA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3102,6 +3257,8 @@ void ALU_MC6803E_SUBB(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3138,6 +3295,8 @@ void ALU_MC6803E_SUBD(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -3161,6 +3320,8 @@ void ALU_MC6803E_TAB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorB & 0x80));
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -3184,6 +3345,8 @@ void ALU_MC6803E_TBA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3212,6 +3375,8 @@ void ALU_MC6803E_TST(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3235,6 +3400,8 @@ void ALU_MC6803E_TSTA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3258,6 +3425,8 @@ void ALU_MC6803E_TSTB(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3281,6 +3450,8 @@ void ALU_MC6803E_BRA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3304,6 +3475,8 @@ void ALU_MC6803E_BRN(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3327,6 +3500,8 @@ void ALU_MC6803E_BCC(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3350,6 +3525,8 @@ void ALU_MC6803E_BCS(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3373,6 +3550,8 @@ void ALU_MC6803E_BLO(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3396,6 +3575,8 @@ void ALU_MC6803E_BEQ(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3419,6 +3600,8 @@ void ALU_MC6803E_BGE(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3442,6 +3625,8 @@ void ALU_MC6803E_BGT(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3465,6 +3650,8 @@ void ALU_MC6803E_BHI(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3488,6 +3675,8 @@ void ALU_MC6803E_BHS(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3511,6 +3700,8 @@ void ALU_MC6803E_BLE(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3534,6 +3725,8 @@ void ALU_MC6803E_BLS(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3557,6 +3750,8 @@ void ALU_MC6803E_BLT(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3580,6 +3775,8 @@ void ALU_MC6803E_BMI(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3603,6 +3800,8 @@ void ALU_MC6803E_BNE(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3626,6 +3825,8 @@ void ALU_MC6803E_BVC(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3649,6 +3850,8 @@ void ALU_MC6803E_BVS(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3672,6 +3875,8 @@ void ALU_MC6803E_BPL(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3695,6 +3900,8 @@ void ALU_MC6803E_BSR(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -3722,6 +3929,8 @@ void ALU_MC6803E_JMP(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3754,6 +3963,8 @@ void ALU_MC6803E_JSR(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3777,6 +3988,8 @@ void ALU_MC6803E_RTI(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3800,6 +4013,8 @@ void ALU_MC6803E_RTS(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3823,6 +4038,8 @@ void ALU_MC6803E_SWI(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3846,6 +4063,8 @@ void ALU_MC6803E_WAI(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3871,6 +4090,8 @@ void ALU_MC6803E_TESTPC(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -3890,6 +4111,8 @@ void ALU_MC6803E_CLC(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -3909,6 +4132,8 @@ void ALU_MC6803E_CLI(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -3928,6 +4153,8 @@ void ALU_MC6803E_CLV(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -3947,6 +4174,8 @@ void ALU_MC6803E_SEC(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -3966,6 +4195,8 @@ void ALU_MC6803E_SEI(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -3985,6 +4216,8 @@ void ALU_MC6803E_SEV(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -4010,6 +4243,8 @@ void ALU_MC6803E_TAP(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->flagRegister & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->flagRegister);
 	// @CC why set V and C...
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -4029,4 +4264,6 @@ void ALU_MC6803E_TPA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
