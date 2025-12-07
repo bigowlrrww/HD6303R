@@ -36,6 +36,10 @@ void PrepareForNextTest();
  *********************************************************************************************************************/
 bool test_Unknown(uint8_t Mnemonic);
 bool test_NOP();
+bool test_AIM();
+bool test_OIM();
+bool test_EIM();
+bool test_TIM();
 
 
 #endif

@@ -32,9 +32,9 @@ all: $(TARGET-libMC6803E) $(TARGET-test)
 # Build static library
 $(TARGET-libMC6803E): $(OBJS-libMC6803E)
 	$(AR) rcs $@ $(OBJS-libMC6803E)
-	$(CP) $(LIBDIR)\libMC6803E.h libMC6803E.h
-	$(CP) $(LIBDIR)\Image.h Image.h
-	$(CP) $(LIBDIR)\ROM.6803 ROM.6803
+	$(CP) $(LIBDIR)/libMC6803E.h libMC6803E.h
+	$(CP) $(LIBDIR)/Image.h Image.h
+	$(CP) $(LIBDIR)/ROM.6803 ROM.6803
 
 # Compile library object files
 $(LIBDIR)/%.o: $(LIBDIR)/%.c

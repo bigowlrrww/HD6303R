@@ -77,6 +77,18 @@ int main(int argc, char *argv[])
 	addItem(&list, "NOP", test_NOP());
 	PrepareForNextTest();
 
+	addItem(&list, "AIM", test_AIM());
+	PrepareForNextTest();
+
+	addItem(&list, "OIM", test_OIM());
+	PrepareForNextTest();
+
+	addItem(&list, "EIM", test_EIM());
+	PrepareForNextTest();
+
+	addItem(&list, "TIM", test_TIM());
+	PrepareForNextTest();
+
 	// Provide a sumary of results
 	printf("Testing Summary: \n");
 	printBreak("=",70);
@@ -197,6 +209,127 @@ bool test_NOP()
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+bool test_AIM()
+{
+	printf("Testing AIM\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// AIM #$F0, $10 (Direct)
+	// Memory at $10 = $AA (10101010)
+	// Imm = $F0 (11110000)
+	// Result = $A0 (10100000)
+	// Flags: N=1, Z=0, V=0
+
+	p->MemoryMap[0xE000] = 0x71; // AIM Direct
+	p->MemoryMap[0xE001] = 0xF0; // Imm
+	p->MemoryMap[0xE002] = 0x10; // Direct Addr
+	p->MemoryMap[0x0010] = 0xAA; // Initial value
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0x71);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 3);
+	passAllTests &= CheckSame((uint8_t)0xA0, curr.MemoryMap[0x0010], "Memory Result");
+	passAllTests &= CheckSame((uint8_t)1, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+
+	return passAllTests;
+}
+
+bool test_OIM()
+{
+	printf("Testing OIM\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// OIM #$0F, $10 (Direct)
+	// Memory at $10 = $A0 (10100000)
+	// Imm = $0F (00001111)
+	// Result = $AF (10101111)
+	// Flags: N=1, Z=0, V=0
+
+	p->MemoryMap[0xE000] = 0x72; // OIM Direct
+	p->MemoryMap[0xE001] = 0x0F; // Imm
+	p->MemoryMap[0xE002] = 0x10; // Direct Addr
+	p->MemoryMap[0x0010] = 0xA0; // Initial value
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0x72);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 3);
+	passAllTests &= CheckSame((uint8_t)0xAF, curr.MemoryMap[0x0010], "Memory Result");
+	passAllTests &= CheckSame((uint8_t)1, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+
+	return passAllTests;
+}
+
+bool test_EIM()
+{
+	printf("Testing EIM\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// EIM #$FF, $10 (Direct)
+	// Memory at $10 = $AA (10101010)
+	// Imm = $FF (11111111)
+	// Result = $55 (01010101)
+	// Flags: N=0, Z=0, V=0
+
+	p->MemoryMap[0xE000] = 0x75; // EIM Direct
+	p->MemoryMap[0xE001] = 0xFF; // Imm
+	p->MemoryMap[0xE002] = 0x10; // Direct Addr
+	p->MemoryMap[0x0010] = 0xAA; // Initial value
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0x75);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 3);
+	passAllTests &= CheckSame((uint8_t)0x55, curr.MemoryMap[0x0010], "Memory Result");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+
+	return passAllTests;
+}
+
+bool test_TIM()
+{
+	printf("Testing TIM\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// TIM #$0F, $10 (Direct)
+	// Memory at $10 = $F0 (11110000)
+	// Imm = $0F (00001111)
+	// Result = $00 (00000000)
+	// Flags: N=0, Z=1, V=0
+	// Memory should NOT change
+
+	p->MemoryMap[0xE000] = 0x7B; // TIM Direct
+	p->MemoryMap[0xE001] = 0x0F; // Imm
+	p->MemoryMap[0xE002] = 0x10; // Direct Addr
+	p->MemoryMap[0x0010] = 0xF0; // Initial value
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0x7B);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 3);
+	passAllTests &= CheckSame((uint8_t)0xF0, curr.MemoryMap[0x0010], "Memory Result (Unchanged)");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)1, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
 
 	return passAllTests;
 }
