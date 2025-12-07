@@ -24,7 +24,8 @@ OBJS-copyLocal =
 # Test program
 TARGET-test = MC6803_UNIT
 OBJS-test   = MC6803_UNIT.o \
-			  Tests.o
+			  Tests.o \
+			  ItemList.o
 
 all: $(TARGET-libMC6803E) $(TARGET-test)
 

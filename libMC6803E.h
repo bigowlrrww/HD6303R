@@ -35,6 +35,16 @@ void ALU_MC6803E_PrintCurrentMneunomic(MC6803E_MPU *);
 uint8_t MemoryRead(MC6803E_MPU *, uint16_t);
 uint8_t MemoryWrite(MC6803E_MPU * p, uint16_t address, uint8_t value);
 
+//Helpful flags
+#define MC6803E_FLAG_C	(uint8_t)(0x1 << 0)
+#define MC6803E_FLAG_V	(uint8_t)(0x1 << 1)
+#define MC6803E_FLAG_Z	(uint8_t)(0x1 << 2)
+#define MC6803E_FLAG_N	(uint8_t)(0x1 << 3)
+#define MC6803E_FLAG_I	(uint8_t)(0x1 << 4)
+#define MC6803E_FLAG_H	(uint8_t)(0x1 << 5)
+#define MC6803E_FLAG_VERIFIED (uint8_t)(0x1 << 6)
+#define MC6803E_FLAG_IMP (uint8_t)(0x1 << 7)
+
 #ifdef __cplusplus
 }
 #endif
