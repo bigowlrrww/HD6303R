@@ -4267,23 +4267,10 @@ void ALU_MC6803E_AIM(MC6803E_MPU * p)
 	switch (instruction) {
 		case 0x71: // AIM Direct
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "AIM #$%02X, $%02X", uint16_From_uint8s(immediate, direct_addr));
-			// Note: SetCurrentMneunomicWithPayload takes a 16-bit payload, so we pack immediate and address
-			// But the format string needs to be adjusted or we use a custom string.
-			// The existing helper might not support two 8-bit args nicely.
-			// Let's just use a custom format string logic if needed, or reuse the helper if it fits.
-			// The helper uses %02x %02x %02x for 3 byte instructions.
-			// Let's manually set it for clarity.
 			{
 				char buffer[64];
 				sprintf(buffer, "AIM #$%02X, $%02X", immediate, direct_addr);
 				ALU_MC6803E_SetCurrentMneunomic(p, buffer);
-				// We need to set the raw bytes too? The helper does it.
-				// Let's use the helper properly.
-				// ALU_MC6803E_SetCurrentMneunomicWithPayload16 uses 3 bytes from memory.
-				// So we can just pass a dummy payload or use the helper.
-				// Actually, let's just use the helper with the 16-bit value of the two bytes.
-				// But wait, the helper prints the instruction name.
-				// Let's stick to the pattern.
 			}
 			
 			val = MemoryRead(p, addr);
