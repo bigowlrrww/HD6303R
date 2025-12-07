@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build (Make)",
+            "label": "Build (TEST)",
             "type": "shell",
             "command": "mingw32-make",
             "args": [],
@@ -18,15 +18,49 @@
             }
         },
         {
-            "label": "Clean",
+            "label": "Clean (TEST)",
             "type": "shell",
             "command": "mingw32-make",
-            "args": ["clean"],
+            "args": [
+                "clean"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": false
             },
             "problemMatcher": []
+        },
+        {
+            "label": "Build Unit Tests",
+            "type": "shell",
+            "command": "mingw32-make",
+            "args": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/UnitTests/"
+            }
+        },
+        {
+            "label": "Clean Unit Tests",
+            "type": "shell",
+            "command": "mingw32-make",
+            "args": [
+                "clean"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}/UnitTests/"
+            }
         }
     ]
 }

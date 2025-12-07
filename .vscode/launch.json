@@ -20,6 +20,20 @@
                         "ignoreFailures": true
                     }
                 ]
+            },
+            {
+                "name": "Debug Unit Tests",
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceFolder}/UnitTests/MC6803_UNIT.exe",
+                "args": [],
+                "stopAtEntry": false,
+                "cwd": "${workspaceFolder}",
+                "environment": [],
+                "preLaunchTask": "Build Unit Tests",
+                "console": "integratedTerminal",
+                "MIMode": "gdb",
+                "miDebuggerPath": "gdb.exe"
             }
         ]
     }
