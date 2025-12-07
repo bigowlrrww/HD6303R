@@ -553,6 +553,18 @@ MC6803E_API uint16_t ALU_MC6803E_Execute(MC6803E_MPU * p, uint8_t instruction)
 		case 0x07: // TPA Inherent
 			ALU_MC6803E_TPA(p);
 			break;
+		case 0x71: // AIM Direct
+			ALU_MC6803E_AIM(p);
+			break;
+		case 0x72: // OIM Direct
+			ALU_MC6803E_OIM(p);
+			break;
+		case 0x75: // EIM Direct
+			ALU_MC6803E_EIM(p);
+			break;
+		case 0x7B: // TIM Direct
+			ALU_MC6803E_TIM(p);
+			break;
 		default:
 			printf("Unknown instruction (%X) at PC -> %X.\n", instruction, p->pc);
 			return 0xFFFF; //INVALID PC LOCATION Intentionally
@@ -4235,6 +4247,168 @@ void ALU_MC6803E_TPA(MC6803E_MPU * p)
 		default:
 			break;
 	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
+}
+/*
+		void ALU_MC6803E_AIM(MC6803E_MPU * p)
+		Boolean:	(M) & (Imm) -> M
+		Flags:		N Z V=0
+*/
+void ALU_MC6803E_AIM(MC6803E_MPU * p)
+{
+	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
+	uint8_t immediate = (uint8_t)MemoryRead(p, (p->pc+1));
+	uint8_t direct_addr = (uint8_t)MemoryRead(p, (p->pc+2));
+	uint16_t addr = (uint16_t)direct_addr;
+	uint8_t val;
+	uint8_t result;
+
+	switch (instruction) {
+		case 0x71: // AIM Direct
+			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "AIM #$%02X, $%02X", uint16_From_uint8s(immediate, direct_addr));
+			// Note: SetCurrentMneunomicWithPayload takes a 16-bit payload, so we pack immediate and address
+			// But the format string needs to be adjusted or we use a custom string.
+			// The existing helper might not support two 8-bit args nicely.
+			// Let's just use a custom format string logic if needed, or reuse the helper if it fits.
+			// The helper uses %02x %02x %02x for 3 byte instructions.
+			// Let's manually set it for clarity.
+			{
+				char buffer[64];
+				sprintf(buffer, "AIM #$%02X, $%02X", immediate, direct_addr);
+				ALU_MC6803E_SetCurrentMneunomic(p, buffer);
+				// We need to set the raw bytes too? The helper does it.
+				// Let's use the helper properly.
+				// ALU_MC6803E_SetCurrentMneunomicWithPayload16 uses 3 bytes from memory.
+				// So we can just pass a dummy payload or use the helper.
+				// Actually, let's just use the helper with the 16-bit value of the two bytes.
+				// But wait, the helper prints the instruction name.
+				// Let's stick to the pattern.
+			}
+			
+			val = MemoryRead(p, addr);
+			result = val & immediate;
+			MemoryWrite(p, addr, result);
+			ALU_MC6803E_IncrementPC(p, 2);
+			break;
+		default:
+			break;
+	}
+
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (result & 0x80));
+	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, result);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
+}
+
+/*
+		void ALU_MC6803E_OIM(MC6803E_MPU * p)
+		Boolean:	(M) | (Imm) -> M
+		Flags:		N Z V=0
+*/
+void ALU_MC6803E_OIM(MC6803E_MPU * p)
+{
+	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
+	uint8_t immediate = (uint8_t)MemoryRead(p, (p->pc+1));
+	uint8_t direct_addr = (uint8_t)MemoryRead(p, (p->pc+2));
+	uint16_t addr = (uint16_t)direct_addr;
+	uint8_t val;
+	uint8_t result;
+
+	switch (instruction) {
+		case 0x72: // OIM Direct
+			{
+				char buffer[64];
+				sprintf(buffer, "OIM #$%02X, $%02X", immediate, direct_addr);
+				ALU_MC6803E_SetCurrentMneunomic(p, buffer);
+			}
+			val = MemoryRead(p, addr);
+			result = val | immediate;
+			MemoryWrite(p, addr, result);
+			ALU_MC6803E_IncrementPC(p, 2);
+			break;
+		default:
+			break;
+	}
+
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (result & 0x80));
+	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, result);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
+}
+
+/*
+		void ALU_MC6803E_EIM(MC6803E_MPU * p)
+		Boolean:	(M) ^ (Imm) -> M
+		Flags:		N Z V=0
+*/
+void ALU_MC6803E_EIM(MC6803E_MPU * p)
+{
+	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
+	uint8_t immediate = (uint8_t)MemoryRead(p, (p->pc+1));
+	uint8_t direct_addr = (uint8_t)MemoryRead(p, (p->pc+2));
+	uint16_t addr = (uint16_t)direct_addr;
+	uint8_t val;
+	uint8_t result;
+
+	switch (instruction) {
+		case 0x75: // EIM Direct
+			{
+				char buffer[64];
+				sprintf(buffer, "EIM #$%02X, $%02X", immediate, direct_addr);
+				ALU_MC6803E_SetCurrentMneunomic(p, buffer);
+			}
+			val = MemoryRead(p, addr);
+			result = val ^ immediate;
+			MemoryWrite(p, addr, result);
+			ALU_MC6803E_IncrementPC(p, 2);
+			break;
+		default:
+			break;
+	}
+
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (result & 0x80));
+	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, result);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
+}
+
+/*
+		void ALU_MC6803E_TIM(MC6803E_MPU * p)
+		Boolean:	(M) & (Imm)
+		Flags:		N Z V=0
+*/
+void ALU_MC6803E_TIM(MC6803E_MPU * p)
+{
+	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
+	uint8_t immediate = (uint8_t)MemoryRead(p, (p->pc+1));
+	uint8_t direct_addr = (uint8_t)MemoryRead(p, (p->pc+2));
+	uint16_t addr = (uint16_t)direct_addr;
+	uint8_t val;
+	uint8_t result;
+
+	switch (instruction) {
+		case 0x7B: // TIM Direct
+			{
+				char buffer[64];
+				sprintf(buffer, "TIM #$%02X, $%02X", immediate, direct_addr);
+				ALU_MC6803E_SetCurrentMneunomic(p, buffer);
+			}
+			val = MemoryRead(p, addr);
+			result = val & immediate;
+			// TIM does not write back to memory
+			ALU_MC6803E_IncrementPC(p, 2);
+			break;
+		default:
+			break;
+	}
+
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (result & 0x80));
+	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, result);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
