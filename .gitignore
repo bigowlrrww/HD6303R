@@ -6,3 +6,4 @@ MC6803E_ALU.o
 MC6803E_Core.o
 MC6803E_Memory.o
 MC6803_TEST.exe
+*.exe

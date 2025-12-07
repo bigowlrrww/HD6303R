@@ -63,3 +63,13 @@ bool checkVerified(uint8_t flags)
     if (flags & MC6803E_FLAG_VERIFIED) return PASS();
     else return WARN();
 }
+
+/**
+ * This should be called like:
+ * verifyUnknownMnemonic(ALU_MC6803E_Execute(p, 0x00));
+ */
+bool verifyUnknownMnemonic(uint16_t ExecResult)
+{
+    if (ExecResult == 0xFFFF) return PASS();
+    else return FAIL();
+}

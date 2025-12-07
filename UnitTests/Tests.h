@@ -19,3 +19,4 @@ bool checkPC(uint16_t a, uint16_t b, uint8_t expectedStep);
 
 bool checkImplemented(uint8_t flags);
 bool checkVerified(uint8_t flags);
+bool verifyUnknownMnemonic(uint16_t ExecResult);

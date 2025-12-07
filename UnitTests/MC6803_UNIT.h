@@ -13,8 +13,6 @@
 #include <libMC6803E.h>
 #include "Tests.h"
 
-void ResetMPU();
-
 typedef struct _MPU_State {
 	uint16_t pc;
 	uint8_t flagRegister;
@@ -25,13 +23,19 @@ typedef struct _MPU_State {
 	uint16_t stackPointer;
 	uint8_t MemoryMap[0x10000];
 } MPU_State;
+
+void printBreak(const char*ch, int repeat);
+
+void ResetMPU();
 MPU_State getMPUState();
+
+void PrepareForNextTest();
 
 /*********************************************************************************************************************
  * UNIT TESTS
  *********************************************************************************************************************/
-
- bool test_NOP();
+bool test_Unknown(uint8_t Mnemonic);
+bool test_NOP();
 
 
 #endif

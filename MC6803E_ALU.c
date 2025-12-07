@@ -558,6 +558,7 @@ MC6803E_API uint16_t ALU_MC6803E_Execute(MC6803E_MPU * p, uint8_t instruction)
 			break;
 		default:
 			printf("Unknown instruction (%X) at PC -> %X.\n", instruction, p->pc);
+			return 0xFFFF; //INVALID PC LOCATION Intentionally
 			break;
 	}
 	
