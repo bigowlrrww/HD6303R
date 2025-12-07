@@ -529,9 +529,6 @@ MC6803E_API uint16_t ALU_MC6803E_Execute(MC6803E_MPU * p, uint8_t instruction)
 		case 0x3E: // WAI Inherent
 			ALU_MC6803E_WAI(p);
 			break;
-		case 0x4E: // TESTPC Inherent
-			ALU_MC6803E_TESTPC(p);
-			break;
 		case 0x0C: // CLC Inherent
 			ALU_MC6803E_CLC(p);
 			break;
@@ -4060,33 +4057,6 @@ void ALU_MC6803E_WAI(MC6803E_MPU * p)
 	switch (instruction) {
 		case 0x3E: // WAI Inherent
 			ALU_MC6803E_SetCurrentMneunomic(p, "WAI");
-			break;
-		default:
-			break;
-	}
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
-}
-
-// NOT IMPLEMENTED
-/*
-		void ALU_MC6803E_TESTPC(MC6803E_MPU * p)
-		Boolean:	
-		Flags:		H I N Z V C
-*/
-void ALU_MC6803E_TESTPC(MC6803E_MPU * p)
-{
-	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
-	uint8_t unsigned_payload = (uint8_t)MemoryRead(p, (p->pc+1));
-	int8_t signed_payload = (int8_t)MemoryRead(p, (p->pc+1));
-	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
-	uint16_t direct_address = (uint16_t)unsigned_payload;
-
-	// @CC what is this?!
-
-	switch (instruction) {
-		case 0x4E: // TESTPC Inherent
-			ALU_MC6803E_SetCurrentMneunomic(p, "TESTPC");
 			break;
 		default:
 			break;
