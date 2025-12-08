@@ -41,5 +41,25 @@ bool test_OIM();
 bool test_EIM();
 bool test_TIM();
 
+// Load/Store
+bool test_LDAA();
+bool test_LDAB();
+bool test_STAA();
+bool test_STAB();
+
+// Arithmetic
+bool test_ADDA();
+bool test_ADDB();
+bool test_SUBA();
+bool test_SUBB();
+
+// Logic
+bool test_ANDA();
+bool test_ANDB();
+bool test_ORAA();
+bool test_ORAB();
+bool test_EORA();
+bool test_EORB();
+
 
 #endif

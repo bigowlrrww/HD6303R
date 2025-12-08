@@ -1158,39 +1158,59 @@ void ALU_MC6803E_ADDA(MC6803E_MPU * p)
 	uint16_t direct_address = (uint16_t)unsigned_payload;
 
 	uint16_t result;
+	uint8_t val;
 
 	switch (instruction) {
 		case 0x8B: // ADDA Immediate
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDA #$%02X", unsigned_payload);
-			result = (p->accumulatorA + unsigned_payload);
+			val = unsigned_payload;
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0x9B: // ADDA Direct
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDA %02X", unsigned_payload);
-			result = (p->accumulatorA + MemoryRead(p, direct_address));
+			val = MemoryRead(p, direct_address);
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xAB: // ADDA Index
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDA %02X(x)", unsigned_payload);
-			result = (p->accumulatorA + MemoryRead(p, p->indexRegister + unsigned_payload));
+			val = MemoryReadIndexValue(p, unsigned_payload);
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xBB: // ADDA Extended
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDA %04X", unsigned_payload_double);
-			result = (p->accumulatorA + MemoryRead(p, unsigned_payload_double));
+			val = MemoryRead(p, unsigned_payload_double);
 			ALU_MC6803E_IncrementPC(p, 2);
 			break;
 		default:
+			val = 0;
 			break;
 	}
 	
-	p->accumulatorA = (uint8_t)result;
+	result = (uint16_t)p->accumulatorA + (uint16_t)val;
+	
+	// H: (A3 & M3) | (M3 & !R3) | (!R3 & A3)
+	// Actually simpler: H is set if carry from bit 3.
+	// (A & 0x0F) + (M & 0x0F) > 0x0F? No, that's not quite right if there was a carry in?
+	// But this is ADD, not ADC. So no carry in.
+	// So ((A & 0x0F) + (M & 0x0F)) > 0x0F is correct.
+	// Or use the formula: H = (A ^ M ^ R) & 0x10
+	uint8_t H = ((p->accumulatorA ^ val ^ result) & 0x10);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_H, H);
 
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_H, (p->accumulatorA & 0x10));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
-	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (result & 0x80));
+	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, (uint8_t)result);
+	
+	// V: (A7 & M7 & !R7) | (!A7 & !M7 & R7)
+	uint8_t A7 = (p->accumulatorA & 0x80);
+	uint8_t M7 = (val & 0x80);
+	uint8_t R7 = (result & 0x80);
+	uint8_t V = (A7 && M7 && !R7) || (!A7 && !M7 && R7);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, V);
+	
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (result >> 8));
+
+	p->accumulatorA = (uint8_t)result;
+	
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
@@ -1204,44 +1224,59 @@ void ALU_MC6803E_ADDB(MC6803E_MPU * p)
 {
 	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
 	uint8_t unsigned_payload = (uint8_t)MemoryRead(p, (p->pc+1));
-	int8_t signed_payload = (int8_t)MemoryRead(p, (p->pc+1));
 	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
 	uint16_t direct_address = (uint16_t)unsigned_payload;
 
 	uint16_t result;
+	uint8_t val;
 
 	switch (instruction) {
 		case 0xCB: // ADDB Immediate
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDB #$%02X", unsigned_payload);
-			result = (p->accumulatorB + unsigned_payload);
+			val = unsigned_payload;
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xDB: // ADDB Direct
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDB %02X", unsigned_payload);
-			result = (p->accumulatorB + MemoryRead(p, direct_address));
+			val = MemoryRead(p, direct_address);
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xEB: // ADDB Index
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDB %02X(x)", unsigned_payload);
-			result = (p->accumulatorB + MemoryReadIndexValue(p, unsigned_payload));
+			val = MemoryReadIndexValue(p, unsigned_payload);
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xFB: // ADDB Extended
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "ADDB %04X", unsigned_payload_double);
-			result = (p->accumulatorB + MemoryRead(p, unsigned_payload_double));
+			val = MemoryRead(p, unsigned_payload_double);
 			ALU_MC6803E_IncrementPC(p, 2);
 			break;
 		default:
+			val = 0;
 			break;
 	}
 	
+	result = (uint16_t)p->accumulatorB + (uint16_t)val;
+	
+	// H: (A3 & M3) | (M3 & !R3) | (!R3 & A3)
+	// H = (B ^ M ^ R) & 0x10
+	uint8_t H = ((p->accumulatorB ^ val ^ result) & 0x10);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_H, H);
+
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (result & 0x80));
+	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, (uint8_t)result);
+	
+	// V: (A7 & M7 & !R7) | (!A7 & !M7 & R7)
+	uint8_t B7 = (p->accumulatorB & 0x80);
+	uint8_t M7 = (val & 0x80);
+	uint8_t R7 = (result & 0x80);
+	uint8_t V = (B7 && M7 && !R7) || (!B7 && !M7 && R7);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, V);
+	
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (result >> 8));
+
 	p->accumulatorB = (uint8_t)result;
 
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_H, (p->accumulatorB & 0x10));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorB & 0x80));
-	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
@@ -3110,7 +3145,7 @@ void ALU_MC6803E_STAA(MC6803E_MPU * p)
 			break;
 	}
 	
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, p->accumulatorA);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
@@ -3151,7 +3186,7 @@ void ALU_MC6803E_STAB(MC6803E_MPU * p)
 			break;
 	}
 	
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, p->accumulatorB);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorB & 0x80));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorB);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_V);
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
@@ -3205,32 +3240,65 @@ void ALU_MC6803E_SUBA(MC6803E_MPU * p)
 {
 	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
 	uint8_t unsigned_payload = (uint8_t)MemoryRead(p, (p->pc+1));
-	int8_t signed_payload = (int8_t)MemoryRead(p, (p->pc+1));
 	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
 	uint16_t direct_address = (uint16_t)unsigned_payload;
+
+	uint16_t result;
+	uint8_t val;
 
 	switch (instruction) {
 		case 0x80: // SUBA Immediate
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "SUBA #$%02X", unsigned_payload);
+			val = unsigned_payload;
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0x90: // SUBA Direct
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "SUBA %02X", unsigned_payload);
+			val = MemoryRead(p, direct_address);
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xA0: // SUBA Index
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "SUBA %02X(x)", unsigned_payload);
+			val = MemoryReadIndexValue(p, unsigned_payload);
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xB0: // SUBA Extended
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "SUBA %04X", unsigned_payload_double);
+			val = MemoryRead(p, unsigned_payload_double);
 			ALU_MC6803E_IncrementPC(p, 2);
 			break;
 		default:
+			val = 0;
 			break;
 	}
+
+	result = p->accumulatorA - val;
+	
+	// Flags
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (result & 0x80));
+	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, (uint8_t)result);
+	// V: (A7 & !M7 & !R7) | (!A7 & M7 & R7) for SUB?
+	// Subtraction: R = A - M
+	// V = (A7 & !M7 & !R7) | (!A7 & M7 & R7)
+	uint8_t A7 = (p->accumulatorA & 0x80);
+	uint8_t M7 = (val & 0x80);
+	uint8_t R7 = (result & 0x80);
+	uint8_t V = (A7 && !M7 && !R7) || (!A7 && M7 && R7);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, V);
+	
+	// C: Set if absolute value of M > absolute value of A? (Borrow)
+	// C = (!A7 & M7) | (M7 & R7) | (R7 & !A7)
+	// Or just check if result > 0xFF (underflow wrap)
+	// In C, uint8 subtraction wraps. 0x20 - 0x30 = 0xF0.
+	// If we do 0x20 - 0x30 in uint16, we get 0xFFF0.
+	// So if result & 0x100 is set? No, that's for ADD.
+	// For SUB, if A < M, C is set.
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (p->accumulatorA < val));
+
+	p->accumulatorA = (uint8_t)result;
+
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -3243,32 +3311,56 @@ void ALU_MC6803E_SUBB(MC6803E_MPU * p)
 {
 	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
 	uint8_t unsigned_payload = (uint8_t)MemoryRead(p, (p->pc+1));
-	int8_t signed_payload = (int8_t)MemoryRead(p, (p->pc+1));
 	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
 	uint16_t direct_address = (uint16_t)unsigned_payload;
+
+	uint16_t result;
+	uint8_t val;
 
 	switch (instruction) {
 		case 0xC0: // SUBB Immediate
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "SUBB #$%02X", unsigned_payload);
+			val = unsigned_payload;
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xD0: // SUBB Direct
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "SUBB %02X", unsigned_payload);
+			val = MemoryRead(p, direct_address);
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xE0: // SUBB Index
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "SUBB %02X(x)", unsigned_payload);
+			val = MemoryReadIndexValue(p, unsigned_payload);
 			ALU_MC6803E_IncrementPC(p, 1);
 			break;
 		case 0xF0: // SUBB Extended
 			ALU_MC6803E_SetCurrentMneunomicWithPayload(p, "SUBB %04X", unsigned_payload_double);
+			val = MemoryRead(p, unsigned_payload_double);
 			ALU_MC6803E_IncrementPC(p, 2);
 			break;
 		default:
+			val = 0;
 			break;
 	}
+
+	result = p->accumulatorB - val;
+	
+	// Flags
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (result & 0x80));
+	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, (uint8_t)result);
+	
+	uint8_t B7 = (p->accumulatorB & 0x80);
+	uint8_t M7 = (val & 0x80);
+	uint8_t R7 = (result & 0x80);
+	uint8_t V = (B7 && !M7 && !R7) || (!B7 && M7 && R7);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, V);
+	
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (p->accumulatorB < val));
+
+	p->accumulatorB = (uint8_t)result;
+
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED

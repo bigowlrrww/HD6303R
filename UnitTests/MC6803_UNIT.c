@@ -89,6 +89,40 @@ int main(int argc, char *argv[])
 	addItem(&list, "TIM", test_TIM());
 	PrepareForNextTest();
 
+	// Load/Store
+	addItem(&list, "LDAA", test_LDAA());
+	PrepareForNextTest();
+	addItem(&list, "LDAB", test_LDAB());
+	PrepareForNextTest();
+	addItem(&list, "STAA", test_STAA());
+	PrepareForNextTest();
+	addItem(&list, "STAB", test_STAB());
+	PrepareForNextTest();
+
+	// Arithmetic
+	addItem(&list, "ADDA", test_ADDA());
+	PrepareForNextTest();
+	addItem(&list, "ADDB", test_ADDB());
+	PrepareForNextTest();
+	addItem(&list, "SUBA", test_SUBA());
+	PrepareForNextTest();
+	addItem(&list, "SUBB", test_SUBB());
+	PrepareForNextTest();
+
+	// Logic
+	addItem(&list, "ANDA", test_ANDA());
+	PrepareForNextTest();
+	addItem(&list, "ANDB", test_ANDB());
+	PrepareForNextTest();
+	addItem(&list, "ORAA", test_ORAA());
+	PrepareForNextTest();
+	addItem(&list, "ORAB", test_ORAB());
+	PrepareForNextTest();
+	addItem(&list, "EORA", test_EORA());
+	PrepareForNextTest();
+	addItem(&list, "EORB", test_EORB());
+	PrepareForNextTest();
+
 	// Provide a sumary of results
 	printf("Testing Summary: \n");
 	printBreak("=",70);
@@ -329,6 +363,350 @@ bool test_TIM()
 	passAllTests &= CheckSame((uint8_t)0xF0, curr.MemoryMap[0x0010], "Memory Result (Unchanged)");
 	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
 	passAllTests &= CheckSame((uint8_t)1, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+
+	return passAllTests;
+}
+
+// Load/Store
+bool test_LDAA()
+{
+	printf("Testing LDAA\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// LDAA Immediate #$55
+	p->MemoryMap[0xE000] = 0x86; 
+	p->MemoryMap[0xE001] = 0x55;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0x86);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame((uint8_t)0x55, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+
+	return passAllTests;
+}
+
+bool test_LDAB()
+{
+	printf("Testing LDAB\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// LDAB Immediate #$AA
+	p->MemoryMap[0xE000] = 0xC6; 
+	p->MemoryMap[0xE001] = 0xAA;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0xC6);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame((uint8_t)0xAA, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame((uint8_t)1, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+
+	return passAllTests;
+}
+
+bool test_STAA()
+{
+	printf("Testing STAA\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// STAA Direct $10
+	p->accumulatorA = 0x55;
+	p->MemoryMap[0xE000] = 0x97; 
+	p->MemoryMap[0xE001] = 0x10;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0x97);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame((uint8_t)0x55, curr.MemoryMap[0x0010], "Memory Result");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+
+	return passAllTests;
+}
+
+bool test_STAB()
+{
+	printf("Testing STAB\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// STAB Direct $10
+	p->accumulatorB = 0xAA;
+	p->MemoryMap[0xE000] = 0xD7; 
+	p->MemoryMap[0xE001] = 0x10;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0xD7);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame((uint8_t)0xAA, curr.MemoryMap[0x0010], "Memory Result");
+	passAllTests &= CheckSame((uint8_t)1, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+
+	return passAllTests;
+}
+
+// Arithmetic
+bool test_ADDA()
+{
+	printf("Testing ADDA\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// ADDA Immediate #$10 (A=$20 -> $30)
+	p->accumulatorA = 0x20;
+	p->MemoryMap[0xE000] = 0x8B; 
+	p->MemoryMap[0xE001] = 0x10;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0x8B);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame((uint8_t)0x30, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_H) ? 1 : 0), "Flag H");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_C) ? 1 : 0), "Flag C");
+
+	return passAllTests;
+}
+
+bool test_ADDB()
+{
+	printf("Testing ADDB\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// ADDB Immediate #$F0 (B=$20 -> $10, Carry)
+	p->accumulatorB = 0x20;
+	p->MemoryMap[0xE000] = 0xCB; 
+	p->MemoryMap[0xE001] = 0xF0;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0xCB);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame((uint8_t)0x10, curr.accumulatorB, "Accumulator B");
+	// H flag not affected by ADDB? Actually it is for ADD instructions usually.
+	// But let's check standard flags.
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+	passAllTests &= CheckSame((uint8_t)1, (uint8_t)((curr.flagRegister & MC6803E_FLAG_C) ? 1 : 0), "Flag C");
+
+	return passAllTests;
+}
+
+bool test_SUBA()
+{
+	printf("Testing SUBA\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// SUBA Immediate #$10 (A=$20 -> $10)
+	p->accumulatorA = 0x20;
+	p->MemoryMap[0xE000] = 0x80; 
+	p->MemoryMap[0xE001] = 0x10;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0x80);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame((uint8_t)0x10, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_C) ? 1 : 0), "Flag C");
+
+	return passAllTests;
+}
+
+bool test_SUBB()
+{
+	printf("Testing SUBB\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// SUBB Immediate #$30 (B=$20 -> $F0, Carry/Borrow)
+	p->accumulatorB = 0x20;
+	p->MemoryMap[0xE000] = 0xC0; 
+	p->MemoryMap[0xE001] = 0x30;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0xC0);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame((uint8_t)0xF0, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame((uint8_t)1, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V"); // V is complicated
+	passAllTests &= CheckSame((uint8_t)1, (uint8_t)((curr.flagRegister & MC6803E_FLAG_C) ? 1 : 0), "Flag C");
+
+	return passAllTests;
+}
+
+// Logic
+bool test_ANDA()
+{
+	printf("Testing ANDA\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// ANDA Immediate #$0F (A=$F0 -> $00)
+	p->accumulatorA = 0xF0;
+	p->MemoryMap[0xE000] = 0x84; 
+	p->MemoryMap[0xE001] = 0x0F;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0x84);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame((uint8_t)0x00, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)1, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+
+	return passAllTests;
+}
+
+bool test_ANDB()
+{
+	printf("Testing ANDB\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// ANDB Immediate #$F0 (B=$0F -> $00)
+	p->accumulatorB = 0x0F;
+	p->MemoryMap[0xE000] = 0xC4; 
+	p->MemoryMap[0xE001] = 0xF0;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0xC4);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame((uint8_t)0x00, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)1, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+
+	return passAllTests;
+}
+
+bool test_ORAA()
+{
+	printf("Testing ORAA\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// ORAA Immediate #$0F (A=$F0 -> $FF)
+	p->accumulatorA = 0xF0;
+	p->MemoryMap[0xE000] = 0x8A; 
+	p->MemoryMap[0xE001] = 0x0F;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0x8A);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame((uint8_t)0xFF, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame((uint8_t)1, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+
+	return passAllTests;
+}
+
+bool test_ORAB()
+{
+	printf("Testing ORAB\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// ORAB Immediate #$F0 (B=$0F -> $FF)
+	p->accumulatorB = 0x0F;
+	p->MemoryMap[0xE000] = 0xCA; 
+	p->MemoryMap[0xE001] = 0xF0;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0xCA);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame((uint8_t)0xFF, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame((uint8_t)1, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+
+	return passAllTests;
+}
+
+bool test_EORA()
+{
+	printf("Testing EORA\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// EORA Immediate #$FF (A=$AA -> $55)
+	p->accumulatorA = 0xAA;
+	p->MemoryMap[0xE000] = 0x88; 
+	p->MemoryMap[0xE001] = 0xFF;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0x88);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame((uint8_t)0x55, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
+
+	return passAllTests;
+}
+
+bool test_EORB()
+{
+	printf("Testing EORB\n");
+	printBreak("-",70);
+	bool passAllTests = true;
+
+	// EORB Immediate #$FF (B=$55 -> $AA)
+	p->accumulatorB = 0x55;
+	p->MemoryMap[0xE000] = 0xC8; 
+	p->MemoryMap[0xE001] = 0xFF;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0xC8);
+	MPU_State curr = getMPUState();
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame((uint8_t)0xAA, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame((uint8_t)1, (uint8_t)((curr.flagRegister & MC6803E_FLAG_N) ? 1 : 0), "Flag N");
+	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_Z) ? 1 : 0), "Flag Z");
 	passAllTests &= CheckSame((uint8_t)0, (uint8_t)((curr.flagRegister & MC6803E_FLAG_V) ? 1 : 0), "Flag V");
 
 	return passAllTests;
