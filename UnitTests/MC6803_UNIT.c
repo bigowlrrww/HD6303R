@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
 
 	addItem(&list, "NOP", test_NOP());
 	PrepareForNextTest();
+	addItem(&list, "LSRD", test_LSRD());
 
 	// Provide a sumary of results
 	printf("Testing Summary: \n");
@@ -201,6 +202,68 @@ bool test_NOP()
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+bool test_LSRD()
+{
+	PrintH1("Testing LSRD\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+
+	PrintH2("Carry Not Set LSRD\n");
+	passAllTests &= test_LSRD_exec(0xCAD7);
+
+	PrintH2("Carry Set LSRD\n");
+	passAllTests &= test_LSRD_exec(0xCADF);
+
+	PrintH2("Clear LSRD\n");
+	passAllTests &= test_LSRD_exec(0x0001);
+
+	PrintH2("empty LSRD\n");
+	passAllTests &= test_LSRD_exec(0x0000);
+
+	return passAllTests;
+}
+
+bool test_LSRD_exec(uint16_t value)
+{
+	bool passAllTests = true;
+	*p->accumulatorD = value;
+
+	MPU_State prev = getMPUState();
+	ALU_MC6803E_Execute(p, 0x04);
+	MPU_State curr = getMPUState();
+
+	checkImplemented(curr.flagRegister);
+	checkVerified(curr.flagRegister);
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+
+//Flag Checks
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); //Same
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); //Same
+
+	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N); //Always
+	if (!!(curr.flagRegister & MC6803E_FLAG_N)^!!(curr.flagRegister& MC6803E_FLAG_C)) // N xor C == 1?
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+	
+	if (curr.accumulatorD == 0x0000) //Z if all bits are cleared; cleared otherwise
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+
+	if (prev.accumulatorD & 0x0001) //before operation lsb of ACCD was set; cleared otherwise
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
 
 	return passAllTests;
 }
