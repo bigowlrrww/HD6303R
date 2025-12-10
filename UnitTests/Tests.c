@@ -101,7 +101,7 @@ bool CheckFlagSet(uint8_t a, uint8_t b, uint8_t flag)
 {
     printf("%s was set", flagToStr(flag));
     if (Verbose) printf(" [0x%02X->0x%02X]", a&flag, b&flag);
-    if (a & flag) {printf("  Invalid a.%s", flagToStr(flag)); return WARN();}
+    if (a & flag) {printf(" Invalid a.%s", flagToStr(flag)); return WARN();}
     else if (b & flag) return PASS();
     else return FAIL();
 }
@@ -110,7 +110,7 @@ bool CheckFlagUnset(uint8_t a, uint8_t b, uint8_t flag)
 {
     printf("%s was unset", flagToStr(flag));
     if (Verbose) printf(" [0x%02X->0x%02X]", a&flag, b&flag);
-    if (!(a & flag)) {printf("  Invalid a.%s", flagToStr(flag)); return WARN();}
+    if (!(a & flag)) {printf(" Invalid a.%s", flagToStr(flag)); return WARN();}
     else if (!(b & flag)) return PASS();
     return FAIL();
 }

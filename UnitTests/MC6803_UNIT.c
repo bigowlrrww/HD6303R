@@ -1,6 +1,9 @@
 #include "MC6803_UNIT.h"
 #include "ItemList.h"
 
+#define PrintH1(fmt, ...) printf("\033[35m" fmt "\033[0m", ##__VA_ARGS__)
+#define PrintH2(fmt, ...) printf("\033[36m" fmt "\033[0m", ##__VA_ARGS__)
+
 // Global Processor pointer
 MC6803E_MPU *p;
 ItemList list;
@@ -149,18 +152,19 @@ MPU_State getMPUState()
 
 bool test_Unknown(uint8_t Mnemonic)
 {
-	printf("Testing 0x%02X\n", Mnemonic);
+	PrintH1("Testing 0x%02X\n", Mnemonic);
+	printBreak("-",70);
 	return verifyUnknownMnemonic(ALU_MC6803E_Execute(p, Mnemonic));
 }
 
 bool test_NOP()
 {
-	printf("Testing NOP\n");
+	PrintH1("Testing NOP\n");
 	printBreak("-",70);
 
 	bool passAllTests = true;
 
-	printf("Case startup NOP\n");
+	PrintH2("Case startup NOP\n");
 	MPU_State prev = getMPUState();
 	ALU_MC6803E_Execute(p, 0x01);
 	MPU_State curr = getMPUState();
@@ -175,7 +179,7 @@ bool test_NOP()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
 
-	printf("\nCase Values set NOP\n");
+	PrintH2("\nCase Values set NOP\n");
 
 	p->accumulatorB = 0x12;
 	p->accumulatorA = 0x34;
