@@ -82,7 +82,8 @@ int main(int argc, char *argv[])
 	addItem(&list, "LSRD", test_LSRD());
 
 	// Provide a sumary of results
-	printf("Testing Summary: \n");
+	printBreak("-",70);
+	PrintH1("Testing Summary: \n");
 	printBreak("=",70);
 	bool AllPass = true;
 	for (size_t i = 0; i < list.size; i++)
@@ -226,6 +227,10 @@ bool test_LSRD()
 
 	PrintH2("empty LSRD\n");
 	passAllTests &= test_LSRD_exec(0x0000);
+
+	PrintH2("upper set shift LSRD\n");
+	passAllTests &= test_LSRD_exec(0xFFFF);
+	passAllTests &= CheckSame(*(p->accumulatorD),0x7FFF, "Zero always shift into MSBit");
 
 	return passAllTests;
 }
