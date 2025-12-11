@@ -18,9 +18,6 @@ OBJS-libMC6803E   = $(LIBDIR)/Image.o \
 					$(LIBDIR)/MC6803E_Memory.o \
 					$(LIBDIR)/MC6803E_Core.o
 
-# Files to copy
-OBJS-copyLocal = 
-
 # Test program
 TARGET-test = MC6803_UNIT
 OBJS-test   = MC6803_UNIT.o \
@@ -30,11 +27,10 @@ OBJS-test   = MC6803_UNIT.o \
 all: $(TARGET-libMC6803E) $(TARGET-test)
 
 # Build static library
-$(TARGET-libMC6803E): $(OBJS-libMC6803E)
-	$(AR) rcs $@ $(OBJS-libMC6803E)
+$(TARGET-libMC6803E): $(OBJS-libMC6803E) 
 	$(CP) $(LIBDIR)\libMC6803E.h libMC6803E.h
-	$(CP) $(LIBDIR)\Image.h Image.h
 	$(CP) $(LIBDIR)\ROM.6803 ROM.6803
+	$(AR) rcs $@ $(OBJS-libMC6803E)
 
 # Compile library object files
 $(LIBDIR)/%.o: $(LIBDIR)/%.c
