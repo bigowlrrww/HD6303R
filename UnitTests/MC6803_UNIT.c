@@ -248,9 +248,9 @@ bool test_LSRD_exec(uint16_t value)
 
 	checkImplemented(curr.flagRegister);
 	checkVerified(curr.flagRegister);
+
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
-	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
-	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckRSH(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
