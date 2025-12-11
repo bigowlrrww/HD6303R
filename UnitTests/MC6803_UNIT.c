@@ -167,6 +167,7 @@ bool test_NOP()
 
 	PrintH2("Case startup NOP\n");
 	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x01);
 	ALU_MC6803E_Execute(p, 0x01);
 	MPU_State curr = getMPUState();
 
@@ -190,6 +191,7 @@ bool test_NOP()
 	p->flagRegister = 0xFF;
 
 	prev = getMPUState();
+	MemoryWrite(p,p->pc,0x01);
 	ALU_MC6803E_Execute(p, 0x01);
 	curr = getMPUState();
 
@@ -232,8 +234,10 @@ bool test_LSRD_exec(uint16_t value)
 {
 	bool passAllTests = true;
 	*p->accumulatorD = value;
+	p->flagRegister |= MC6803E_FLAG_N;
 
 	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x04);
 	ALU_MC6803E_Execute(p, 0x04);
 	MPU_State curr = getMPUState();
 
