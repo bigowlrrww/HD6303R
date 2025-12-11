@@ -2459,7 +2459,6 @@ void ALU_MC6803E_LSRB(MC6803E_MPU * p)
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
-// NOT IMPLEMENTED
 /*
 		void ALU_MC6803E_LSRD(MC6803E_MPU * p)
 		Boolean:	b0 -> C; 0 b16 b15 b14 ... b3 b2 b1 -> D
@@ -2468,20 +2467,26 @@ void ALU_MC6803E_LSRB(MC6803E_MPU * p)
 void ALU_MC6803E_LSRD(MC6803E_MPU * p)
 {
 	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
-	uint8_t unsigned_payload = (uint8_t)MemoryRead(p, (p->pc+1));
-	int8_t signed_payload = (int8_t)MemoryRead(p, (p->pc+1));
-	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
-	uint16_t direct_address = (uint16_t)unsigned_payload;
+	uint32_t result;
 
 	switch (instruction) {
 		case 0x04: // LSRD Inherent
 			ALU_MC6803E_SetCurrentMneunomic(p, "LSRD");
+			ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, *(p->accumulatorD) & 0x01);
+			result = ((*(p->accumulatorD)) >> 1);
 			break;
 		default:
 			break;
 	}
+
+	*(p->accumulatorD) = (uint16_t)result;
+
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_N);
+	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, *p->accumulatorD);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, ALU_MC6803E_GetFlag(p, MC6803E_FLAG_N) ^ ALU_MC6803E_GetFlag(p,MC6803E_FLAG_C));// N xor C == 1?
+
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
