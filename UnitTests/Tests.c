@@ -69,16 +69,36 @@ bool CheckSame16(uint16_t a, uint16_t b, const char *str)
 bool CheckRSH8(uint8_t a, uint8_t b, const char *str)
 {
     printf("%s",str);
-    if (Verbose) printf(" [0x%02X>>1==0x%02X]", a, b);
-    if (a>>1 == b) return PASS();
+    uint8_t result = ((uint8_t)a)>>1;
+    if (Verbose) printf(" [(0x%02X>>1)0x%02X==0x%02X]", a, result, b);
+    if (result == b) return PASS();
     else return FAIL();
 }
 
 bool CheckRSH16(uint16_t a, uint16_t b, const char *str)
 {
     printf("%s",str);
-    if (Verbose) printf(" [0x%02X>>1==0x%02X]", a, b);
-    if (a>>1 == b) return PASS();
+    uint16_t result = ((uint16_t)a)>>1;
+    if (Verbose) printf(" [(0x%04X>>1)0x%04X==0x%04X]", a, result, b);
+    if (result == b) return PASS();
+    else return FAIL();
+}
+
+bool CheckLSH8(uint8_t a, uint8_t b, const char *str)
+{
+    printf("%s",str);
+    uint8_t result = ((uint8_t)a)<<1;
+    if (Verbose) printf(" [(0x%02X<<1)0x%02X==0x%02X]", a, result, b);
+    if (result == b) return PASS();
+    else return FAIL();
+}
+
+bool CheckLSH16(uint16_t a, uint16_t b, const char *str)
+{
+    printf("%s",str);
+    uint16_t result = ((uint16_t)a)<<1;
+    if (Verbose) printf(" [(0x%04X<<1)0x%04X==0x%04X]", a, result, b);
+    if (result == b) return PASS();
     else return FAIL();
 }
 

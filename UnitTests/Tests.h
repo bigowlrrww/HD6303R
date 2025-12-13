@@ -13,6 +13,11 @@
     uint16_t: CheckRSH16 \
 )(a, b, c)
 
+#define CheckLSH(a, b, c) _Generic((a), \
+    uint8_t:  CheckLSH8, \
+    uint16_t: CheckLSH16 \
+)(a, b, c)
+
 void EnVerbose();
 bool PASS();
 bool WARN();
@@ -24,6 +29,9 @@ bool CheckSame16(uint16_t a, uint16_t b, const char *str);
 
 bool CheckRSH8(uint8_t a, uint8_t b, const char *str);
 bool CheckRSH16(uint16_t a, uint16_t b, const char *str);
+
+bool CheckLSH8(uint8_t a, uint8_t b, const char *str);
+bool CheckLSH16(uint16_t a, uint16_t b, const char *str);
 
 bool checkPC(uint16_t a, uint16_t b, uint8_t expectedStep);
 
