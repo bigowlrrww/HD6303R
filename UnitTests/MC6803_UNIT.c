@@ -82,6 +82,8 @@ int main(int argc, char *argv[])
 	addItem(&list, "LSRD", test_LSRD());
 	PrepareForNextTest();
 	addItem(&list, "ASLD", test_ASLD());
+	PrepareForNextTest();
+	addItem(&list, "TAP", test_TAP());
 
 	// Provide a sumary of results
 	printBreak("-",70);
@@ -374,4 +376,48 @@ bool test_ASLD_exec(uint16_t value)
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
 
 	return passAllTests;
+}
+
+bool test_TAP()
+{
+	PrintH1("Testing TAP\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+
+	PrintH2("0xE5 TAP\n");
+	p->flagRegister = 0xD5;
+	passAllTests &= test_TAP_exec(0xEA);
+	PrintH2("0xDA TAP\n");
+	p->flagRegister = 0xE5;
+	passAllTests &= test_TAP_exec(0xD5);
+
+	return passAllTests;
+}
+
+bool test_TAP_exec(uint8_t value)
+{
+	bool passAllTests = true;
+	p->accumulatorA = value;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0xABCD;
+	p->flagRegister |= 0xC0;
+
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x06);
+	ALU_MC6803E_Execute(p, 0x06);
+	MPU_State curr = getMPUState();
+
+	checkImplemented(curr.flagRegister);
+	checkVerified(curr.flagRegister);
+
+	passAllTests &= CheckSame(prev.accumulatorA, curr.flagRegister | 0xC0, "CC is Set"); //Ensure that the top 2 are set, they should be in the processor.
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+
 }

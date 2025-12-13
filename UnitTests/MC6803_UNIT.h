@@ -40,4 +40,6 @@ bool test_LSRD();
 bool test_LSRD_exec(uint16_t value);
 bool test_ASLD();
 bool test_ASLD_exec(uint16_t value);
+bool test_TAP();
+bool test_TAP_exec(uint8_t value);
 #endif
