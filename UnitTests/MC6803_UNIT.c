@@ -219,15 +219,21 @@ bool test_LSRD()
 	bool passAllTests = true;
 
 	PrintH2("Carry Not Set LSRD\n");
+	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
+	p->flagRegister |= MC6803E_FLAG_Z;
 	passAllTests &= test_LSRD_exec(0xCAD7);
 
 	PrintH2("Carry Set LSRD\n");
+	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C | MC6803E_FLAG_V);
+	p->flagRegister |= MC6803E_FLAG_Z;
 	passAllTests &= test_LSRD_exec(0xCADF);
 
 	PrintH2("Clear LSRD\n");
+	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C | MC6803E_FLAG_V);
 	passAllTests &= test_LSRD_exec(0x0001);
 
 	PrintH2("empty LSRD\n");
+	p->flagRegister &= ~(MC6803E_FLAG_Z);
 	passAllTests &= test_LSRD_exec(0x0000);
 
 	PrintH2("upper set shift LSRD\n");
@@ -244,7 +250,7 @@ bool test_LSRD_exec(uint16_t value)
 	p->flagRegister |= MC6803E_FLAG_N;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
-	p->flagRegister = 0xFF;
+	p->flagRegister |= 0xC0;
 
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x04);
@@ -291,18 +297,31 @@ bool test_ASLD()
 	bool passAllTests = true;
 
 	PrintH2("Carry Not Set ASLD\n");
-	passAllTests &= test_ASLD_exec(0xCAD7);
+	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
+	p->flagRegister |= MC6803E_FLAG_Z | MC6803E_FLAG_V;
+	passAllTests &= test_ASLD_exec(0x7AD7);
 
 	PrintH2("Carry Set ASLD\n");
-	passAllTests &= test_ASLD_exec(0xCADF);
+	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
+	p->flagRegister |= MC6803E_FLAG_Z | MC6803E_FLAG_V;
+	passAllTests &= test_ASLD_exec(0xFADF);
 
 	PrintH2("Clear ASLD\n");
-	passAllTests &= test_ASLD_exec(0x0001);
+	p->flagRegister |= MC6803E_FLAG_V;
+	passAllTests &= test_ASLD_exec(0x8000);
 
-	PrintH2("empty ASLD\n");
+	PrintH2("Empty ASLD\n");
+	p->flagRegister &= ~(MC6803E_FLAG_Z);
+	p->flagRegister |= MC6803E_FLAG_V | MC6803E_FLAG_C | MC6803E_FLAG_N;
 	passAllTests &= test_ASLD_exec(0x0000);
 
+	PrintH2("N is set ASLD\n");
+	p->flagRegister &= ~(MC6803E_FLAG_Z );
+	p->flagRegister |= MC6803E_FLAG_C | MC6803E_FLAG_N| MC6803E_FLAG_V;
+	passAllTests &= test_ASLD_exec(0x8000);
+
 	PrintH2("lower set shift ASLD\n");
+	p->flagRegister |= MC6803E_FLAG_V;
 	passAllTests &= test_ASLD_exec(0xFFFF);
 	passAllTests &= CheckSame(*(p->accumulatorD),0xFFFE, "Zero always shift into LSBit");
 
@@ -313,10 +332,9 @@ bool test_ASLD_exec(uint16_t value)
 {
 	bool passAllTests = true;
 	*p->accumulatorD = value;
-	p->flagRegister |= MC6803E_FLAG_N;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
-	p->flagRegister = 0xFF;
+	p->flagRegister |= 0xC0;
 
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x05);
