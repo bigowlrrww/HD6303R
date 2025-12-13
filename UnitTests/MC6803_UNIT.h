@@ -38,5 +38,6 @@ bool test_Unknown(uint8_t Mnemonic);
 bool test_NOP();
 bool test_LSRD();
 bool test_LSRD_exec(uint16_t value);
-
+bool test_ASLD();
+bool test_ASLD_exec(uint16_t value);
 #endif

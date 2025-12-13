@@ -80,6 +80,8 @@ int main(int argc, char *argv[])
 	addItem(&list, "NOP", test_NOP());
 	PrepareForNextTest();
 	addItem(&list, "LSRD", test_LSRD());
+	PrepareForNextTest();
+	addItem(&list, "ASLD", test_ASLD());
 
 	// Provide a sumary of results
 	printBreak("-",70);
@@ -240,6 +242,9 @@ bool test_LSRD_exec(uint16_t value)
 	bool passAllTests = true;
 	*p->accumulatorD = value;
 	p->flagRegister |= MC6803E_FLAG_N;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0xABCD;
+	p->flagRegister = 0xFF;
 
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x04);
@@ -255,21 +260,97 @@ bool test_LSRD_exec(uint16_t value)
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
 //Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); //Same
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); //Same
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
 
-	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N); //Always
-	if (!!(curr.flagRegister & MC6803E_FLAG_N)^!!(curr.flagRegister& MC6803E_FLAG_C)) // N xor C == 1?
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
-	
-	if (curr.accumulatorD == 0x0000) //Z if all bits are cleared; cleared otherwise
+	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N); 		//N: Cleared
+
+	if (curr.accumulatorD == 0x0000) 															//Z: if all bits are cleared; cleared otherwise
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
 
-	if (prev.accumulatorD & 0x0001) //before operation lsb of ACCD was set; cleared otherwise
+	if (!!(curr.flagRegister & MC6803E_FLAG_N)^!!(curr.flagRegister& MC6803E_FLAG_C)) 			// V: Set if, after the completion of the shift operation, N xor C == 1?
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+
+	if (prev.accumulatorD & 0x0001) 															//C: Set if, before the operation, the least significant bit of the ACCX or M was set; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+
+	return passAllTests;
+}
+
+bool test_ASLD()
+{
+	PrintH1("Testing ASLD\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+
+	PrintH2("Carry Not Set ASLD\n");
+	passAllTests &= test_ASLD_exec(0xCAD7);
+
+	PrintH2("Carry Set ASLD\n");
+	passAllTests &= test_ASLD_exec(0xCADF);
+
+	PrintH2("Clear ASLD\n");
+	passAllTests &= test_ASLD_exec(0x0001);
+
+	PrintH2("empty ASLD\n");
+	passAllTests &= test_ASLD_exec(0x0000);
+
+	PrintH2("lower set shift ASLD\n");
+	passAllTests &= test_ASLD_exec(0xFFFF);
+	passAllTests &= CheckSame(*(p->accumulatorD),0xFFFE, "Zero always shift into LSBit");
+
+	return passAllTests;
+}
+
+bool test_ASLD_exec(uint16_t value)
+{
+	bool passAllTests = true;
+	*p->accumulatorD = value;
+	p->flagRegister |= MC6803E_FLAG_N;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0xABCD;
+	p->flagRegister = 0xFF;
+
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x05);
+	ALU_MC6803E_Execute(p, 0x05);
+	MPU_State curr = getMPUState();
+
+	checkImplemented(curr.flagRegister);
+	checkVerified(curr.flagRegister);
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckLSH(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+
+//Flag Checks
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
+
+	if (curr.accumulatorD & 0x1000)																//N: Set if most significant bit of the result is set; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+
+	if (curr.accumulatorD == 0x0000) 															//Z: Set if all bits of the result are cleared; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+
+	if (!!(curr.flagRegister & MC6803E_FLAG_N)^!!(curr.flagRegister& MC6803E_FLAG_C)) 			//V: Set if, after the completion of the shift operation, N xor C == 1?
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+
+	if (prev.accumulatorD & 0x1000) 															//C: Set if, before the operation, the most significant bit of the ACCX or M was set; cleared otherwise.
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
