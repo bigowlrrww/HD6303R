@@ -1480,7 +1480,7 @@ void ALU_MC6803E_ASLD(MC6803E_MPU * p)
 	switch (instruction) {
 		case 0x05: // LSRD Inherent
 			ALU_MC6803E_SetCurrentMneunomic(p, "LSRD");
-			ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, *(p->accumulatorD) & 0x1000);
+			ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, !!(*(p->accumulatorD) & 0x1000));
 			result = ((*(p->accumulatorD)) << 1);
 			break;
 		default:
@@ -1489,7 +1489,7 @@ void ALU_MC6803E_ASLD(MC6803E_MPU * p)
 
 	*(p->accumulatorD) = (uint16_t)result;
 
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, *(p->accumulatorD) & 0x1000);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, !!(*(p->accumulatorD) & 0x1000));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, *p->accumulatorD);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, ALU_MC6803E_GetFlag(p, MC6803E_FLAG_N) ^ ALU_MC6803E_GetFlag(p,MC6803E_FLAG_C));// N xor C == 1?
 
@@ -4214,17 +4214,12 @@ void ALU_MC6803E_TAP(MC6803E_MPU * p)
 	switch (instruction) {
 		case 0x06: // TAP Inherent
 			ALU_MC6803E_SetCurrentMneunomic(p, "TAP");
-			p->flagRegister = p->accumulatorA;
+			p->flagRegister = p->accumulatorA | 0xC0; // Ensure the top is set like it should be
 			break;
 		default:
 			break;
 	}
-	
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_H, (p->flagRegister & 0x10));
-	// @CC why set I here.
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->flagRegister & 0x80));
-	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->flagRegister);
-	// @CC why set V and C...
+
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
