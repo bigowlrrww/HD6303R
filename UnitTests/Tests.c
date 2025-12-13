@@ -19,6 +19,12 @@ bool WARN()
     printf("\e[33mWARN\e[0m\n");
     return true;
 }
+bool WARN_I()
+{
+    printf("\033[55G"); 
+    printf("\e[33m(WARN)\e[0m");
+    return true;
+}
 bool FAIL()
 {
     printf("\033[50G"); 
@@ -137,8 +143,8 @@ bool CheckFlagSet(uint8_t a, uint8_t b, uint8_t flag)
 {
     printf("%s was set", flagToStr(flag));
     if (Verbose) printf(" [0x%02X->0x%02X]", a&flag, b&flag);
-    if (a & flag) {printf(" Invalid a.%s", flagToStr(flag)); return WARN();}
-    else if (b & flag) return PASS();
+    if (a & flag) {printf(" Invalid a.%s", flagToStr(flag)); WARN_I();}
+    if (b & flag) return PASS();
     else return FAIL();
 }
 
@@ -146,8 +152,8 @@ bool CheckFlagUnset(uint8_t a, uint8_t b, uint8_t flag)
 {
     printf("%s was unset", flagToStr(flag));
     if (Verbose) printf(" [0x%02X->0x%02X]", a&flag, b&flag);
-    if (!(a & flag)) {printf(" Invalid a.%s", flagToStr(flag)); return WARN();}
-    else if (!(b & flag)) return PASS();
+    if (!(a & flag)) {printf(" Invalid a.%s", flagToStr(flag)); WARN_I();}
+    if (!(b & flag)) return PASS();
     return FAIL();
 }
 
