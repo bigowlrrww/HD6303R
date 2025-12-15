@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
+#include <stdint.h>
 
 typedef struct {
     char *name;
-    bool flag;
+    uint8_t flag;
 } Item;
 
 typedef struct {
@@ -18,7 +18,7 @@ typedef struct {
 void initItemList(ItemList *list);
 
 // Add a new item
-void addItem(ItemList *list, const char *name, bool flag);
+void addItem(ItemList *list, const char *name, uint8_t flag);
 
 // Free memory
 void freeItemList(ItemList *list);
