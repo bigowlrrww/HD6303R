@@ -34,12 +34,14 @@ void PrepareForNextTest();
 /*********************************************************************************************************************
  * UNIT TESTS
  *********************************************************************************************************************/
-bool test_Unknown(uint8_t Mnemonic);
-bool test_NOP();
-bool test_LSRD();
+uint8_t test_Unknown(uint8_t Mnemonic);
+uint8_t test_NOP();
+uint8_t test_LSRD();
 bool test_LSRD_exec(uint16_t value);
-bool test_ASLD();
+uint8_t test_ASLD();
 bool test_ASLD_exec(uint16_t value);
-bool test_TAP();
+uint8_t test_TAP();
 bool test_TAP_exec(uint8_t value);
+uint8_t test_TPA();
+bool test_TPA_exec(uint8_t value);
 #endif

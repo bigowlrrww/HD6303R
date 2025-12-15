@@ -4,6 +4,13 @@
 #define PrintH1(fmt, ...) printf("\033[35m" fmt "\033[0m", ##__VA_ARGS__)
 #define PrintH2(fmt, ...) printf("\033[36m" fmt "\033[0m", ##__VA_ARGS__)
 
+bool NOT_VERIFIED()
+{
+    printf("\033[55G"); 
+    printf("\e[33m(NOT_VERIFIED)\e[0m");
+    return true;
+}
+
 // Global Processor pointer
 MC6803E_MPU *p;
 ItemList list;
@@ -95,7 +102,8 @@ int main(int argc, char *argv[])
 	for (size_t i = 0; i < list.size; i++)
 	{
 		printf("%s:", list.items[i].name);
-		if (list.items[i].flag)
+		if (!(list.items[i].flag & 0x02)) NOT_VERIFIED();
+		if (list.items[i].flag & 0x01)
 			PASS();
 		else
 			FAIL();
@@ -158,19 +166,21 @@ MPU_State getMPUState()
  * UNIT TESTS
  *********************************************************************************************************************/
 
-bool test_Unknown(uint8_t Mnemonic)
+//Special case, returns uint8_t with verified flag thrown.
+uint8_t test_Unknown(uint8_t Mnemonic)
 {
 	PrintH1("Testing 0x%02X\n", Mnemonic);
 	printBreak("-",70);
-	return verifyUnknownMnemonic(ALU_MC6803E_Execute(p, Mnemonic));
+	return (verifyUnknownMnemonic(ALU_MC6803E_Execute(p, Mnemonic)) | 0x2);
 }
 
-bool test_NOP()
+uint8_t test_NOP()
 {
 	PrintH1("Testing NOP\n");
 	printBreak("-",70);
 
 	bool passAllTests = true;
+	bool verified = true;
 
 	PrintH2("Case startup NOP\n");
 	MPU_State prev = getMPUState();
@@ -179,7 +189,7 @@ bool test_NOP()
 	MPU_State curr = getMPUState();
 
 	checkImplemented(curr.flagRegister);
-	checkVerified(curr.flagRegister);
+	verified &= checkVerified(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
@@ -212,20 +222,22 @@ bool test_NOP()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
 
-	return passAllTests;
+	return (passAllTests | ((uint8_t)verified << 1));
 }
 
-bool test_LSRD()
+uint8_t test_LSRD()
 {
 	PrintH1("Testing LSRD\n");
 	printBreak("-",70);
 
 	bool passAllTests = true;
+	bool verified = true;
 
 	PrintH2("Carry Not Set LSRD\n");
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
 	p->flagRegister |= MC6803E_FLAG_Z;
 	passAllTests &= test_LSRD_exec(0xCAD7);
+	verified &= checkVerified(p->flagRegister);
 
 	PrintH2("Carry Set LSRD\n");
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C | MC6803E_FLAG_V);
@@ -244,7 +256,7 @@ bool test_LSRD()
 	passAllTests &= test_LSRD_exec(0xFFFF);
 	passAllTests &= CheckSame(*(p->accumulatorD),0x7FFF, "Zero always shift into MSBit");
 
-	return passAllTests;
+	return (passAllTests | ((uint8_t)verified << 1));
 }
 
 bool test_LSRD_exec(uint16_t value)
@@ -293,17 +305,19 @@ bool test_LSRD_exec(uint16_t value)
 	return passAllTests;
 }
 
-bool test_ASLD()
+uint8_t test_ASLD()
 {
 	PrintH1("Testing ASLD\n");
 	printBreak("-",70);
 
 	bool passAllTests = true;
+	bool verified = true;
 
 	PrintH2("Carry Not Set ASLD\n");
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
 	p->flagRegister |= MC6803E_FLAG_Z | MC6803E_FLAG_V;
 	passAllTests &= test_ASLD_exec(0x7AD7);
+	verified &= checkVerified(p->flagRegister);
 
 	PrintH2("Carry Set ASLD\n");
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
@@ -329,7 +343,7 @@ bool test_ASLD()
 	passAllTests &= test_ASLD_exec(0xFFFF);
 	passAllTests &= CheckSame(*(p->accumulatorD),0xFFFE, "Zero always shift into LSBit");
 
-	return passAllTests;
+	return (passAllTests | ((uint8_t)verified << 1));
 }
 
 bool test_ASLD_exec(uint16_t value)
@@ -380,21 +394,23 @@ bool test_ASLD_exec(uint16_t value)
 	return passAllTests;
 }
 
-bool test_TAP()
+uint8_t test_TAP()
 {
 	PrintH1("Testing TAP\n");
 	printBreak("-",70);
 
 	bool passAllTests = true;
+	bool verified = true;
 
 	PrintH2("0xE5 TAP\n");
 	p->flagRegister = 0xD5;
 	passAllTests &= test_TAP_exec(0xEA);
+	verified &= checkVerified(p->flagRegister);
 	PrintH2("0xDA TAP\n");
 	p->flagRegister = 0xE5;
 	passAllTests &= test_TAP_exec(0xD5);
 
-	return passAllTests;
+	return (passAllTests | ((uint8_t)verified << 1));
 }
 
 bool test_TAP_exec(uint8_t value)
@@ -421,5 +437,50 @@ bool test_TAP_exec(uint8_t value)
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+}
 
+uint8_t test_TPA()
+{
+	PrintH1("Testing TPA\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = true;
+
+	PrintH2("0xE5 TPA\n");
+	p->accumulatorA = 0xD5;
+	passAllTests &= test_TPA_exec(0xEA);
+	verified &= checkVerified(p->flagRegister);
+	PrintH2("0xDA TPA\n");
+	p->accumulatorA = 0xE5;
+	passAllTests &= test_TPA_exec(0xD5);
+	PrintH2("0x00 TPA\n");
+	p->accumulatorA = 0x00;
+	passAllTests &= test_TPA_exec(0xFE);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_TPA_exec(uint8_t value)
+{
+	bool passAllTests = true;
+	p->flagRegister = value;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0xABCD;
+	p->flagRegister |= 0xC0;
+
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x07);
+	ALU_MC6803E_Execute(p, 0x07);
+	MPU_State curr = getMPUState();
+
+	checkImplemented(curr.flagRegister);
+	checkVerified(curr.flagRegister);
+
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister | 0xC0), curr.accumulatorA, "CC is loaded in Accu A"); //Ensure that the top 2 are set, they should be in the processor.
+	passAllTests &= CheckSame((uint8_t)(curr.accumulatorA & 0xC0), (uint8_t)0xC0, "Upper bits set in Accu A");
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 }
