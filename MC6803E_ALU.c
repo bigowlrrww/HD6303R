@@ -1480,7 +1480,7 @@ void ALU_MC6803E_ASLD(MC6803E_MPU * p)
 	switch (instruction) {
 		case 0x05: // ASLD Inherent
 			ALU_MC6803E_SetCurrentMneunomic(p, "ASLD");
-			ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, !!(*(p->accumulatorD) & 0x1000));
+			ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, !!(*(p->accumulatorD) & 0x8000));
 			result = ((*(p->accumulatorD)) << 1);
 			break;
 		default:
@@ -1489,7 +1489,7 @@ void ALU_MC6803E_ASLD(MC6803E_MPU * p)
 
 	*(p->accumulatorD) = (uint16_t)result;
 
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, !!(*(p->accumulatorD) & 0x1000));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, !!(*(p->accumulatorD) & 0x8000));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, *p->accumulatorD);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, ALU_MC6803E_GetFlag(p, MC6803E_FLAG_N) ^ ALU_MC6803E_GetFlag(p,MC6803E_FLAG_C));// N xor C == 1?
 

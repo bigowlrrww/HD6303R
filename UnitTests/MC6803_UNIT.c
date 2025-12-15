@@ -387,7 +387,7 @@ bool test_ASLD_exec(uint16_t value)
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
 
-	if (curr.accumulatorD & 0x1000)																//N: Set if most significant bit of the result is set; cleared otherwise.
+	if (curr.accumulatorD & 0x8000)																//N: Set if most significant bit of the result is set; cleared otherwise.
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
@@ -402,7 +402,7 @@ bool test_ASLD_exec(uint16_t value)
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
 
-	if (prev.accumulatorD & 0x1000) 															//C: Set if, before the operation, the most significant bit of the ACCX or M was set; cleared otherwise.
+	if (prev.accumulatorD & 0x8000) 															//C: Set if, before the operation, the most significant bit of the ACCX or M was set; cleared otherwise.
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
