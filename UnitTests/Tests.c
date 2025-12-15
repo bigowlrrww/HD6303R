@@ -131,6 +131,22 @@ bool CheckAdd16(uint16_t a, uint16_t b, uint16_t result, const char *str)
     else return FAIL();
 }
 
+bool CheckSub8(uint8_t a, uint8_t b, uint8_t result, const char *str)
+{
+    printf("%s", str);
+    if (Verbose) printf(" [0x%02X-0x%02X==0x%02X]", a, b, result);
+    if ((uint8_t)(a - b) == result) return PASS();
+    else return FAIL();
+}
+
+bool CheckSub16(uint16_t a, uint16_t b, uint16_t result, const char *str)
+{
+    printf("%s", str);
+    if (Verbose) printf(" [0x%04X-0x%04X==0x%04X]", a, b, result);
+    if ((uint16_t)(a - b) == result) return PASS();
+    else return FAIL();
+}
+
 bool checkPC(uint16_t a, uint16_t b, uint8_t expectedStep)
 {
     printf("PC incremented correctly");

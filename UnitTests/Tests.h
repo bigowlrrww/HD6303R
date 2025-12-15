@@ -23,6 +23,11 @@
     uint16_t: CheckAdd16 \
 )(a,b,result,d)
 
+#define CheckSubtraction(a,b,result,d) _Generic((a), \
+    uint8_t:  CheckSub8, \
+    uint16_t: CheckSub16 \
+)(a,b,result,d)
+
 void EnVerbose();
 bool PASS();
 bool WARN();
@@ -41,6 +46,9 @@ bool CheckLSH16(uint16_t a, uint16_t b, const char *str);
 
 bool CheckAdd8(uint8_t a, uint8_t b, uint8_t result, const char *str);
 bool CheckAdd16(uint16_t a, uint16_t b, uint16_t result, const char *str);
+
+bool CheckSub8(uint8_t a, uint8_t b, uint8_t result, const char *str);
+bool CheckSub16(uint16_t a, uint16_t b, uint16_t result, const char *str);
 
 bool checkPC(uint16_t a, uint16_t b, uint8_t expectedStep);
 
