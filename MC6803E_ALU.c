@@ -4236,11 +4236,11 @@ void ALU_MC6803E_TPA(MC6803E_MPU * p)
 	switch (instruction) {
 		case 0x07: // TPA Inherent
 			ALU_MC6803E_SetCurrentMneunomic(p, "TPA");
-			p->accumulatorA = p->flagRegister;
+			p->accumulatorA = p->flagRegister | 0xC0; // Ensure the top is set like it should be
 			break;
 		default:
 			break;
 	}
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_VERIFIED);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
