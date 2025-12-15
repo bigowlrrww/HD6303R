@@ -45,9 +45,11 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x06) TAP", test_TAP());
 	PrepareForNextTest();
-	addItem(&list, "(0x06) TPA", test_TPA());
+	addItem(&list, "(0x07) TPA", test_TPA());
 	PrepareForNextTest();
-	addItem(&list, "(0x07) INX", test_INX());
+	addItem(&list, "(0x08) INX", test_INX());
+	PrepareForNextTest();
+	addItem(&list, "(0x09) DEX", test_DEX());
 	PrepareForNextTest();
 	addItem(&list, "(0x12)", test_Unknown(0x12));
 	PrepareForNextTest();
@@ -182,11 +184,11 @@ uint8_t test_NOP()
 	printBreak("-",70);
 
 	bool passAllTests = true;
-	bool verified = true;
+	bool verified = false;
 
 	PrintH2("Case startup NOP\n");
 	passAllTests &= test_NOP_exec();
-	verified &= checkVerified(p->flagRegister);
+	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("Case Values set NOP\n");
@@ -226,13 +228,13 @@ uint8_t test_LSRD()
 	printBreak("-",70);
 
 	bool passAllTests = true;
-	bool verified = true;
+	bool verified = false;
 
 	PrintH2("Carry Not Set LSRD\n");
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
 	p->flagRegister |= MC6803E_FLAG_Z;
 	passAllTests &= test_LSRD_exec(0xCAD7);
-	verified &= checkVerified(p->flagRegister);
+	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("Carry Set LSRD\n");
@@ -309,13 +311,13 @@ uint8_t test_ASLD()
 	printBreak("-",70);
 
 	bool passAllTests = true;
-	bool verified = true;
+	bool verified = false;
 
 	PrintH2("Carry Not Set ASLD\n");
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
 	p->flagRegister |= MC6803E_FLAG_Z | MC6803E_FLAG_V;
 	passAllTests &= test_ASLD_exec(0x7AD7);
-	verified &= checkVerified(p->flagRegister);
+	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("Carry Set ASLD\n");
@@ -402,12 +404,12 @@ uint8_t test_TAP()
 	printBreak("-",70);
 
 	bool passAllTests = true;
-	bool verified = true;
+	bool verified = false;
 
 	PrintH2("0xE5 TAP\n");
 	p->flagRegister = 0xD5;
 	passAllTests &= test_TAP_exec(0xEA);
-	verified &= checkVerified(p->flagRegister);
+	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("0xDA TAP\n");
@@ -448,12 +450,12 @@ uint8_t test_TPA()
 	printBreak("-",70);
 
 	bool passAllTests = true;
-	bool verified = true;
+	bool verified = false;
 
 	PrintH2("0xE5 TPA\n");
 	p->accumulatorA = 0xD5;
 	passAllTests &= test_TPA_exec(0xEA);
-	verified &= checkVerified(p->flagRegister);
+	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("0xDA TPA\n");
@@ -497,11 +499,11 @@ uint8_t test_INX()
 	printBreak("-",70);
 
 	bool passAllTests = true;
-	bool verified = true;
+	bool verified = false;
 	PrintH2("startup INX\n");
 	p->flagRegister |= MC6803E_FLAG_Z;
 	passAllTests &= test_INX_exec();
-	verified &= checkVerified(p->flagRegister);
+	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("Values set INX\n");
