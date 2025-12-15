@@ -51,4 +51,6 @@ uint8_t test_DEX();
 bool test_DEX_exec();
 uint8_t test_CLV();
 bool test_CLV_exec();
+uint8_t test_SEV();
+bool test_SEV_exec();
 #endif
