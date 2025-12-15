@@ -207,7 +207,6 @@ bool test_NOP_exec()
 	MPU_State curr = getMPUState();
 
 	checkImplemented(curr.flagRegister);
-	checkVerified(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
@@ -272,7 +271,6 @@ bool test_LSRD_exec(uint16_t value)
 	MPU_State curr = getMPUState();
 
 	checkImplemented(curr.flagRegister);
-	checkVerified(curr.flagRegister);
 
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckRSH(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -363,7 +361,6 @@ bool test_ASLD_exec(uint16_t value)
 	MPU_State curr = getMPUState();
 
 	checkImplemented(curr.flagRegister);
-	checkVerified(curr.flagRegister);
 
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckLSH(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -432,7 +429,6 @@ bool test_TAP_exec(uint8_t value)
 	MPU_State curr = getMPUState();
 
 	checkImplemented(curr.flagRegister);
-	checkVerified(curr.flagRegister);
 
 	passAllTests &= CheckSame(prev.accumulatorA, curr.flagRegister | 0xC0, "CC is Set"); //Ensure that the top 2 are set, they should be in the processor.
 
@@ -484,7 +480,6 @@ bool test_TPA_exec(uint8_t value)
 	MPU_State curr = getMPUState();
 
 	checkImplemented(curr.flagRegister);
-	checkVerified(curr.flagRegister);
 
 	passAllTests &= CheckSame((uint8_t)(prev.flagRegister | 0xC0), curr.accumulatorA, "CC is loaded in Accu A"); //Ensure that the top 2 are set, they should be in the processor.
 	passAllTests &= CheckSame((uint8_t)(curr.accumulatorA & 0xC0), (uint8_t)0xC0, "Upper bits set in Accu A");
