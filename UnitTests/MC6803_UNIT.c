@@ -63,6 +63,8 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x0F) SEI", test_SEI());
 	PrepareForNextTest();
+	addItem(&list, "(0x10) SBA", test_SBA());
+	PrepareForNextTest();
 	addItem(&list, "(0x12)", test_Unknown(0x12));
 	PrepareForNextTest();
 	addItem(&list, "(0x13)", test_Unknown(0x13));
@@ -973,6 +975,70 @@ bool test_SEI_exec()
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);		//Z: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);		//V: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);		//C: Not affected.
+
+	return passAllTests;
+}
+
+uint8_t test_SBA()
+{
+	PrintH1("Testing SBA\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("I Not set SBA\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_V);
+	passAllTests &= test_SBA_exec();
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+}
+
+bool test_SBA_exec()
+{
+	bool passAllTests = true;
+	uint8_t resFoo;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0xABCD;
+
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x10);
+	ALU_MC6803E_Execute(p, 0x10);
+	MPU_State curr = getMPUState();
+
+	checkImplemented(curr.flagRegister);
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+
+//Flag Checks
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
+
+	if (curr.accumulatorA & 0x80)																//N: Set if most significant bit of the result is set; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+
+	if (curr.accumulatorA == 0x00) 															//Z: Set if all bits of the result are cleared; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+
+	if (__builtin_sub_overflow(curr.accumulatorB, prev.accumulatorA, &resFoo)) 			//V: Set if there was two’s complement overflow as a result of the operation.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+
+	if (((~prev.accumulatorA & prev.accumulatorB)|(prev.accumulatorB&curr.accumulatorA)|(curr.accumulatorA&prev.accumulatorA))&0x80)	//C: Carry is set if the absolute value of accumulator B plus previous Carry is larger than the absolute value of accumulator A; reset otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
 
 	return passAllTests;
 }
