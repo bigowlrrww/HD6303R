@@ -557,3 +557,74 @@ bool test_INX_exec()
 
 	return passAllTests;
 }
+
+uint8_t test_DEX()
+{
+	PrintH1("Testing DEX\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("index -> zero DEX\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_Z);
+	passAllTests &= test_DEX_exec();
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+
+	PrintH2("Values set DEX\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0xABCD;
+	p->flagRegister = 0xFF;
+	passAllTests &= test_DEX_exec();
+	printBreak(".",54);
+
+	PrintH2("DEX rolls over\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0000;
+	p->flagRegister = 0xFF;
+	passAllTests &= test_DEX_exec();
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_DEX_exec()
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x09);
+	ALU_MC6803E_Execute(p, 0x09);
+	MPU_State curr = getMPUState();
+
+	checkImplemented(curr.flagRegister);
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSubtraction(prev.indexRegister, 1, curr.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+
+	//Flag Checks
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);		//N: Not affected.
+
+	if (curr.indexRegister == 0x0000) 															//Z: Set if all bits of the result are cleared; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);		//V: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);		//C: Not affected.
+
+	return passAllTests;
+}
