@@ -47,6 +47,8 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x06) TPA", test_TPA());
 	PrepareForNextTest();
+	addItem(&list, "(0x07) INX", test_INX());
+	PrepareForNextTest();
 	addItem(&list, "(0x12)", test_Unknown(0x12));
 	PrepareForNextTest();
 	addItem(&list, "(0x13)", test_Unknown(0x13));
@@ -487,4 +489,69 @@ bool test_TPA_exec(uint8_t value)
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+}
+
+uint8_t test_INX()
+{
+	PrintH1("Testing INX\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = true;
+	PrintH2("startup INX\n");
+	p->flagRegister |= MC6803E_FLAG_Z;
+	passAllTests &= test_INX_exec();
+	verified &= checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Values set INX\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0xABCD;
+	p->flagRegister = 0xFF;
+	passAllTests &= test_INX_exec();
+	printBreak(".",54);
+
+	PrintH2("INX rolls over\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0xFFFF;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_Z);
+	passAllTests &= test_INX_exec();
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_INX_exec()
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x08);
+	ALU_MC6803E_Execute(p, 0x08);
+	MPU_State curr = getMPUState();
+
+	checkImplemented(curr.flagRegister);
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckAddition(prev.indexRegister, 1, curr.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+
+	//Flag Checks
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);		//N: Not affected.
+
+	if (curr.indexRegister == 0x0000) 															//Z: Set if all bits of the result are cleared; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);		//V: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);		//C: Not affected.
+
+	return passAllTests;
 }

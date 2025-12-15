@@ -45,4 +45,6 @@ uint8_t test_TAP();
 bool test_TAP_exec(uint8_t value);
 uint8_t test_TPA();
 bool test_TPA_exec(uint8_t value);
+uint8_t test_INX();
+bool test_INX_exec();
 #endif
