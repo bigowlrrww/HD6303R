@@ -59,4 +59,6 @@ uint8_t test_SEC();
 bool test_SEC_exec();
 uint8_t test_CLI();
 bool test_CLI_exec();
+uint8_t test_SEI();
+bool test_SEI_exec();
 #endif
