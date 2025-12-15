@@ -1478,8 +1478,8 @@ void ALU_MC6803E_ASLD(MC6803E_MPU * p)
 	uint32_t result;
 
 	switch (instruction) {
-		case 0x05: // LSRD Inherent
-			ALU_MC6803E_SetCurrentMneunomic(p, "LSRD");
+		case 0x05: // ASLD Inherent
+			ALU_MC6803E_SetCurrentMneunomic(p, "ASLD");
 			ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, !!(*(p->accumulatorD) & 0x1000));
 			result = ((*(p->accumulatorD)) << 1);
 			break;
