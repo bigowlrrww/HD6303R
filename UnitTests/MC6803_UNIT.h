@@ -36,6 +36,7 @@ void PrepareForNextTest();
  *********************************************************************************************************************/
 uint8_t test_Unknown(uint8_t Mnemonic);
 uint8_t test_NOP();
+bool test_NOP_exec();
 uint8_t test_LSRD();
 bool test_LSRD_exec(uint16_t value);
 uint8_t test_ASLD();

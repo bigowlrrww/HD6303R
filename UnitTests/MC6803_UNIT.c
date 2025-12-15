@@ -183,34 +183,28 @@ uint8_t test_NOP()
 	bool verified = true;
 
 	PrintH2("Case startup NOP\n");
+	passAllTests &= test_NOP_exec();
+	verified &= checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Case Values set NOP\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0xABCD;
+	p->flagRegister = 0xFF;
+	passAllTests &= test_NOP_exec();
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_NOP_exec()
+{
+	bool passAllTests = true;
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x01);
 	ALU_MC6803E_Execute(p, 0x01);
 	MPU_State curr = getMPUState();
-
-	checkImplemented(curr.flagRegister);
-	verified &= checkVerified(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
-	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
-	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
-	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
-	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
-	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
-	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
-
-	PrintH2("\nCase Values set NOP\n");
-
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
-	// D should be set already because of A and B
-	p->stackPointer = 0x5678;
-	p->indexRegister = 0xABCD;
-	p->flagRegister = 0xFF;
-
-	prev = getMPUState();
-	MemoryWrite(p,p->pc,0x01);
-	ALU_MC6803E_Execute(p, 0x01);
-	curr = getMPUState();
 
 	checkImplemented(curr.flagRegister);
 	checkVerified(curr.flagRegister);
@@ -222,7 +216,7 @@ uint8_t test_NOP()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
 
-	return (passAllTests | ((uint8_t)verified << 1));
+	return passAllTests;
 }
 
 uint8_t test_LSRD()
@@ -238,19 +232,23 @@ uint8_t test_LSRD()
 	p->flagRegister |= MC6803E_FLAG_Z;
 	passAllTests &= test_LSRD_exec(0xCAD7);
 	verified &= checkVerified(p->flagRegister);
+	printBreak(".",54);
 
 	PrintH2("Carry Set LSRD\n");
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C | MC6803E_FLAG_V);
 	p->flagRegister |= MC6803E_FLAG_Z;
 	passAllTests &= test_LSRD_exec(0xCADF);
+	printBreak(".",54);
 
 	PrintH2("Clear LSRD\n");
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C | MC6803E_FLAG_V);
 	passAllTests &= test_LSRD_exec(0x0001);
+	printBreak(".",54);
 
 	PrintH2("empty LSRD\n");
 	p->flagRegister &= ~(MC6803E_FLAG_Z);
 	passAllTests &= test_LSRD_exec(0x0000);
+	printBreak(".",54);
 
 	PrintH2("upper set shift LSRD\n");
 	passAllTests &= test_LSRD_exec(0xFFFF);
@@ -318,25 +316,30 @@ uint8_t test_ASLD()
 	p->flagRegister |= MC6803E_FLAG_Z | MC6803E_FLAG_V;
 	passAllTests &= test_ASLD_exec(0x7AD7);
 	verified &= checkVerified(p->flagRegister);
+	printBreak(".",54);
 
 	PrintH2("Carry Set ASLD\n");
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
 	p->flagRegister |= MC6803E_FLAG_Z | MC6803E_FLAG_V;
 	passAllTests &= test_ASLD_exec(0xFADF);
+	printBreak(".",54);
 
 	PrintH2("Clear ASLD\n");
 	p->flagRegister |= MC6803E_FLAG_V;
 	passAllTests &= test_ASLD_exec(0x8000);
+	printBreak(".",54);
 
 	PrintH2("Empty ASLD\n");
 	p->flagRegister &= ~(MC6803E_FLAG_Z);
 	p->flagRegister |= MC6803E_FLAG_V | MC6803E_FLAG_C | MC6803E_FLAG_N;
 	passAllTests &= test_ASLD_exec(0x0000);
+	printBreak(".",54);
 
 	PrintH2("N is set ASLD\n");
 	p->flagRegister &= ~(MC6803E_FLAG_Z );
 	p->flagRegister |= MC6803E_FLAG_C | MC6803E_FLAG_N| MC6803E_FLAG_V;
 	passAllTests &= test_ASLD_exec(0x8000);
+	printBreak(".",54);
 
 	PrintH2("lower set shift ASLD\n");
 	p->flagRegister |= MC6803E_FLAG_V;
@@ -406,6 +409,8 @@ uint8_t test_TAP()
 	p->flagRegister = 0xD5;
 	passAllTests &= test_TAP_exec(0xEA);
 	verified &= checkVerified(p->flagRegister);
+	printBreak(".",54);
+
 	PrintH2("0xDA TAP\n");
 	p->flagRegister = 0xE5;
 	passAllTests &= test_TAP_exec(0xD5);
@@ -451,9 +456,13 @@ uint8_t test_TPA()
 	p->accumulatorA = 0xD5;
 	passAllTests &= test_TPA_exec(0xEA);
 	verified &= checkVerified(p->flagRegister);
+	printBreak(".",54);
+
 	PrintH2("0xDA TPA\n");
 	p->accumulatorA = 0xE5;
 	passAllTests &= test_TPA_exec(0xD5);
+	printBreak(".",54);
+	
 	PrintH2("0x00 TPA\n");
 	p->accumulatorA = 0x00;
 	passAllTests &= test_TPA_exec(0xFE);
