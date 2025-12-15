@@ -31,22 +31,6 @@
             "problemMatcher": []
         },
         {
-            "label": "Build Unit Tests",
-            "type": "shell",
-            "command": "mingw32-make",
-            "args": [],
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}/UnitTests/"
-            }
-        },
-        {
             "label": "Clean Unit Tests",
             "type": "shell",
             "command": "mingw32-make",
@@ -61,6 +45,25 @@
             "options": {
                 "cwd": "${workspaceFolder}/UnitTests/"
             }
+        },
+        {
+            "label": "Build Unit Tests",
+            "type": "shell",
+            "command": "mingw32-make",
+            "args": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/UnitTests/"
+            },
+            "dependsOn": [
+                "Clean Unit Tests"
+            ]
         }
     ]
 }

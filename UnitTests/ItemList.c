@@ -7,7 +7,7 @@ void initItemList(ItemList *list) {
 }
 
 // Add a new item
-void addItem(ItemList *list, const char *name, bool flag) {
+void addItem(ItemList *list, const char *name, uint8_t flag) {
     if (list->size == list->capacity) {
         list->capacity *= 2;
         list->items = realloc(list->items, list->capacity * sizeof(Item));
