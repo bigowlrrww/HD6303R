@@ -21,6 +21,7 @@
 void EnVerbose();
 bool PASS();
 bool WARN();
+bool WARN_I();
 bool FAIL();
 const char* flagToStr(uint8_t flag);
 

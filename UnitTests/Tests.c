@@ -126,7 +126,7 @@ bool checkVerified(uint8_t flags)
 {
     printf("Function Verified");
     if (flags & MC6803E_FLAG_VERIFIED) return PASS();
-    else return WARN();
+    else return FAIL();
 }
 
 /**
