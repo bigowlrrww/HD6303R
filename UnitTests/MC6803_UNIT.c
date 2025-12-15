@@ -1017,25 +1017,27 @@ bool test_SBA_exec()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
 //Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		// H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		// I: Not affected.
 
-	if (curr.accumulatorA & 0x80)																//N: Set if most significant bit of the result is set; cleared otherwise.
+	if (curr.accumulatorA & 0x80) 																// N: Set if most significant bit of the result is set; cleared otherwise.
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
 
-	if (curr.accumulatorA == 0x00) 															//Z: Set if all bits of the result are cleared; cleared otherwise.
+	if (curr.accumulatorA == 0x00) 																// Z: Set if all bits of the result are cleared; cleared otherwise.
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
 
-	if (__builtin_sub_overflow(curr.accumulatorB, prev.accumulatorA, &resFoo)) 			//V: Set if there was two’s complement overflow as a result of the operation.
+	if (__builtin_sub_overflow(curr.accumulatorB, prev.accumulatorA, &resFoo)) 					// V: Set if there was two’s complement overflow as a result of the operation.
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
 
-	if (((~prev.accumulatorA & prev.accumulatorB)|(prev.accumulatorB&curr.accumulatorA)|(curr.accumulatorA&prev.accumulatorA))&0x80)	//C: Carry is set if the absolute value of accumulator B plus previous Carry is larger than the absolute value of accumulator A; reset otherwise.
+	if (((~prev.accumulatorA & prev.accumulatorB) | 
+		 (prev.accumulatorB & curr.accumulatorA) | 
+		 (curr.accumulatorA & prev.accumulatorA)) & 0x80) 										// C: Carry is set if the absolute value of accumulator B plus previous Carry is larger than the absolute value of accumulator A; reset otherwise.
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
