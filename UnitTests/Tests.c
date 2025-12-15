@@ -31,6 +31,13 @@ bool FAIL()
     printf("\e[31mFAIL\e[0m\n");
     return false;
 }
+//A soft failure, warn the user return false, but only show yellow on the FAIL
+bool FAIL_S()
+{
+    printf("\033[50G"); 
+    printf("\e[33mFAIL\e[0m\n");
+    return false;
+}
 
 const char* flagToStr(uint8_t flag)
 {
@@ -108,6 +115,22 @@ bool CheckLSH16(uint16_t a, uint16_t b, const char *str)
     else return FAIL();
 }
 
+bool CheckAdd8(uint8_t a, uint8_t b, uint8_t result, const char *str)
+{
+    printf("%s", str);
+    if (Verbose) printf(" [0x%02X+0x%02X==0x%02X]", a, b, result);
+    if ((uint8_t)(a + b) == result) return PASS();
+    else return FAIL();
+}
+
+bool CheckAdd16(uint16_t a, uint16_t b, uint16_t result, const char *str)
+{
+    printf("%s", str);
+    if (Verbose) printf(" [0x%04X+0x%04X==0x%04X]", a, b, result);
+    if ((uint16_t)(a + b) == result) return PASS();
+    else return FAIL();
+}
+
 bool checkPC(uint16_t a, uint16_t b, uint8_t expectedStep)
 {
     printf("PC incremented correctly");
@@ -126,7 +149,7 @@ bool checkVerified(uint8_t flags)
 {
     printf("Function Verified");
     if (flags & MC6803E_FLAG_VERIFIED) return PASS();
-    else return FAIL();
+    else return FAIL_S();
 }
 
 /**
