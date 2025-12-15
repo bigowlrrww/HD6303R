@@ -55,4 +55,6 @@ uint8_t test_SEV();
 bool test_SEV_exec();
 uint8_t test_CLC();
 bool test_CLC_exec();
+uint8_t test_SEC();
+bool test_SEC_exec();
 #endif

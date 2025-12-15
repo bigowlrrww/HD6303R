@@ -57,6 +57,8 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x0C) CLC", test_CLC());
 	PrepareForNextTest();
+	addItem(&list, "(0x0D) SEC", test_SEC());
+	PrepareForNextTest();
 	addItem(&list, "(0x12)", test_Unknown(0x12));
 	PrepareForNextTest();
 	addItem(&list, "(0x13)", test_Unknown(0x13));
@@ -800,6 +802,62 @@ bool test_CLC_exec()
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);		//Z: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);		//V: Not affected.
 	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);		//C: Cleared.
+
+	return passAllTests;
+}
+
+uint8_t test_SEC()
+{
+	PrintH1("Testing SEC\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("C Not set SEC\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_C);
+	passAllTests &= test_SEC_exec();
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("C already set SEC\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0xABCD;
+	p->flagRegister = 0xFF;
+	passAllTests &= test_SEC_exec();
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_SEC_exec()
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x0D);
+	ALU_MC6803E_Execute(p, 0x0D);
+	MPU_State curr = getMPUState();
+
+	checkImplemented(curr.flagRegister);
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, curr.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+
+	//Flag Checks
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);		//N: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);		//Z: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);		//V: Not affected.
+	passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);			//C: Set.
 
 	return passAllTests;
 }
