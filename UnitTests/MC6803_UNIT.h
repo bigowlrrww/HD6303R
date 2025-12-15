@@ -49,4 +49,6 @@ uint8_t test_INX();
 bool test_INX_exec();
 uint8_t test_DEX();
 bool test_DEX_exec();
+uint8_t test_CLV();
+bool test_CLV_exec();
 #endif
