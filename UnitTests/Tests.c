@@ -63,6 +63,19 @@ const char* flagToStr(uint8_t flag)
     return "BadFLAG";
 }
 
+//A-B
+bool __check_sub_carry(uint8_t a, uint8_t b)
+{
+    uint8_t result = (a - b);
+    return ((((~a & b) | (b & result) | (result & ~a)) & 0x80) > 0);
+}
+
+//A-B
+bool __check_sub_overflow(uint8_t a, uint8_t b)
+{
+    uint8_t result = (a - b);
+    return ((((a & ~b & ~result) | (~a & b & result)) & 0x80) > 0);
+}
 
 bool CheckSame8(uint8_t a, uint8_t b, const char *str)
 {
