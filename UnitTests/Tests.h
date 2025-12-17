@@ -35,6 +35,9 @@ bool WARN_I();
 bool FAIL();
 const char* flagToStr(uint8_t flag);
 
+bool __check_sub_carry(uint8_t a, uint8_t b);
+bool __check_sub_overflow(uint8_t a, uint8_t b);
+
 bool CheckSame8(uint8_t a, uint8_t b, const char *str);
 bool CheckSame16(uint16_t a, uint16_t b, const char *str);
 

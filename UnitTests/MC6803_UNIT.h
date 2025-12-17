@@ -61,4 +61,8 @@ uint8_t test_CLI();
 bool test_CLI_exec();
 uint8_t test_SEI();
 bool test_SEI_exec();
+uint8_t test_SBA();
+bool test_SBA_exec();
+uint8_t test_CBA();
+bool test_CBA_exec();
 #endif

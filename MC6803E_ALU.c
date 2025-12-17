@@ -1653,29 +1653,36 @@ void ALU_MC6803E_BITB(MC6803E_MPU * p)
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
-// NOT IMPLEMENTED
 /*
 		void ALU_MC6803E_CBA(MC6803E_MPU * p)
 		Boolean:	A - B
 		Flags:		N Z V C
+		N = R7
+		Z = R7'+R6'+ ... R1'+R0'
+		V = A7B7'R7'|A7'B7R7
+		C = A7'B7 | B7R7 | R7A7'
 */
 void ALU_MC6803E_CBA(MC6803E_MPU * p)
 {
 	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
-	uint8_t unsigned_payload = (uint8_t)MemoryRead(p, (p->pc+1));
-	int8_t signed_payload = (int8_t)MemoryRead(p, (p->pc+1));
-	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
-	uint16_t direct_address = (uint16_t)unsigned_payload;
+	uint8_t result;
 
 	switch (instruction) {
 		case 0x11: // CBA Inherent
 			ALU_MC6803E_SetCurrentMneunomic(p, "CBA");
+			result = (p->accumulatorA - p->accumulatorB);
 			break;
 		default:
 			break;
 	}
+	
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (result & 0x80));
+	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, result);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, ((p->accumulatorA & ~p->accumulatorB & ~result) | (~p->accumulatorA & p->accumulatorB & result))&0x80);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((~p->accumulatorA & p->accumulatorB)|(p->accumulatorB&result)|(result&~p->accumulatorA))&0x80);
+
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -2981,22 +2988,30 @@ void ALU_MC6803E_RORB(MC6803E_MPU * p)
 		void ALU_MC6803E_SBA(MC6803E_MPU * p)
 		Boolean:	A - B -> A
 		Flags:		N Z V C
+		N = R7
+		Z = R7'+R6'+ ... R1'+R0'
+		V = A7B7'R7'|A7'B7R7
+		C = A7'B7 | B7R7 | R7A7'
 */
 void ALU_MC6803E_SBA(MC6803E_MPU * p)
 {
 	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
+	uint8_t result;
 
 	switch (instruction) {
 		case 0x10: // SBA Inherent
 			ALU_MC6803E_SetCurrentMneunomic(p, "SBA");
-			p->accumulatorA = (p->accumulatorA - p->accumulatorB);
+			result = (p->accumulatorA - p->accumulatorB);
 			break;
 		default:
 			break;
 	}
 	
-	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
-	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (result & 0x80));
+	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, result);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, ((p->accumulatorA & ~p->accumulatorB & ~result) | (~p->accumulatorA & p->accumulatorB & result))&0x80);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((~p->accumulatorA & p->accumulatorB)|(p->accumulatorB&result)|(result&~p->accumulatorA))&0x80);
+	p->accumulatorA = result;
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }

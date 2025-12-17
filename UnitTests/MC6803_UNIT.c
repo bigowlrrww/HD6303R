@@ -63,6 +63,10 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x0F) SEI", test_SEI());
 	PrepareForNextTest();
+	addItem(&list, "(0x10) SBA", test_SBA());
+	PrepareForNextTest();
+	addItem(&list, "(0x11) CBA", test_CBA());
+	PrepareForNextTest();
 	addItem(&list, "(0x12)", test_Unknown(0x12));
 	PrepareForNextTest();
 	addItem(&list, "(0x13)", test_Unknown(0x13));
@@ -221,6 +225,7 @@ bool test_NOP_exec()
 	MemoryWrite(p,p->pc,0x01);
 	ALU_MC6803E_Execute(p, 0x01);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -285,6 +290,7 @@ bool test_LSRD_exec(uint16_t value)
 	MemoryWrite(p,p->pc,0x04);
 	ALU_MC6803E_Execute(p, 0x04);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -375,6 +381,7 @@ bool test_ASLD_exec(uint16_t value)
 	MemoryWrite(p,p->pc,0x05);
 	ALU_MC6803E_Execute(p, 0x05);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -443,6 +450,7 @@ bool test_TAP_exec(uint8_t value)
 	MemoryWrite(p,p->pc,0x06);
 	ALU_MC6803E_Execute(p, 0x06);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -494,6 +502,7 @@ bool test_TPA_exec(uint8_t value)
 	MemoryWrite(p,p->pc,0x07);
 	ALU_MC6803E_Execute(p, 0x07);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -545,6 +554,7 @@ bool test_INX_exec()
 	MemoryWrite(p,p->pc,0x08);
 	ALU_MC6803E_Execute(p, 0x08);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -616,6 +626,7 @@ bool test_DEX_exec()
 	MemoryWrite(p,p->pc,0x09);
 	ALU_MC6803E_Execute(p, 0x09);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -649,7 +660,7 @@ uint8_t test_CLV()
 	bool passAllTests = true;
 	bool verified = false;
 
-	PrintH2("V not set CLV\n");
+	PrintH2("V not set CLV (WARN is good)\n");
 	p->accumulatorB = 0x12;
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
@@ -677,6 +688,7 @@ bool test_CLV_exec()
 	MemoryWrite(p,p->pc,0x0A);
 	ALU_MC6803E_Execute(p, 0x0A);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -715,7 +727,7 @@ uint8_t test_SEV()
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
-	PrintH2("V already set SEV\n");
+	PrintH2("V already set SEV (WARN is good)\n");
 	p->accumulatorB = 0x12;
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
@@ -733,6 +745,7 @@ bool test_SEV_exec()
 	MemoryWrite(p,p->pc,0x0B);
 	ALU_MC6803E_Execute(p, 0x0B);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -761,7 +774,7 @@ uint8_t test_CLC()
 	bool passAllTests = true;
 	bool verified = false;
 
-	PrintH2("C not set CLC\n");
+	PrintH2("C not set CLC (WARN is good)\n");
 	p->accumulatorB = 0x12;
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
@@ -789,6 +802,7 @@ bool test_CLC_exec()
 	MemoryWrite(p,p->pc,0x0C);
 	ALU_MC6803E_Execute(p, 0x0C);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -827,7 +841,7 @@ uint8_t test_SEC()
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
-	PrintH2("C already set SEC\n");
+	PrintH2("C already set SEC (WARN is good)\n");
 	p->accumulatorB = 0x12;
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
@@ -845,6 +859,7 @@ bool test_SEC_exec()
 	MemoryWrite(p,p->pc,0x0D);
 	ALU_MC6803E_Execute(p, 0x0D);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -873,7 +888,7 @@ uint8_t test_CLI()
 	bool passAllTests = true;
 	bool verified = false;
 
-	PrintH2("I not set CLI\n");
+	PrintH2("I not set CLI (WARN is good)\n");
 	p->accumulatorB = 0x12;
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
@@ -901,6 +916,7 @@ bool test_CLI_exec()
 	MemoryWrite(p,p->pc,0x0E);
 	ALU_MC6803E_Execute(p, 0x0E);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -939,7 +955,7 @@ uint8_t test_SEI()
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
-	PrintH2("I already set SEI\n");
+	PrintH2("I already set SEI (WARN is good)\n");
 	p->accumulatorB = 0x12;
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
@@ -957,6 +973,7 @@ bool test_SEI_exec()
 	MemoryWrite(p,p->pc,0x0F);
 	ALU_MC6803E_Execute(p, 0x0F);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -973,6 +990,235 @@ bool test_SEI_exec()
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);		//Z: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);		//V: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);		//C: Not affected.
+
+	return passAllTests;
+}
+
+uint8_t test_SBA()
+{
+	PrintH1("Testing SBA\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("No Flags set SBA\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = 0xFF;
+	passAllTests &= test_SBA_exec();
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Z Set SBA\n");
+	p->accumulatorB = 0x22;
+	p->accumulatorA = 0x22;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_Z);
+	passAllTests &= test_SBA_exec();
+	printBreak(".",54);
+
+	PrintH2("N Set SBA\n");
+	p->accumulatorB = 0x01;
+	p->accumulatorA = 0x81;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_N);
+	passAllTests &= test_SBA_exec();
+	printBreak(".",54);
+
+	PrintH2("C Set SBA\n");
+	p->accumulatorB = 0x82;
+	p->accumulatorA = 0x01;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_C);
+	passAllTests &= test_SBA_exec();
+	printBreak(".",54);
+
+	PrintH2("V Set SBA\n");
+	p->accumulatorB = 0x01;
+	p->accumulatorA = 0x80;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_V);
+	passAllTests &= test_SBA_exec();
+	printBreak(".",54);
+
+	PrintH2("N/V/C Set SBA\n");
+	p->accumulatorB = 0x80;
+	p->accumulatorA = 0x01;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~(MC6803E_FLAG_N|MC6803E_FLAG_V|MC6803E_FLAG_C));
+	passAllTests &= test_SBA_exec();
+
+	return passAllTests;
+}
+
+bool test_SBA_exec()
+{
+	bool passAllTests = true;
+
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0xABCD;
+
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x10);
+	ALU_MC6803E_Execute(p, 0x10);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+
+	checkImplemented(curr.flagRegister);
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+
+	passAllTests &= CheckSubtraction(prev.accumulatorA, prev.accumulatorB, curr.accumulatorA, "A-B=R?");
+
+//Flag Checks
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		// H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		// I: Not affected.
+
+	if (curr.accumulatorA & 0x80) 																// N: Set if most significant bit of the result is set; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+
+	if (curr.accumulatorA == 0x00) 																// Z: Set if all bits of the result are cleared; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+
+	if (__check_sub_overflow(prev.accumulatorA, prev.accumulatorB)) 					// V: Set if there was two’s complement overflow as a result of the operation.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+
+	if (__check_sub_carry(prev.accumulatorA,prev.accumulatorB)) 										// C: Carry is set if the absolute value of accumulator B plus previous Carry is larger than the absolute value of accumulator A; reset otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+
+	return passAllTests;
+}
+
+uint8_t test_CBA()
+{
+	PrintH1("Testing CBA\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("No Flags set CBA\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = 0xFF;
+	passAllTests &= test_CBA_exec();
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Z Set CBA\n");
+	p->accumulatorB = 0x22;
+	p->accumulatorA = 0x22;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_Z);
+	passAllTests &= test_CBA_exec();
+	printBreak(".",54);
+
+	PrintH2("N Set CBA\n");
+	p->accumulatorB = 0x01;
+	p->accumulatorA = 0x81;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_N);
+	passAllTests &= test_CBA_exec();
+	printBreak(".",54);
+
+	PrintH2("C Set CBA\n");
+	p->accumulatorB = 0x82;
+	p->accumulatorA = 0x01;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_C);
+	passAllTests &= test_CBA_exec();
+	printBreak(".",54);
+
+	PrintH2("V Set CBA\n");
+	p->accumulatorB = 0x01;
+	p->accumulatorA = 0x80;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_V);
+	passAllTests &= test_CBA_exec();
+	printBreak(".",54);
+
+	PrintH2("N/V/C Set CBA\n");
+	p->accumulatorB = 0x80;
+	p->accumulatorA = 0x01;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~(MC6803E_FLAG_N|MC6803E_FLAG_V|MC6803E_FLAG_C));
+	passAllTests &= test_CBA_exec();
+
+	return passAllTests;
+}
+
+bool test_CBA_exec()
+{
+	bool passAllTests = true;
+
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0xABCD;
+
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x11);
+	ALU_MC6803E_Execute(p, 0x11);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+
+	uint8_t result = (prev.accumulatorA - prev.accumulatorB);
+	checkImplemented(curr.flagRegister);
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+
+//Flag Checks
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		// H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		// I: Not affected.
+
+	if (result & 0x80) 																// N: Set if most significant bit of the result is set; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+
+	if (result == 0x00) 																// Z: Set if all bits of the result are cleared; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+
+	if (__check_sub_overflow(prev.accumulatorA, prev.accumulatorB)) 					// V: Set if there was two’s complement overflow as a result of the operation.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+
+	if (__check_sub_carry(prev.accumulatorA,prev.accumulatorB)) 										// C: Carry is set if the absolute value of accumulator B plus previous Carry is larger than the absolute value of accumulator A; reset otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
 
 	return passAllTests;
 }
