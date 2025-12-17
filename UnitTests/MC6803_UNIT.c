@@ -1234,34 +1234,37 @@ uint8_t test_TAB()
 	bool verified = false;
 
 	PrintH2("0xE5 TAB\n");
-	p->accumulatorB = 0xD5;
+	p->accumulatorA = 0xE5;
+	p->accumulatorB = 0xDA;
 	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
-	passAllTests &= test_TAB_exec(0xEA);
+	passAllTests &= test_TAB_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("0xDA TAB\n");
+	p->accumulatorA = 0xDA;
 	p->accumulatorB = 0xE5;
 	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
-	passAllTests &= test_TAB_exec(0xD5);
+	passAllTests &= test_TAB_exec();
 	printBreak(".",54);
 
 	PrintH2("N set TAB\n");
+	p->accumulatorA = 0x80;
 	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
-	passAllTests &= test_TAB_exec(0x80);
+	passAllTests &= test_TAB_exec();
 	printBreak(".",54);
 
 	PrintH2("Z set TAB\n");
+	p->accumulatorA = 0x00;
 	p->flagRegister = (0xc0 | MC6803E_FLAG_N | MC6803E_FLAG_V);
-	passAllTests &= test_TAB_exec(0x00);
+	passAllTests &= test_TAB_exec();
 
 	return (passAllTests | ((uint8_t)verified << 1));
 }
 
-bool test_TAB_exec(uint8_t value)
+bool test_TAB_exec()
 {
 	bool passAllTests = true;
-	p->accumulatorA = value;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister |= 0xC0;
