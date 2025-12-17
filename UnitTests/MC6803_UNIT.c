@@ -225,6 +225,7 @@ bool test_NOP_exec()
 	MemoryWrite(p,p->pc,0x01);
 	ALU_MC6803E_Execute(p, 0x01);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -289,6 +290,7 @@ bool test_LSRD_exec(uint16_t value)
 	MemoryWrite(p,p->pc,0x04);
 	ALU_MC6803E_Execute(p, 0x04);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -379,6 +381,7 @@ bool test_ASLD_exec(uint16_t value)
 	MemoryWrite(p,p->pc,0x05);
 	ALU_MC6803E_Execute(p, 0x05);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -447,6 +450,7 @@ bool test_TAP_exec(uint8_t value)
 	MemoryWrite(p,p->pc,0x06);
 	ALU_MC6803E_Execute(p, 0x06);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -498,6 +502,7 @@ bool test_TPA_exec(uint8_t value)
 	MemoryWrite(p,p->pc,0x07);
 	ALU_MC6803E_Execute(p, 0x07);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -549,6 +554,7 @@ bool test_INX_exec()
 	MemoryWrite(p,p->pc,0x08);
 	ALU_MC6803E_Execute(p, 0x08);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -620,6 +626,7 @@ bool test_DEX_exec()
 	MemoryWrite(p,p->pc,0x09);
 	ALU_MC6803E_Execute(p, 0x09);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -681,6 +688,7 @@ bool test_CLV_exec()
 	MemoryWrite(p,p->pc,0x0A);
 	ALU_MC6803E_Execute(p, 0x0A);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -737,6 +745,7 @@ bool test_SEV_exec()
 	MemoryWrite(p,p->pc,0x0B);
 	ALU_MC6803E_Execute(p, 0x0B);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -793,6 +802,7 @@ bool test_CLC_exec()
 	MemoryWrite(p,p->pc,0x0C);
 	ALU_MC6803E_Execute(p, 0x0C);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -849,6 +859,7 @@ bool test_SEC_exec()
 	MemoryWrite(p,p->pc,0x0D);
 	ALU_MC6803E_Execute(p, 0x0D);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -905,6 +916,7 @@ bool test_CLI_exec()
 	MemoryWrite(p,p->pc,0x0E);
 	ALU_MC6803E_Execute(p, 0x0E);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -961,6 +973,7 @@ bool test_SEI_exec()
 	MemoryWrite(p,p->pc,0x0F);
 	ALU_MC6803E_Execute(p, 0x0F);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -1057,6 +1070,7 @@ bool test_SBA_exec()
 	MemoryWrite(p,p->pc,0x10);
 	ALU_MC6803E_Execute(p, 0x10);
 	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
