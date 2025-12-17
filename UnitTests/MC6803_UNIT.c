@@ -252,39 +252,43 @@ uint8_t test_LSRD()
 	bool verified = false;
 
 	PrintH2("Carry Not Set LSRD\n");
+	*p->accumulatorD = 0xCAD7;
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
 	p->flagRegister |= MC6803E_FLAG_Z;
-	passAllTests &= test_LSRD_exec(0xCAD7);
+	passAllTests &= test_LSRD_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("Carry Set LSRD\n");
+	*p->accumulatorD = 0xCADF;
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C | MC6803E_FLAG_V);
 	p->flagRegister |= MC6803E_FLAG_Z;
-	passAllTests &= test_LSRD_exec(0xCADF);
+	passAllTests &= test_LSRD_exec();
 	printBreak(".",54);
 
 	PrintH2("Clear LSRD\n");
+	*p->accumulatorD = 0x0001;
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C | MC6803E_FLAG_V);
-	passAllTests &= test_LSRD_exec(0x0001);
+	passAllTests &= test_LSRD_exec();
 	printBreak(".",54);
 
 	PrintH2("empty LSRD\n");
+	*p->accumulatorD = 0x0000;
 	p->flagRegister &= ~(MC6803E_FLAG_Z);
-	passAllTests &= test_LSRD_exec(0x0000);
+	passAllTests &= test_LSRD_exec();
 	printBreak(".",54);
 
 	PrintH2("upper set shift LSRD\n");
-	passAllTests &= test_LSRD_exec(0xFFFF);
+	*p->accumulatorD = 0xFFFF;
+	passAllTests &= test_LSRD_exec();
 	passAllTests &= CheckSame(*(p->accumulatorD),0x7FFF, "Zero always shift into MSBit");
 
 	return (passAllTests | ((uint8_t)verified << 1));
 }
 
-bool test_LSRD_exec(uint16_t value)
+bool test_LSRD_exec()
 {
 	bool passAllTests = true;
-	*p->accumulatorD = value;
 	p->flagRegister |= MC6803E_FLAG_N;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
@@ -336,47 +340,52 @@ uint8_t test_ASLD()
 	bool verified = false;
 
 	PrintH2("Carry Not Set ASLD\n");
+	*p->accumulatorD = 0x7AD7;
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
 	p->flagRegister |= MC6803E_FLAG_Z | MC6803E_FLAG_V;
-	passAllTests &= test_ASLD_exec(0x7AD7);
+	passAllTests &= test_ASLD_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("Carry Set ASLD\n");
+	*p->accumulatorD = 0xFADF;
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
 	p->flagRegister |= MC6803E_FLAG_Z | MC6803E_FLAG_V;
-	passAllTests &= test_ASLD_exec(0xFADF);
+	passAllTests &= test_ASLD_exec();
 	printBreak(".",54);
 
 	PrintH2("Clear ASLD\n");
+	*p->accumulatorD = 0x8000;
 	p->flagRegister |= MC6803E_FLAG_V;
-	passAllTests &= test_ASLD_exec(0x8000);
+	passAllTests &= test_ASLD_exec();
 	printBreak(".",54);
 
 	PrintH2("Empty ASLD\n");
+	*p->accumulatorD = 0x0000;
 	p->flagRegister &= ~(MC6803E_FLAG_Z);
 	p->flagRegister |= MC6803E_FLAG_V | MC6803E_FLAG_C | MC6803E_FLAG_N;
-	passAllTests &= test_ASLD_exec(0x0000);
+	passAllTests &= test_ASLD_exec();
 	printBreak(".",54);
 
 	PrintH2("N is set ASLD\n");
+	*p->accumulatorD = 0x8000;
 	p->flagRegister &= ~(MC6803E_FLAG_Z );
 	p->flagRegister |= MC6803E_FLAG_C | MC6803E_FLAG_N| MC6803E_FLAG_V;
-	passAllTests &= test_ASLD_exec(0x8000);
+	passAllTests &= test_ASLD_exec();
 	printBreak(".",54);
 
 	PrintH2("lower set shift ASLD\n");
+	*p->accumulatorD = 0xFFFF;
 	p->flagRegister |= MC6803E_FLAG_V;
-	passAllTests &= test_ASLD_exec(0xFFFF);
+	passAllTests &= test_ASLD_exec();
 	passAllTests &= CheckSame(*(p->accumulatorD),0xFFFE, "Zero always shift into LSBit");
 
 	return (passAllTests | ((uint8_t)verified << 1));
 }
 
-bool test_ASLD_exec(uint16_t value)
+bool test_ASLD_exec()
 {
 	bool passAllTests = true;
-	*p->accumulatorD = value;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister |= 0xC0;
@@ -431,21 +440,22 @@ uint8_t test_TAP()
 
 	PrintH2("0xE5 TAP\n");
 	p->flagRegister = 0xD5;
-	passAllTests &= test_TAP_exec(0xEA);
+	p->accumulatorA = 0xEA;
+	passAllTests &= test_TAP_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("0xDA TAP\n");
+	p->accumulatorA = 0xD5;
 	p->flagRegister = 0xE5;
-	passAllTests &= test_TAP_exec(0xD5);
+	passAllTests &= test_TAP_exec();
 
 	return (passAllTests | ((uint8_t)verified << 1));
 }
 
-bool test_TAP_exec(uint8_t value)
+bool test_TAP_exec()
 {
 	bool passAllTests = true;
-	p->accumulatorA = value;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister |= 0xC0;
@@ -478,26 +488,28 @@ uint8_t test_TPA()
 
 	PrintH2("0xE5 TPA\n");
 	p->accumulatorA = 0xD5;
-	passAllTests &= test_TPA_exec(0xEA);
+	p->flagRegister = 0xEA;
+	passAllTests &= test_TPA_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("0xDA TPA\n");
 	p->accumulatorA = 0xE5;
-	passAllTests &= test_TPA_exec(0xD5);
+	p->flagRegister = 0xD5;
+	passAllTests &= test_TPA_exec();
 	printBreak(".",54);
 	
 	PrintH2("0x00 TPA\n");
 	p->accumulatorA = 0x00;
-	passAllTests &= test_TPA_exec(0xFE);
+	p->flagRegister = 0xFE;
+	passAllTests &= test_TPA_exec();
 
 	return (passAllTests | ((uint8_t)verified << 1));
 }
 
-bool test_TPA_exec(uint8_t value)
+bool test_TPA_exec()
 {
 	bool passAllTests = true;
-	p->flagRegister = value;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister |= 0xC0;
