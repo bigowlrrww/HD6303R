@@ -456,7 +456,7 @@ bool test_TAP_exec(uint8_t value)
 
 	checkImplemented(curr.flagRegister);
 
-	passAllTests &= CheckSame(prev.accumulatorA, curr.flagRegister | 0xC0, "CC is Set"); //Ensure that the top 2 are set, they should be in the processor.
+	passAllTests &= CheckSame(prev.accumulatorA, curr.flagRegister | 0xC0, "AccuA -> CCR"); //Ensure that the top 2 are set, they should be in the processor.
 
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
