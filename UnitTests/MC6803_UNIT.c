@@ -651,7 +651,7 @@ uint8_t test_CLV()
 	bool passAllTests = true;
 	bool verified = false;
 
-	PrintH2("V not set CLV\n");
+	PrintH2("V not set CLV (WARN is good)\n");
 	p->accumulatorB = 0x12;
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
@@ -717,7 +717,7 @@ uint8_t test_SEV()
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
-	PrintH2("V already set SEV\n");
+	PrintH2("V already set SEV (WARN is good)\n");
 	p->accumulatorB = 0x12;
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
@@ -763,7 +763,7 @@ uint8_t test_CLC()
 	bool passAllTests = true;
 	bool verified = false;
 
-	PrintH2("C not set CLC\n");
+	PrintH2("C not set CLC (WARN is good)\n");
 	p->accumulatorB = 0x12;
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
@@ -829,7 +829,7 @@ uint8_t test_SEC()
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
-	PrintH2("C already set SEC\n");
+	PrintH2("C already set SEC (WARN is good)\n");
 	p->accumulatorB = 0x12;
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
@@ -875,7 +875,7 @@ uint8_t test_CLI()
 	bool passAllTests = true;
 	bool verified = false;
 
-	PrintH2("I not set CLI\n");
+	PrintH2("I not set CLI (WARN is good)\n");
 	p->accumulatorB = 0x12;
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
@@ -941,7 +941,7 @@ uint8_t test_SEI()
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
-	PrintH2("I already set SEI\n");
+	PrintH2("I already set SEI (WARN is good)\n");
 	p->accumulatorB = 0x12;
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
@@ -987,21 +987,67 @@ uint8_t test_SBA()
 	bool passAllTests = true;
 	bool verified = false;
 
-	PrintH2("I Not set SBA\n");
+	PrintH2("No Flags set SBA\n");
 	p->accumulatorB = 0x12;
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_V);
+	p->flagRegister = 0xFF;
 	passAllTests &= test_SBA_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
+
+	PrintH2("Z Set SBA\n");
+	p->accumulatorB = 0x22;
+	p->accumulatorA = 0x22;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_Z);
+	passAllTests &= test_SBA_exec();
+	printBreak(".",54);
+
+	PrintH2("N Set SBA\n");
+	p->accumulatorB = 0x01;
+	p->accumulatorA = 0x81;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_N);
+	passAllTests &= test_SBA_exec();
+	printBreak(".",54);
+
+	PrintH2("C Set SBA\n");
+	p->accumulatorB = 0x82;
+	p->accumulatorA = 0x01;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_C);
+	passAllTests &= test_SBA_exec();
+	printBreak(".",54);
+
+	PrintH2("V Set SBA\n");
+	p->accumulatorB = 0x01;
+	p->accumulatorA = 0x80;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_V);
+	passAllTests &= test_SBA_exec();
+	printBreak(".",54);
+
+	PrintH2("N/V/C Set SBA\n");
+	p->accumulatorB = 0x80;
+	p->accumulatorA = 0x01;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~(MC6803E_FLAG_N|MC6803E_FLAG_V|MC6803E_FLAG_C));
+	passAllTests &= test_SBA_exec();
+
+	return passAllTests;
 }
 
 bool test_SBA_exec()
 {
 	bool passAllTests = true;
-	uint8_t resFoo;
+
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 
@@ -1015,6 +1061,8 @@ bool test_SBA_exec()
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+
+	passAllTests &= CheckSubtraction(prev.accumulatorA, prev.accumulatorB, curr.accumulatorA, "A-B=R?");
 
 //Flag Checks
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		// H: Not affected.
@@ -1030,14 +1078,12 @@ bool test_SBA_exec()
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
 
-	if (__builtin_sub_overflow(curr.accumulatorB, prev.accumulatorA, &resFoo)) 					// V: Set if there was two’s complement overflow as a result of the operation.
+	if (__check_sub_overflow(prev.accumulatorA, prev.accumulatorB)) 					// V: Set if there was two’s complement overflow as a result of the operation.
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
 
-	if (((~prev.accumulatorA & prev.accumulatorB) | 
-		 (prev.accumulatorB & curr.accumulatorA) | 
-		 (curr.accumulatorA & prev.accumulatorA)) & 0x80) 										// C: Carry is set if the absolute value of accumulator B plus previous Carry is larger than the absolute value of accumulator A; reset otherwise.
+	if (__check_sub_carry(prev.accumulatorA,prev.accumulatorB)) 										// C: Carry is set if the absolute value of accumulator B plus previous Carry is larger than the absolute value of accumulator A; reset otherwise.
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
