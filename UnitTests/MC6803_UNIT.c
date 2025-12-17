@@ -75,6 +75,10 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x15)", test_Unknown(0x15));
 	PrepareForNextTest();
+	addItem(&list, "(0x16) TAB", test_TAB());
+	PrepareForNextTest();
+	addItem(&list, "(0x17) TBA", test_TBA());
+	PrepareForNextTest();
 	addItem(&list, "(0x1C)", test_Unknown(0x1C));
 	PrepareForNextTest();
 	addItem(&list, "(0x1D)", test_Unknown(0x1D));
@@ -248,39 +252,43 @@ uint8_t test_LSRD()
 	bool verified = false;
 
 	PrintH2("Carry Not Set LSRD\n");
+	*p->accumulatorD = 0xCAD7;
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
 	p->flagRegister |= MC6803E_FLAG_Z;
-	passAllTests &= test_LSRD_exec(0xCAD7);
+	passAllTests &= test_LSRD_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("Carry Set LSRD\n");
+	*p->accumulatorD = 0xCADF;
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C | MC6803E_FLAG_V);
 	p->flagRegister |= MC6803E_FLAG_Z;
-	passAllTests &= test_LSRD_exec(0xCADF);
+	passAllTests &= test_LSRD_exec();
 	printBreak(".",54);
 
 	PrintH2("Clear LSRD\n");
+	*p->accumulatorD = 0x0001;
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C | MC6803E_FLAG_V);
-	passAllTests &= test_LSRD_exec(0x0001);
+	passAllTests &= test_LSRD_exec();
 	printBreak(".",54);
 
 	PrintH2("empty LSRD\n");
+	*p->accumulatorD = 0x0000;
 	p->flagRegister &= ~(MC6803E_FLAG_Z);
-	passAllTests &= test_LSRD_exec(0x0000);
+	passAllTests &= test_LSRD_exec();
 	printBreak(".",54);
 
 	PrintH2("upper set shift LSRD\n");
-	passAllTests &= test_LSRD_exec(0xFFFF);
+	*p->accumulatorD = 0xFFFF;
+	passAllTests &= test_LSRD_exec();
 	passAllTests &= CheckSame(*(p->accumulatorD),0x7FFF, "Zero always shift into MSBit");
 
 	return (passAllTests | ((uint8_t)verified << 1));
 }
 
-bool test_LSRD_exec(uint16_t value)
+bool test_LSRD_exec()
 {
 	bool passAllTests = true;
-	*p->accumulatorD = value;
 	p->flagRegister |= MC6803E_FLAG_N;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
@@ -332,47 +340,52 @@ uint8_t test_ASLD()
 	bool verified = false;
 
 	PrintH2("Carry Not Set ASLD\n");
+	*p->accumulatorD = 0x7AD7;
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
 	p->flagRegister |= MC6803E_FLAG_Z | MC6803E_FLAG_V;
-	passAllTests &= test_ASLD_exec(0x7AD7);
+	passAllTests &= test_ASLD_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("Carry Set ASLD\n");
+	*p->accumulatorD = 0xFADF;
 	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
 	p->flagRegister |= MC6803E_FLAG_Z | MC6803E_FLAG_V;
-	passAllTests &= test_ASLD_exec(0xFADF);
+	passAllTests &= test_ASLD_exec();
 	printBreak(".",54);
 
 	PrintH2("Clear ASLD\n");
+	*p->accumulatorD = 0x8000;
 	p->flagRegister |= MC6803E_FLAG_V;
-	passAllTests &= test_ASLD_exec(0x8000);
+	passAllTests &= test_ASLD_exec();
 	printBreak(".",54);
 
 	PrintH2("Empty ASLD\n");
+	*p->accumulatorD = 0x0000;
 	p->flagRegister &= ~(MC6803E_FLAG_Z);
 	p->flagRegister |= MC6803E_FLAG_V | MC6803E_FLAG_C | MC6803E_FLAG_N;
-	passAllTests &= test_ASLD_exec(0x0000);
+	passAllTests &= test_ASLD_exec();
 	printBreak(".",54);
 
 	PrintH2("N is set ASLD\n");
+	*p->accumulatorD = 0x8000;
 	p->flagRegister &= ~(MC6803E_FLAG_Z );
 	p->flagRegister |= MC6803E_FLAG_C | MC6803E_FLAG_N| MC6803E_FLAG_V;
-	passAllTests &= test_ASLD_exec(0x8000);
+	passAllTests &= test_ASLD_exec();
 	printBreak(".",54);
 
 	PrintH2("lower set shift ASLD\n");
+	*p->accumulatorD = 0xFFFF;
 	p->flagRegister |= MC6803E_FLAG_V;
-	passAllTests &= test_ASLD_exec(0xFFFF);
+	passAllTests &= test_ASLD_exec();
 	passAllTests &= CheckSame(*(p->accumulatorD),0xFFFE, "Zero always shift into LSBit");
 
 	return (passAllTests | ((uint8_t)verified << 1));
 }
 
-bool test_ASLD_exec(uint16_t value)
+bool test_ASLD_exec()
 {
 	bool passAllTests = true;
-	*p->accumulatorD = value;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister |= 0xC0;
@@ -427,21 +440,22 @@ uint8_t test_TAP()
 
 	PrintH2("0xE5 TAP\n");
 	p->flagRegister = 0xD5;
-	passAllTests &= test_TAP_exec(0xEA);
+	p->accumulatorA = 0xEA;
+	passAllTests &= test_TAP_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("0xDA TAP\n");
+	p->accumulatorA = 0xD5;
 	p->flagRegister = 0xE5;
-	passAllTests &= test_TAP_exec(0xD5);
+	passAllTests &= test_TAP_exec();
 
 	return (passAllTests | ((uint8_t)verified << 1));
 }
 
-bool test_TAP_exec(uint8_t value)
+bool test_TAP_exec()
 {
 	bool passAllTests = true;
-	p->accumulatorA = value;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister |= 0xC0;
@@ -454,7 +468,7 @@ bool test_TAP_exec(uint8_t value)
 
 	checkImplemented(curr.flagRegister);
 
-	passAllTests &= CheckSame(prev.accumulatorA, curr.flagRegister | 0xC0, "CC is Set"); //Ensure that the top 2 are set, they should be in the processor.
+	passAllTests &= CheckSame(prev.accumulatorA, curr.flagRegister | 0xC0, "AccuA -> CCR"); //Ensure that the top 2 are set, they should be in the processor.
 
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
@@ -474,26 +488,28 @@ uint8_t test_TPA()
 
 	PrintH2("0xE5 TPA\n");
 	p->accumulatorA = 0xD5;
-	passAllTests &= test_TPA_exec(0xEA);
+	p->flagRegister = 0xEA;
+	passAllTests &= test_TPA_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("0xDA TPA\n");
 	p->accumulatorA = 0xE5;
-	passAllTests &= test_TPA_exec(0xD5);
+	p->flagRegister = 0xD5;
+	passAllTests &= test_TPA_exec();
 	printBreak(".",54);
 	
 	PrintH2("0x00 TPA\n");
 	p->accumulatorA = 0x00;
-	passAllTests &= test_TPA_exec(0xFE);
+	p->flagRegister = 0xFE;
+	passAllTests &= test_TPA_exec();
 
 	return (passAllTests | ((uint8_t)verified << 1));
 }
 
-bool test_TPA_exec(uint8_t value)
+bool test_TPA_exec()
 {
 	bool passAllTests = true;
-	p->flagRegister = value;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister |= 0xC0;
@@ -1221,4 +1237,157 @@ bool test_CBA_exec()
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
 
 	return passAllTests;
+}
+
+uint8_t test_TAB()
+{
+	PrintH1("Testing TAB\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("0xE5 TAB\n");
+	p->accumulatorA = 0xE5;
+	p->accumulatorB = 0xDA;
+	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
+	passAllTests &= test_TAB_exec();
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("0xDA TAB\n");
+	p->accumulatorA = 0xDA;
+	p->accumulatorB = 0xE5;
+	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
+	passAllTests &= test_TAB_exec();
+	printBreak(".",54);
+
+	PrintH2("N set TAB\n");
+	p->accumulatorA = 0x80;
+	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
+	passAllTests &= test_TAB_exec();
+	printBreak(".",54);
+
+	PrintH2("Z set TAB\n");
+	p->accumulatorA = 0x00;
+	p->flagRegister = (0xc0 | MC6803E_FLAG_N | MC6803E_FLAG_V);
+	passAllTests &= test_TAB_exec();
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_TAB_exec()
+{
+	bool passAllTests = true;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0xABCD;
+	p->flagRegister |= 0xC0;
+
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x16);
+	ALU_MC6803E_Execute(p, 0x16);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+
+	checkImplemented(curr.flagRegister);
+
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorB, "AccuA -> AccuB"); //Ensure that the top 2 are set, they should be in the processor.
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+
+//Flag Checks
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		// H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		// I: Not affected.
+
+	if (curr.accumulatorB & 0x80) 																			// N: Set if the most significant bit of the contents of the accumulator is set; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+
+	if (curr.accumulatorB == 0x00) 																		// Z: Set if all bits of the accumulator are cleared; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+
+	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V); 		// V: Cleared.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C); 		// C: Not affected.
+}
+uint8_t test_TBA()
+{
+	PrintH1("Testing TBA\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("0xE5 TBA\n");
+	p->accumulatorB = 0xE5;
+	p->accumulatorA = 0xDA;
+	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
+	passAllTests &= test_TBA_exec();
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("0xDA TBA\n");
+	p->accumulatorB = 0xDA;
+	p->accumulatorA = 0xE5;
+	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
+	passAllTests &= test_TBA_exec();
+	printBreak(".",54);
+
+	PrintH2("N set TBA\n");
+	p->accumulatorB = 0x80;
+	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
+	passAllTests &= test_TBA_exec();
+	printBreak(".",54);
+
+	PrintH2("Z set TBA\n");
+	p->accumulatorB = 0x00;
+	p->flagRegister = (0xc0 | MC6803E_FLAG_N | MC6803E_FLAG_V);
+	passAllTests &= test_TBA_exec();
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_TBA_exec()
+{
+	bool passAllTests = true;
+	p->stackPointer = 0x5678;
+	p->indexRegister = 0xABCD;
+	p->flagRegister |= 0xC0;
+
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x17);
+	ALU_MC6803E_Execute(p, 0x17);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+
+	checkImplemented(curr.flagRegister);
+
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorA, "AccuB -> AccuA"); //Ensure that the top 2 are set, they should be in the processor.
+
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+
+//Flag Checks
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		// H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		// I: Not affected.
+
+	if (curr.accumulatorA & 0x80) 																			// N: Set if the most significant bit of the contents of the accumulator is set; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+
+	if (curr.accumulatorA == 0x00) 																		// Z: Set if all bits of the accumulator are cleared; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+
+	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V); 		// V: Cleared.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C); 		// C: Not affected.
 }
