@@ -1971,29 +1971,33 @@ void ALU_MC6803E_COMB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
-// NOT IMPLEMENTED
 /*
 		void ALU_MC6803E_DAA(MC6803E_MPU * p)
 		Boolean:	BCD(Ah) + BCD(Al) -> A
-		Flags:		N Z V C
+		Flags:		N Z C
 */
 void ALU_MC6803E_DAA(MC6803E_MPU * p)
 {
 	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
-	uint8_t unsigned_payload = (uint8_t)MemoryRead(p, (p->pc+1));
-	int8_t signed_payload = (int8_t)MemoryRead(p, (p->pc+1));
-	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
-	uint16_t direct_address = (uint16_t)unsigned_payload;
+	uint8_t adj = 0;
 
 	switch (instruction) {
 		case 0x19: // DAA Inherent
 			ALU_MC6803E_SetCurrentMneunomic(p, "DAA");
+
+			if ((p->accumulatorA & 0x0F) > 9 || ALU_MC6803E_GetFlag(p, MC6803E_FLAG_H)) adj += 0x06;
+			if ((p->accumulatorA > 0x99) || ALU_MC6803E_GetFlag(p,MC6803E_FLAG_C)) adj += 0x60;
+			p->accumulatorA = p->accumulatorA + adj;
 			break;
 		default:
 			break;
 	}
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, p->accumulatorA & 0x80);
+	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, adj & 0x60);
+
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
