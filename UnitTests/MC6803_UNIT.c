@@ -1415,8 +1415,6 @@ uint8_t test_XGDX()
 	p->indexRegister = 0xE5E5;
 	p->flagRegister = (0xc0 | MC6803E_FLAG_N | MC6803E_FLAG_C);
 	passAllTests &= test_XGDX_exec();
-	printBreak(".",54);
-
 
 	return (passAllTests | ((uint8_t)verified << 1));
 }
