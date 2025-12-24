@@ -81,6 +81,8 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x18) XGDX", test_XGDX());
 	PrepareForNextTest();
+	addItem(&list, "(0x19) DAA", test_DAA());
+	PrepareForNextTest();
 	addItem(&list, "(0x1C)", test_Unknown(0x1C));
 	PrepareForNextTest();
 	addItem(&list, "(0x1D)", test_Unknown(0x1D));
@@ -1434,6 +1436,126 @@ bool test_XGDX_exec()
 	passAllTests &= CheckSame(curr.indexRegister, prev.accumulatorD, "IX == prevAccuD");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_DAA()
+{
+	PrintH1("Testing DAA\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("case1 DAA\n");
+	p->accumulatorA = 0x33;
+	p->flagRegister = (0xC0 | MC6803E_FLAG_C | MC6803E_FLAG_H | MC6803E_FLAG_Z); //C H
+	passAllTests &= test_DAA_exec();
+	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 1);
+	passAllTests &= CheckSame(p->accumulatorA, 0x99, "Result Correct?");
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("case2 DAA\n");
+	p->accumulatorA = 0x2B;
+	p->flagRegister = (0xC0 | MC6803E_FLAG_C | MC6803E_FLAG_Z); //C H'
+	passAllTests &= test_DAA_exec();
+	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 1);
+	passAllTests &= CheckSame(p->accumulatorA, 0x91, "Result Correct?");
+	printBreak(".",54);
+
+	PrintH2("case3 DAA\n");
+	p->accumulatorA = 0x27;
+	p->flagRegister = (0xC0 | MC6803E_FLAG_C | MC6803E_FLAG_Z); //C H'
+	passAllTests &= test_DAA_exec();
+	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 1);
+	passAllTests &= CheckSame(p->accumulatorA, 0x87, "Result Correct?");
+	printBreak(".",54);
+
+	PrintH2("case4 DAA\n");
+	p->accumulatorA = 0xC3;
+	p->flagRegister = (0xC0 | MC6803E_FLAG_H | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H
+	passAllTests &= test_DAA_exec();
+	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 1);
+	passAllTests &= CheckSame(p->accumulatorA, 0x29, "Result Correct?");
+	printBreak(".",54);
+
+	PrintH2("case5 DAA\n");
+	p->accumulatorA = 0x9E;
+	p->flagRegister = (0xC0 | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H'
+	passAllTests &= test_DAA_exec();
+	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 1);
+	passAllTests &= CheckSame(p->accumulatorA, 0x04, "Result Correct?");
+	printBreak(".",54);
+
+	PrintH2("case6 DAA\n");
+	p->accumulatorA = 0xB7;
+	p->flagRegister = (0xC0 | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H'
+	passAllTests &= test_DAA_exec();
+	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 1);
+	passAllTests &= CheckSame(p->accumulatorA, 0x17, "Result Correct?");
+	printBreak(".",54);
+
+	PrintH2("case7 DAA\n");
+	p->accumulatorA = 0x93;
+	p->flagRegister = (0xC0 | MC6803E_FLAG_H | MC6803E_FLAG_Z); //C' H
+	passAllTests &= test_DAA_exec();
+	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 0);
+	passAllTests &= CheckSame(p->accumulatorA, 0x99, "Result Correct?");
+	printBreak(".",54);
+
+	PrintH2("case8 DAA\n");
+	p->accumulatorA = 0x6E;
+	p->flagRegister = (0xC0 | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H'
+	passAllTests &= test_DAA_exec();
+	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 0);
+	passAllTests &= CheckSame(p->accumulatorA, 0x74, "Result Correct?");
+	printBreak(".",54);
+
+	PrintH2("case9 DAA\n");
+	p->accumulatorA = 0x24;
+	p->flagRegister = (0xC0 | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H'
+	passAllTests &= test_DAA_exec();
+	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 0);
+	passAllTests &= CheckSame(p->accumulatorA, 0x24, "Result Correct?");
+
+	PrintH2("case10 DAA\n");
+	p->accumulatorA = 0x00;
+	p->flagRegister = (0xC0 | MC6803E_FLAG_N); //C' H'
+	passAllTests &= test_DAA_exec();
+	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 0);
+	passAllTests &= CheckSame(p->accumulatorA, 0x00, "Result Correct?");
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_DAA_exec()
+{
+	bool passAllTests = true;
+	p->indexRegister = 0xDADA;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x19);
+	ALU_MC6803E_Execute(p, 0x19);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+
+	checkImplemented(curr.flagRegister);
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.indexRegister, curr.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "AccB");
+
+//Flag Checks	
+	if (curr.accumulatorA & 0x80) 																// N: Set if the MSB of the result is "1", cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+
+	if (curr.accumulatorA == 0x00) 																// Z: Set if all bits of the accumulator are cleared; cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
 
 	return passAllTests;
 }
