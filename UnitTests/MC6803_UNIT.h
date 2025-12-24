@@ -69,4 +69,6 @@ uint8_t test_TAB();
 bool test_TAB_exec();
 uint8_t test_TBA();
 bool test_TBA_exec();
+uint8_t test_XGDX();
+bool test_XGDX_exec();
 #endif

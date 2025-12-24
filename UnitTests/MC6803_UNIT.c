@@ -79,6 +79,8 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x17) TBA", test_TBA());
 	PrepareForNextTest();
+	addItem(&list, "(0x18) XGDX", test_XGDX());
+	PrepareForNextTest();
 	addItem(&list, "(0x1C)", test_Unknown(0x1C));
 	PrepareForNextTest();
 	addItem(&list, "(0x1D)", test_Unknown(0x1D));
@@ -1390,4 +1392,50 @@ bool test_TBA_exec()
 
 	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V); 		// V: Cleared.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C); 		// C: Not affected.
+}
+
+uint8_t test_XGDX()
+{
+	PrintH1("Testing XGDX\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("0xE5E5 XGDX\n");
+	*p->accumulatorD = 0xE5E5;
+	p->indexRegister = 0xDADA;
+	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
+	passAllTests &= test_XGDX_exec();
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("0xDADA XGDX\n");
+	*p->accumulatorD = 0xDADA;
+	p->indexRegister = 0xE5E5;
+	p->flagRegister = (0xc0 | MC6803E_FLAG_N | MC6803E_FLAG_C);
+	passAllTests &= test_XGDX_exec();
+	printBreak(".",54);
+
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_XGDX_exec()
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x18);
+	ALU_MC6803E_Execute(p, 0x18);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+
+	checkImplemented(curr.flagRegister);
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(curr.accumulatorD, prev.indexRegister, "AccuD == prevIX");
+	passAllTests &= CheckSame(curr.indexRegister, prev.accumulatorD, "IX == prevAccuD");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
 }
