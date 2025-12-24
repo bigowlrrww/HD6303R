@@ -445,6 +445,9 @@ MC6803E_API uint16_t ALU_MC6803E_Execute(MC6803E_MPU * p, uint8_t instruction)
 		case 0x17: // TBA Inherent
 			ALU_MC6803E_TBA(p);
 			break;
+		case 0x18: // XGDX Inherent
+			ALU_MC6803E_XGDX(p);
+			break;
 		case 0x6D: // TST Index
 		case 0x7D: // TST Extended
 			ALU_MC6803E_TST(p);
@@ -555,6 +558,8 @@ MC6803E_API uint16_t ALU_MC6803E_Execute(MC6803E_MPU * p, uint8_t instruction)
 			break;
 		default:
 			printf("Unknown instruction (%X) at PC -> %X.\n", instruction, p->pc);
+			ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+			ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 			return 0xFFFF; //INVALID PC LOCATION Intentionally
 			break;
 	}
@@ -3372,6 +3377,32 @@ void ALU_MC6803E_TBA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_VERIFIED);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
+
+/*
+		void ALU_MC6803E_XGDX(MC6803E_MPU * p)
+		Boolean:	D <-> IX
+		Flags:		None
+*/
+void ALU_MC6803E_XGDX(MC6803E_MPU * p)
+{
+	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
+	uint16_t Swap1 = *p->accumulatorD;
+	uint16_t Swap2 = p->indexRegister;
+
+	switch (instruction) {
+		case 0x18: // XGDX Inherent
+			ALU_MC6803E_SetCurrentMneunomic(p, "XGDX");
+			*p->accumulatorD = Swap2;
+			p->indexRegister = Swap1;
+			break;
+		default:
+			break;
+	}
+	
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
+}
+
 
 // NOT IMPLEMENTED
 /*
