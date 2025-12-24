@@ -1452,7 +1452,7 @@ uint8_t test_DAA()
 	p->accumulatorA = 0x33;
 	p->flagRegister = (0xC0 | MC6803E_FLAG_C | MC6803E_FLAG_H | MC6803E_FLAG_Z); //C H
 	passAllTests &= test_DAA_exec();
-	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 1);
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)1, "FLAG_C was set");
 	passAllTests &= CheckSame(p->accumulatorA, 0x99, "Result Correct?");
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
@@ -1461,7 +1461,7 @@ uint8_t test_DAA()
 	p->accumulatorA = 0x2B;
 	p->flagRegister = (0xC0 | MC6803E_FLAG_C | MC6803E_FLAG_Z); //C H'
 	passAllTests &= test_DAA_exec();
-	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 1);
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)1, "FLAG_C was set");
 	passAllTests &= CheckSame(p->accumulatorA, 0x91, "Result Correct?");
 	printBreak(".",54);
 
@@ -1469,7 +1469,7 @@ uint8_t test_DAA()
 	p->accumulatorA = 0x27;
 	p->flagRegister = (0xC0 | MC6803E_FLAG_C | MC6803E_FLAG_Z); //C H'
 	passAllTests &= test_DAA_exec();
-	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 1);
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)1, "FLAG_C was set");
 	passAllTests &= CheckSame(p->accumulatorA, 0x87, "Result Correct?");
 	printBreak(".",54);
 
@@ -1477,7 +1477,7 @@ uint8_t test_DAA()
 	p->accumulatorA = 0xC3;
 	p->flagRegister = (0xC0 | MC6803E_FLAG_H | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H
 	passAllTests &= test_DAA_exec();
-	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 1);
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)1, "FLAG_C was set");
 	passAllTests &= CheckSame(p->accumulatorA, 0x29, "Result Correct?");
 	printBreak(".",54);
 
@@ -1485,7 +1485,7 @@ uint8_t test_DAA()
 	p->accumulatorA = 0x9E;
 	p->flagRegister = (0xC0 | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H'
 	passAllTests &= test_DAA_exec();
-	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 1);
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)1, "FLAG_C was set");
 	passAllTests &= CheckSame(p->accumulatorA, 0x04, "Result Correct?");
 	printBreak(".",54);
 
@@ -1493,7 +1493,7 @@ uint8_t test_DAA()
 	p->accumulatorA = 0xB7;
 	p->flagRegister = (0xC0 | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H'
 	passAllTests &= test_DAA_exec();
-	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 1);
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)1, "FLAG_C was set");
 	passAllTests &= CheckSame(p->accumulatorA, 0x17, "Result Correct?");
 	printBreak(".",54);
 
@@ -1501,7 +1501,7 @@ uint8_t test_DAA()
 	p->accumulatorA = 0x93;
 	p->flagRegister = (0xC0 | MC6803E_FLAG_H | MC6803E_FLAG_Z); //C' H
 	passAllTests &= test_DAA_exec();
-	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 0);
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)0, "FLAG_C was unset");
 	passAllTests &= CheckSame(p->accumulatorA, 0x99, "Result Correct?");
 	printBreak(".",54);
 
@@ -1509,7 +1509,7 @@ uint8_t test_DAA()
 	p->accumulatorA = 0x6E;
 	p->flagRegister = (0xC0 | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H'
 	passAllTests &= test_DAA_exec();
-	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 0);
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)0, "FLAG_C was unset");
 	passAllTests &= CheckSame(p->accumulatorA, 0x74, "Result Correct?");
 	printBreak(".",54);
 
@@ -1517,14 +1517,15 @@ uint8_t test_DAA()
 	p->accumulatorA = 0x24;
 	p->flagRegister = (0xC0 | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H'
 	passAllTests &= test_DAA_exec();
-	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 0);
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)0, "FLAG_C was unset");
 	passAllTests &= CheckSame(p->accumulatorA, 0x24, "Result Correct?");
+	printBreak(".",54);
 
 	PrintH2("case10 DAA\n");
 	p->accumulatorA = 0x00;
 	p->flagRegister = (0xC0 | MC6803E_FLAG_N); //C' H'
 	passAllTests &= test_DAA_exec();
-	passAllTests &= ((p->flagRegister & MC6803E_FLAG_C) == 0);
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)0, "FLAG_C was unset");
 	passAllTests &= CheckSame(p->accumulatorA, 0x00, "Result Correct?");
 
 	return (passAllTests | ((uint8_t)verified << 1));
