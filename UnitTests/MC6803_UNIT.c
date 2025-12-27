@@ -83,6 +83,8 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x19) DAA", test_DAA());
 	PrepareForNextTest();
+	addItem(&list, "(0x2B) ABA", test_ABA());
+	PrepareForNextTest();
 	addItem(&list, "(0x1C)", test_Unknown(0x1C));
 	PrepareForNextTest();
 	addItem(&list, "(0x1D)", test_Unknown(0x1D));
@@ -1557,6 +1559,120 @@ bool test_DAA_exec()
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+
+	return passAllTests;
+}
+
+
+uint8_t test_ABA()
+{
+	PrintH1("Testing ABA\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("No Flags ABA\n");
+	p->accumulatorA = 0x33;
+	p->accumulatorB = 0x20;
+	p->flagRegister = (0xFF);
+	passAllTests &= test_ABA_exec();
+	passAllTests &= CheckSame(p->accumulatorA, 0x53, "Result Correct?");
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Flag H ABA\n");
+	p->accumulatorA = 0x0F;
+	p->accumulatorB = 0x0F;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_H);
+	passAllTests &= test_ABA_exec();
+	passAllTests &= CheckSame(p->accumulatorA, 0x1E, "Result Correct?");
+	printBreak(".",54);
+
+	PrintH2("Flag N ABA\n");
+	p->accumulatorA = 0x0F;
+	p->accumulatorB = 0x80;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_N);
+	passAllTests &= test_ABA_exec();
+	passAllTests &= CheckSame(p->accumulatorA, 0x8F, "Result Correct?");
+	printBreak(".",54);
+
+	PrintH2("Flag Z ABA\n");
+	p->accumulatorA = 0x00;
+	p->accumulatorB = 0x00;
+	p->flagRegister = (0xFF & ~MC6803E_FLAG_Z);
+	passAllTests &= test_ABA_exec();
+	passAllTests &= CheckSame(p->accumulatorA, 0x00, "Result Correct?");
+	printBreak(".",54);
+
+	PrintH2("Flag V/C ABA\n");
+	p->accumulatorA = 0x81;
+	p->accumulatorB = 0x82;
+	p->flagRegister = (0xFF & ~(MC6803E_FLAG_V|MC6803E_FLAG_C));
+	passAllTests &= test_ABA_exec();
+	passAllTests &= CheckSame(p->accumulatorA, 0x03, "Result Correct?");
+	printBreak(".",54);
+
+	PrintH2("Flag V/N ABA\n");
+	p->accumulatorA = 0x40;
+	p->accumulatorB = 0x40;
+	p->flagRegister = (0xFF & ~(MC6803E_FLAG_V|MC6803E_FLAG_N));
+	passAllTests &= test_ABA_exec();
+	passAllTests &= CheckSame(p->accumulatorA, 0x80, "Result Correct?");
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_ABA_exec()
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x1B);
+	ALU_MC6803E_Execute(p, 0x1B);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+
+	checkImplemented(curr.flagRegister);
+	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckAddition(prev.accumulatorA, prev.accumulatorB, curr.accumulatorA, "AccA+AccB");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+
+//Flag Checks
+	uint8_t result = prev.accumulatorA + prev.accumulatorB;
+	bool A3 = prev.accumulatorA & 0x08;
+	bool B3 = prev.accumulatorB & 0x08;
+	bool R3 = result & 0x08;
+	bool A7 = prev.accumulatorA & 0x80;
+	bool B7 = prev.accumulatorB & 0x80;
+	bool R7 = result & 0x80;
+
+	if (A3 & B3 | B3 & !R3 | !R3 & A3) 															// H: Set if a carry from bit3 is generated
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H);
+
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected
+	
+	if (R7)
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);		//N: Set if the result's MSB is "1"
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+
+	if (result == 0x0000)			 															//Z: Set if all bits of the result are cleared
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+
+	if (A7 & B7 & !R7 | !A7 & !B7 & R7)															// V: Set if the result overflows
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+
+	if (A7 & B7 | B7 & !R7 | !R7 & A7) 															// C: Set if a carry from the MSB is generated cleared otherwise.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
 
 	return passAllTests;
 }
