@@ -17,12 +17,12 @@
 
 
 #ifdef _WIN32
-  #define MC6803E_API __declspec(dllexport)
+  #define HD6303R_API __declspec(dllexport)
 #else
-  #define MC6803E_API
+  #define HD6303R_API
 #endif
 
-typedef struct _MC6803E_MPU {
+typedef struct _HD6303R_MPU {
 	uint16_t pc;
 	uint8_t flagRegister;
 	uint8_t accumulatorA;
@@ -34,11 +34,11 @@ typedef struct _MC6803E_MPU {
 	uint8_t lastCommandMneunomicLen;
 	// This is used to a pointer to the mneunomic for the last command.
 	char * lastCommandMneunomic;
-} MC6803E_MPU;
+} HD6303R_MPU;
 
-MC6803E_API MC6803E_MPU * MC6803E_MPU_Alloc();
-MC6803E_API void MC6803E_MPU_Free(MC6803E_MPU *);
-MC6803E_API void MC6803E_MPU_PrintRegisters(MC6803E_MPU *);
+HD6303R_API HD6303R_MPU * HD6303R_MPU_Alloc();
+HD6303R_API void HD6303R_MPU_Free(HD6303R_MPU *);
+HD6303R_API void HD6303R_MPU_PrintRegisters(HD6303R_MPU *);
 char * _hex_ToStringWithLeadingZeros(unsigned int, unsigned int);
 char * _uint8_ToString(uint8_t);
 char * _uint16_ToString(uint16_t);

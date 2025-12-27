@@ -1,4 +1,4 @@
-#include "MC6803_UNIT.h"
+#include "HD6303_UNIT.h"
 #include "ItemList.h"
 
 #define PrintH1(fmt, ...) printf("\033[35m" fmt "\033[0m", ##__VA_ARGS__)
@@ -12,12 +12,12 @@ bool NOT_VERIFIED()
 }
 
 // Global Processor pointer
-MC6803E_MPU *p;
+HD6303R_MPU *p;
 ItemList list;
 
 int main(int argc, char *argv[])
 {
-	p = MC6803E_MPU_Alloc();
+	p = HD6303R_MPU_Alloc();
 
 	initItemList(&list);
 
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 	else printf("\e[31mNot all tests Passed :(\e[0m\n");
 
 	// Clean up.
-	MC6803E_MPU_Free(p);
+	HD6303R_MPU_Free(p);
 	freeItemList(&list);
 
 	return 0;
@@ -171,8 +171,8 @@ void PrepareForNextTest()
  */
 void ResetMPU()
 {
-	MC6803E_MPU_Free(p);
-	p = MC6803E_MPU_Alloc();
+	HD6303R_MPU_Free(p);
+	p = HD6303R_MPU_Alloc();
 	p->pc = 0xE000;
 }
 
@@ -201,7 +201,7 @@ uint8_t test_Unknown(uint8_t Mnemonic)
 {
 	PrintH1("Testing 0x%02X\n", Mnemonic);
 	printBreak("-",70);
-	return (verifyUnknownMnemonic(ALU_MC6803E_Execute(p, Mnemonic)) | 0x2);
+	return (verifyUnknownMnemonic(ALU_HD6303R_Execute(p, Mnemonic)) | 0x2);
 }
 
 uint8_t test_NOP()
@@ -233,9 +233,9 @@ bool test_NOP_exec()
 	bool passAllTests = true;
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x01);
-	ALU_MC6803E_Execute(p, 0x01);
+	ALU_HD6303R_Execute(p, 0x01);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -259,28 +259,28 @@ uint8_t test_LSRD()
 
 	PrintH2("Carry Not Set LSRD\n");
 	*p->accumulatorD = 0xCAD7;
-	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
-	p->flagRegister |= MC6803E_FLAG_Z;
+	p->flagRegister &= ~(HD6303R_FLAG_N | HD6303R_FLAG_C);
+	p->flagRegister |= HD6303R_FLAG_Z;
 	passAllTests &= test_LSRD_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("Carry Set LSRD\n");
 	*p->accumulatorD = 0xCADF;
-	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C | MC6803E_FLAG_V);
-	p->flagRegister |= MC6803E_FLAG_Z;
+	p->flagRegister &= ~(HD6303R_FLAG_N | HD6303R_FLAG_C | HD6303R_FLAG_V);
+	p->flagRegister |= HD6303R_FLAG_Z;
 	passAllTests &= test_LSRD_exec();
 	printBreak(".",54);
 
 	PrintH2("Clear LSRD\n");
 	*p->accumulatorD = 0x0001;
-	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C | MC6803E_FLAG_V);
+	p->flagRegister &= ~(HD6303R_FLAG_N | HD6303R_FLAG_C | HD6303R_FLAG_V);
 	passAllTests &= test_LSRD_exec();
 	printBreak(".",54);
 
 	PrintH2("empty LSRD\n");
 	*p->accumulatorD = 0x0000;
-	p->flagRegister &= ~(MC6803E_FLAG_Z);
+	p->flagRegister &= ~(HD6303R_FLAG_Z);
 	passAllTests &= test_LSRD_exec();
 	printBreak(".",54);
 
@@ -295,16 +295,16 @@ uint8_t test_LSRD()
 bool test_LSRD_exec()
 {
 	bool passAllTests = true;
-	p->flagRegister |= MC6803E_FLAG_N;
+	p->flagRegister |= HD6303R_FLAG_N;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister |= 0xC0;
 
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x04);
-	ALU_MC6803E_Execute(p, 0x04);
+	ALU_HD6303R_Execute(p, 0x04);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -314,25 +314,25 @@ bool test_LSRD_exec()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
 //Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected.
 
-	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N); 		//N: Cleared
+	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N); 		//N: Cleared
 
 	if (curr.accumulatorD == 0x0000) 															//Z: if all bits are cleared; cleared otherwise
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 
-	if (!!(curr.flagRegister & MC6803E_FLAG_N)^!!(curr.flagRegister& MC6803E_FLAG_C)) 			// V: Set if, after the completion of the shift operation, N xor C == 1?
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+	if (!!(curr.flagRegister & HD6303R_FLAG_N)^!!(curr.flagRegister& HD6303R_FLAG_C)) 			// V: Set if, after the completion of the shift operation, N xor C == 1?
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
 
 	if (prev.accumulatorD & 0x0001) 															//C: Set if, before the operation, the least significant bit of the ACCX or M was set; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 
 	return passAllTests;
 }
@@ -347,42 +347,42 @@ uint8_t test_ASLD()
 
 	PrintH2("Carry Not Set ASLD\n");
 	*p->accumulatorD = 0x7AD7;
-	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
-	p->flagRegister |= MC6803E_FLAG_Z | MC6803E_FLAG_V;
+	p->flagRegister &= ~(HD6303R_FLAG_N | HD6303R_FLAG_C);
+	p->flagRegister |= HD6303R_FLAG_Z | HD6303R_FLAG_V;
 	passAllTests &= test_ASLD_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("Carry Set ASLD\n");
 	*p->accumulatorD = 0xFADF;
-	p->flagRegister &= ~(MC6803E_FLAG_N | MC6803E_FLAG_C);
-	p->flagRegister |= MC6803E_FLAG_Z | MC6803E_FLAG_V;
+	p->flagRegister &= ~(HD6303R_FLAG_N | HD6303R_FLAG_C);
+	p->flagRegister |= HD6303R_FLAG_Z | HD6303R_FLAG_V;
 	passAllTests &= test_ASLD_exec();
 	printBreak(".",54);
 
 	PrintH2("Clear ASLD\n");
 	*p->accumulatorD = 0x8000;
-	p->flagRegister |= MC6803E_FLAG_V;
+	p->flagRegister |= HD6303R_FLAG_V;
 	passAllTests &= test_ASLD_exec();
 	printBreak(".",54);
 
 	PrintH2("Empty ASLD\n");
 	*p->accumulatorD = 0x0000;
-	p->flagRegister &= ~(MC6803E_FLAG_Z);
-	p->flagRegister |= MC6803E_FLAG_V | MC6803E_FLAG_C | MC6803E_FLAG_N;
+	p->flagRegister &= ~(HD6303R_FLAG_Z);
+	p->flagRegister |= HD6303R_FLAG_V | HD6303R_FLAG_C | HD6303R_FLAG_N;
 	passAllTests &= test_ASLD_exec();
 	printBreak(".",54);
 
 	PrintH2("N is set ASLD\n");
 	*p->accumulatorD = 0x8000;
-	p->flagRegister &= ~(MC6803E_FLAG_Z );
-	p->flagRegister |= MC6803E_FLAG_C | MC6803E_FLAG_N| MC6803E_FLAG_V;
+	p->flagRegister &= ~(HD6303R_FLAG_Z );
+	p->flagRegister |= HD6303R_FLAG_C | HD6303R_FLAG_N| HD6303R_FLAG_V;
 	passAllTests &= test_ASLD_exec();
 	printBreak(".",54);
 
 	PrintH2("lower set shift ASLD\n");
 	*p->accumulatorD = 0xFFFF;
-	p->flagRegister |= MC6803E_FLAG_V;
+	p->flagRegister |= HD6303R_FLAG_V;
 	passAllTests &= test_ASLD_exec();
 	passAllTests &= CheckSame(*(p->accumulatorD),0xFFFE, "Zero always shift into LSBit");
 
@@ -398,9 +398,9 @@ bool test_ASLD_exec()
 
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x05);
-	ALU_MC6803E_Execute(p, 0x05);
+	ALU_HD6303R_Execute(p, 0x05);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -410,28 +410,28 @@ bool test_ASLD_exec()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
 //Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected.
 
 	if (curr.accumulatorD & 0x8000)																//N: Set if most significant bit of the result is set; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
 
 	if (curr.accumulatorD == 0x0000) 															//Z: Set if all bits of the result are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 
-	if (!!(curr.flagRegister & MC6803E_FLAG_N)^!!(curr.flagRegister& MC6803E_FLAG_C)) 			//V: Set if, after the completion of the shift operation, N xor C == 1?
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+	if (!!(curr.flagRegister & HD6303R_FLAG_N)^!!(curr.flagRegister& HD6303R_FLAG_C)) 			//V: Set if, after the completion of the shift operation, N xor C == 1?
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
 
 	if (prev.accumulatorD & 0x8000) 															//C: Set if, before the operation, the most significant bit of the ACCX or M was set; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 
 	return passAllTests;
 }
@@ -468,9 +468,9 @@ bool test_TAP_exec()
 
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x06);
-	ALU_MC6803E_Execute(p, 0x06);
+	ALU_HD6303R_Execute(p, 0x06);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -522,9 +522,9 @@ bool test_TPA_exec()
 
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x07);
-	ALU_MC6803E_Execute(p, 0x07);
+	ALU_HD6303R_Execute(p, 0x07);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -544,7 +544,7 @@ uint8_t test_INX()
 	bool passAllTests = true;
 	bool verified = false;
 	PrintH2("startup INX\n");
-	p->flagRegister |= MC6803E_FLAG_Z;
+	p->flagRegister |= HD6303R_FLAG_Z;
 	passAllTests &= test_INX_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
@@ -563,7 +563,7 @@ uint8_t test_INX()
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xFFFF;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_Z);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_Z);
 	passAllTests &= test_INX_exec();
 
 	return (passAllTests | ((uint8_t)verified << 1));
@@ -574,9 +574,9 @@ bool test_INX_exec()
 	bool passAllTests = true;
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x08);
-	ALU_MC6803E_Execute(p, 0x08);
+	ALU_HD6303R_Execute(p, 0x08);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -587,17 +587,17 @@ bool test_INX_exec()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
 	//Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);		//N: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);		//N: Not affected.
 
 	if (curr.indexRegister == 0x0000) 															//Z: Set if all bits of the result are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);		//V: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);		//C: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);		//V: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);		//C: Not affected.
 
 	return passAllTests;
 }
@@ -615,7 +615,7 @@ uint8_t test_DEX()
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_Z);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_Z);
 	passAllTests &= test_DEX_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
@@ -646,9 +646,9 @@ bool test_DEX_exec()
 	bool passAllTests = true;
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x09);
-	ALU_MC6803E_Execute(p, 0x09);
+	ALU_HD6303R_Execute(p, 0x09);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -659,17 +659,17 @@ bool test_DEX_exec()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
 	//Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);		//N: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);		//N: Not affected.
 
 	if (curr.indexRegister == 0x0000) 															//Z: Set if all bits of the result are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);		//V: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);		//C: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);		//V: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);		//C: Not affected.
 
 	return passAllTests;
 }
@@ -687,7 +687,7 @@ uint8_t test_CLV()
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_V);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
 	passAllTests &= test_CLV_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
@@ -708,9 +708,9 @@ bool test_CLV_exec()
 	bool passAllTests = true;
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x0A);
-	ALU_MC6803E_Execute(p, 0x0A);
+	ALU_HD6303R_Execute(p, 0x0A);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -721,12 +721,12 @@ bool test_CLV_exec()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
 	//Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);		//N: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);		//Z: Not affected.
-	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);		//V: Cleared.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);		//C: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);		//N: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);		//Z: Not affected.
+	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);		//V: Cleared.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);		//C: Not affected.
 
 	return passAllTests;
 }
@@ -744,7 +744,7 @@ uint8_t test_SEV()
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_V);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
 	passAllTests &= test_SEV_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
@@ -765,9 +765,9 @@ bool test_SEV_exec()
 	bool passAllTests = true;
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x0B);
-	ALU_MC6803E_Execute(p, 0x0B);
+	ALU_HD6303R_Execute(p, 0x0B);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -778,12 +778,12 @@ bool test_SEV_exec()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
 	//Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);		//N: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);		//Z: Not affected.
-	passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);			//V: Set.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);		//C: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);		//N: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);		//Z: Not affected.
+	passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);			//V: Set.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);		//C: Not affected.
 
 	return passAllTests;
 }
@@ -801,7 +801,7 @@ uint8_t test_CLC()
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_C);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_C);
 	passAllTests &= test_CLC_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
@@ -822,9 +822,9 @@ bool test_CLC_exec()
 	bool passAllTests = true;
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x0C);
-	ALU_MC6803E_Execute(p, 0x0C);
+	ALU_HD6303R_Execute(p, 0x0C);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -835,12 +835,12 @@ bool test_CLC_exec()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
 	//Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);		//N: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);		//Z: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);		//V: Not affected.
-	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);		//C: Cleared.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);		//N: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);		//Z: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);		//V: Not affected.
+	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);		//C: Cleared.
 
 	return passAllTests;
 }
@@ -858,7 +858,7 @@ uint8_t test_SEC()
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_C);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_C);
 	passAllTests &= test_SEC_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
@@ -879,9 +879,9 @@ bool test_SEC_exec()
 	bool passAllTests = true;
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x0D);
-	ALU_MC6803E_Execute(p, 0x0D);
+	ALU_HD6303R_Execute(p, 0x0D);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -892,12 +892,12 @@ bool test_SEC_exec()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
 	//Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);		//N: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);		//Z: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);		//V: Not affected.
-	passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);			//C: Set.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);		//N: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);		//Z: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);		//V: Not affected.
+	passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);			//C: Set.
 
 	return passAllTests;
 }
@@ -915,7 +915,7 @@ uint8_t test_CLI()
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_I);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_I);
 	passAllTests &= test_CLI_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
@@ -936,9 +936,9 @@ bool test_CLI_exec()
 	bool passAllTests = true;
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x0E);
-	ALU_MC6803E_Execute(p, 0x0E);
+	ALU_HD6303R_Execute(p, 0x0E);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -949,12 +949,12 @@ bool test_CLI_exec()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
 	//Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
-	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Cleared.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);		//N: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);		//Z: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);		//V: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);		//C: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Cleared.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);		//N: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);		//Z: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);		//V: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);		//C: Not affected.
 
 	return passAllTests;
 }
@@ -972,7 +972,7 @@ uint8_t test_SEI()
 	p->accumulatorA = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_I);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_I);
 	passAllTests &= test_SEI_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
@@ -993,9 +993,9 @@ bool test_SEI_exec()
 	bool passAllTests = true;
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x0F);
-	ALU_MC6803E_Execute(p, 0x0F);
+	ALU_HD6303R_Execute(p, 0x0F);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -1006,12 +1006,12 @@ bool test_SEI_exec()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
 	//Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		//H: Not affected.
-	passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Set.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);		//N: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);		//Z: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);		//V: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);		//C: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Set.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);		//N: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);		//Z: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);		//V: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);		//C: Not affected.
 
 	return passAllTests;
 }
@@ -1039,7 +1039,7 @@ uint8_t test_SBA()
 	p->accumulatorA = 0x22;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_Z);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_Z);
 	passAllTests &= test_SBA_exec();
 	printBreak(".",54);
 
@@ -1048,7 +1048,7 @@ uint8_t test_SBA()
 	p->accumulatorA = 0x81;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_N);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_N);
 	passAllTests &= test_SBA_exec();
 	printBreak(".",54);
 
@@ -1057,7 +1057,7 @@ uint8_t test_SBA()
 	p->accumulatorA = 0x01;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_C);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_C);
 	passAllTests &= test_SBA_exec();
 	printBreak(".",54);
 
@@ -1066,7 +1066,7 @@ uint8_t test_SBA()
 	p->accumulatorA = 0x80;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_V);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
 	passAllTests &= test_SBA_exec();
 	printBreak(".",54);
 
@@ -1075,7 +1075,7 @@ uint8_t test_SBA()
 	p->accumulatorA = 0x01;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~(MC6803E_FLAG_N|MC6803E_FLAG_V|MC6803E_FLAG_C));
+	p->flagRegister = (0xFF & ~(HD6303R_FLAG_N|HD6303R_FLAG_V|HD6303R_FLAG_C));
 	passAllTests &= test_SBA_exec();
 
 	return passAllTests;
@@ -1090,9 +1090,9 @@ bool test_SBA_exec()
 
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x10);
-	ALU_MC6803E_Execute(p, 0x10);
+	ALU_HD6303R_Execute(p, 0x10);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -1103,28 +1103,28 @@ bool test_SBA_exec()
 	passAllTests &= CheckSubtraction(prev.accumulatorA, prev.accumulatorB, curr.accumulatorA, "A-B=R?");
 
 //Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		// H: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		// I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		// H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		// I: Not affected.
 
 	if (curr.accumulatorA & 0x80) 																// N: Set if most significant bit of the result is set; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
 
 	if (curr.accumulatorA == 0x00) 																// Z: Set if all bits of the result are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 
 	if (__check_sub_overflow(prev.accumulatorA, prev.accumulatorB)) 					// V: Set if there was two’s complement overflow as a result of the operation.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
 
 	if (__check_sub_carry(prev.accumulatorA,prev.accumulatorB)) 										// C: Carry is set if the absolute value of accumulator B plus previous Carry is larger than the absolute value of accumulator A; reset otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 
 	return passAllTests;
 }
@@ -1152,7 +1152,7 @@ uint8_t test_CBA()
 	p->accumulatorA = 0x22;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_Z);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_Z);
 	passAllTests &= test_CBA_exec();
 	printBreak(".",54);
 
@@ -1161,7 +1161,7 @@ uint8_t test_CBA()
 	p->accumulatorA = 0x81;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_N);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_N);
 	passAllTests &= test_CBA_exec();
 	printBreak(".",54);
 
@@ -1170,7 +1170,7 @@ uint8_t test_CBA()
 	p->accumulatorA = 0x01;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_C);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_C);
 	passAllTests &= test_CBA_exec();
 	printBreak(".",54);
 
@@ -1179,7 +1179,7 @@ uint8_t test_CBA()
 	p->accumulatorA = 0x80;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_V);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
 	passAllTests &= test_CBA_exec();
 	printBreak(".",54);
 
@@ -1188,7 +1188,7 @@ uint8_t test_CBA()
 	p->accumulatorA = 0x01;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
-	p->flagRegister = (0xFF & ~(MC6803E_FLAG_N|MC6803E_FLAG_V|MC6803E_FLAG_C));
+	p->flagRegister = (0xFF & ~(HD6303R_FLAG_N|HD6303R_FLAG_V|HD6303R_FLAG_C));
 	passAllTests &= test_CBA_exec();
 
 	return passAllTests;
@@ -1203,9 +1203,9 @@ bool test_CBA_exec()
 
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x11);
-	ALU_MC6803E_Execute(p, 0x11);
+	ALU_HD6303R_Execute(p, 0x11);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	uint8_t result = (prev.accumulatorA - prev.accumulatorB);
 	checkImplemented(curr.flagRegister);
@@ -1219,28 +1219,28 @@ bool test_CBA_exec()
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
 
 //Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		// H: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		// I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		// H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		// I: Not affected.
 
 	if (result & 0x80) 																// N: Set if most significant bit of the result is set; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
 
 	if (result == 0x00) 																// Z: Set if all bits of the result are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 
 	if (__check_sub_overflow(prev.accumulatorA, prev.accumulatorB)) 					// V: Set if there was two’s complement overflow as a result of the operation.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
 
 	if (__check_sub_carry(prev.accumulatorA,prev.accumulatorB)) 										// C: Carry is set if the absolute value of accumulator B plus previous Carry is larger than the absolute value of accumulator A; reset otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 
 	return passAllTests;
 }
@@ -1256,7 +1256,7 @@ uint8_t test_TAB()
 	PrintH2("0xE5 TAB\n");
 	p->accumulatorA = 0xE5;
 	p->accumulatorB = 0xDA;
-	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
+	p->flagRegister = (0xc0 | HD6303R_FLAG_Z | HD6303R_FLAG_V);
 	passAllTests &= test_TAB_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
@@ -1264,19 +1264,19 @@ uint8_t test_TAB()
 	PrintH2("0xDA TAB\n");
 	p->accumulatorA = 0xDA;
 	p->accumulatorB = 0xE5;
-	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
+	p->flagRegister = (0xc0 | HD6303R_FLAG_Z | HD6303R_FLAG_V);
 	passAllTests &= test_TAB_exec();
 	printBreak(".",54);
 
 	PrintH2("N set TAB\n");
 	p->accumulatorA = 0x80;
-	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
+	p->flagRegister = (0xc0 | HD6303R_FLAG_Z | HD6303R_FLAG_V);
 	passAllTests &= test_TAB_exec();
 	printBreak(".",54);
 
 	PrintH2("Z set TAB\n");
 	p->accumulatorA = 0x00;
-	p->flagRegister = (0xc0 | MC6803E_FLAG_N | MC6803E_FLAG_V);
+	p->flagRegister = (0xc0 | HD6303R_FLAG_N | HD6303R_FLAG_V);
 	passAllTests &= test_TAB_exec();
 
 	return (passAllTests | ((uint8_t)verified << 1));
@@ -1291,9 +1291,9 @@ bool test_TAB_exec()
 
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x16);
-	ALU_MC6803E_Execute(p, 0x16);
+	ALU_HD6303R_Execute(p, 0x16);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -1305,21 +1305,21 @@ bool test_TAB_exec()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
 //Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		// H: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		// I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		// H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		// I: Not affected.
 
 	if (curr.accumulatorB & 0x80) 																			// N: Set if the most significant bit of the contents of the accumulator is set; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
 
 	if (curr.accumulatorB == 0x00) 																		// Z: Set if all bits of the accumulator are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 
-	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V); 		// V: Cleared.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C); 		// C: Not affected.
+	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V); 		// V: Cleared.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C); 		// C: Not affected.
 }
 uint8_t test_TBA()
 {
@@ -1332,7 +1332,7 @@ uint8_t test_TBA()
 	PrintH2("0xE5 TBA\n");
 	p->accumulatorB = 0xE5;
 	p->accumulatorA = 0xDA;
-	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
+	p->flagRegister = (0xc0 | HD6303R_FLAG_Z | HD6303R_FLAG_V);
 	passAllTests &= test_TBA_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
@@ -1340,19 +1340,19 @@ uint8_t test_TBA()
 	PrintH2("0xDA TBA\n");
 	p->accumulatorB = 0xDA;
 	p->accumulatorA = 0xE5;
-	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
+	p->flagRegister = (0xc0 | HD6303R_FLAG_Z | HD6303R_FLAG_V);
 	passAllTests &= test_TBA_exec();
 	printBreak(".",54);
 
 	PrintH2("N set TBA\n");
 	p->accumulatorB = 0x80;
-	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
+	p->flagRegister = (0xc0 | HD6303R_FLAG_Z | HD6303R_FLAG_V);
 	passAllTests &= test_TBA_exec();
 	printBreak(".",54);
 
 	PrintH2("Z set TBA\n");
 	p->accumulatorB = 0x00;
-	p->flagRegister = (0xc0 | MC6803E_FLAG_N | MC6803E_FLAG_V);
+	p->flagRegister = (0xc0 | HD6303R_FLAG_N | HD6303R_FLAG_V);
 	passAllTests &= test_TBA_exec();
 
 	return (passAllTests | ((uint8_t)verified << 1));
@@ -1367,9 +1367,9 @@ bool test_TBA_exec()
 
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x17);
-	ALU_MC6803E_Execute(p, 0x17);
+	ALU_HD6303R_Execute(p, 0x17);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 
@@ -1381,21 +1381,21 @@ bool test_TBA_exec()
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
 //Flag Checks
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H); 		// H: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		// I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		// H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		// I: Not affected.
 
 	if (curr.accumulatorA & 0x80) 																			// N: Set if the most significant bit of the contents of the accumulator is set; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
 
 	if (curr.accumulatorA == 0x00) 																		// Z: Set if all bits of the accumulator are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 
-	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V); 		// V: Cleared.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C); 		// C: Not affected.
+	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V); 		// V: Cleared.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C); 		// C: Not affected.
 }
 
 uint8_t test_XGDX()
@@ -1409,7 +1409,7 @@ uint8_t test_XGDX()
 	PrintH2("0xE5E5 XGDX\n");
 	*p->accumulatorD = 0xE5E5;
 	p->indexRegister = 0xDADA;
-	p->flagRegister = (0xc0 | MC6803E_FLAG_Z | MC6803E_FLAG_V);
+	p->flagRegister = (0xc0 | HD6303R_FLAG_Z | HD6303R_FLAG_V);
 	passAllTests &= test_XGDX_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
@@ -1417,7 +1417,7 @@ uint8_t test_XGDX()
 	PrintH2("0xDADA XGDX\n");
 	*p->accumulatorD = 0xDADA;
 	p->indexRegister = 0xE5E5;
-	p->flagRegister = (0xc0 | MC6803E_FLAG_N | MC6803E_FLAG_C);
+	p->flagRegister = (0xc0 | HD6303R_FLAG_N | HD6303R_FLAG_C);
 	passAllTests &= test_XGDX_exec();
 
 	return (passAllTests | ((uint8_t)verified << 1));
@@ -1428,9 +1428,9 @@ bool test_XGDX_exec()
 	bool passAllTests = true;
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x18);
-	ALU_MC6803E_Execute(p, 0x18);
+	ALU_HD6303R_Execute(p, 0x18);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -1452,82 +1452,82 @@ uint8_t test_DAA()
 
 	PrintH2("case1 DAA\n");
 	p->accumulatorA = 0x33;
-	p->flagRegister = (0xC0 | MC6803E_FLAG_C | MC6803E_FLAG_H | MC6803E_FLAG_Z); //C H
+	p->flagRegister = (0xC0 | HD6303R_FLAG_C | HD6303R_FLAG_H | HD6303R_FLAG_Z); //C H
 	passAllTests &= test_DAA_exec();
-	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)1, "FLAG_C was set");
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & HD6303R_FLAG_C),(uint8_t)1, "FLAG_C was set");
 	passAllTests &= CheckSame(p->accumulatorA, 0x99, "Result Correct?");
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("case2 DAA\n");
 	p->accumulatorA = 0x2B;
-	p->flagRegister = (0xC0 | MC6803E_FLAG_C | MC6803E_FLAG_Z); //C H'
+	p->flagRegister = (0xC0 | HD6303R_FLAG_C | HD6303R_FLAG_Z); //C H'
 	passAllTests &= test_DAA_exec();
-	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)1, "FLAG_C was set");
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & HD6303R_FLAG_C),(uint8_t)1, "FLAG_C was set");
 	passAllTests &= CheckSame(p->accumulatorA, 0x91, "Result Correct?");
 	printBreak(".",54);
 
 	PrintH2("case3 DAA\n");
 	p->accumulatorA = 0x27;
-	p->flagRegister = (0xC0 | MC6803E_FLAG_C | MC6803E_FLAG_Z); //C H'
+	p->flagRegister = (0xC0 | HD6303R_FLAG_C | HD6303R_FLAG_Z); //C H'
 	passAllTests &= test_DAA_exec();
-	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)1, "FLAG_C was set");
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & HD6303R_FLAG_C),(uint8_t)1, "FLAG_C was set");
 	passAllTests &= CheckSame(p->accumulatorA, 0x87, "Result Correct?");
 	printBreak(".",54);
 
 	PrintH2("case4 DAA\n");
 	p->accumulatorA = 0xC3;
-	p->flagRegister = (0xC0 | MC6803E_FLAG_H | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H
+	p->flagRegister = (0xC0 | HD6303R_FLAG_H | HD6303R_FLAG_Z | HD6303R_FLAG_N); //C' H
 	passAllTests &= test_DAA_exec();
-	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)1, "FLAG_C was set");
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & HD6303R_FLAG_C),(uint8_t)1, "FLAG_C was set");
 	passAllTests &= CheckSame(p->accumulatorA, 0x29, "Result Correct?");
 	printBreak(".",54);
 
 	PrintH2("case5 DAA\n");
 	p->accumulatorA = 0x9E;
-	p->flagRegister = (0xC0 | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H'
+	p->flagRegister = (0xC0 | HD6303R_FLAG_Z | HD6303R_FLAG_N); //C' H'
 	passAllTests &= test_DAA_exec();
-	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)1, "FLAG_C was set");
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & HD6303R_FLAG_C),(uint8_t)1, "FLAG_C was set");
 	passAllTests &= CheckSame(p->accumulatorA, 0x04, "Result Correct?");
 	printBreak(".",54);
 
 	PrintH2("case6 DAA\n");
 	p->accumulatorA = 0xB7;
-	p->flagRegister = (0xC0 | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H'
+	p->flagRegister = (0xC0 | HD6303R_FLAG_Z | HD6303R_FLAG_N); //C' H'
 	passAllTests &= test_DAA_exec();
-	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)1, "FLAG_C was set");
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & HD6303R_FLAG_C),(uint8_t)1, "FLAG_C was set");
 	passAllTests &= CheckSame(p->accumulatorA, 0x17, "Result Correct?");
 	printBreak(".",54);
 
 	PrintH2("case7 DAA\n");
 	p->accumulatorA = 0x93;
-	p->flagRegister = (0xC0 | MC6803E_FLAG_H | MC6803E_FLAG_Z); //C' H
+	p->flagRegister = (0xC0 | HD6303R_FLAG_H | HD6303R_FLAG_Z); //C' H
 	passAllTests &= test_DAA_exec();
-	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)0, "FLAG_C was unset");
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & HD6303R_FLAG_C),(uint8_t)0, "FLAG_C was unset");
 	passAllTests &= CheckSame(p->accumulatorA, 0x99, "Result Correct?");
 	printBreak(".",54);
 
 	PrintH2("case8 DAA\n");
 	p->accumulatorA = 0x6E;
-	p->flagRegister = (0xC0 | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H'
+	p->flagRegister = (0xC0 | HD6303R_FLAG_Z | HD6303R_FLAG_N); //C' H'
 	passAllTests &= test_DAA_exec();
-	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)0, "FLAG_C was unset");
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & HD6303R_FLAG_C),(uint8_t)0, "FLAG_C was unset");
 	passAllTests &= CheckSame(p->accumulatorA, 0x74, "Result Correct?");
 	printBreak(".",54);
 
 	PrintH2("case9 DAA\n");
 	p->accumulatorA = 0x24;
-	p->flagRegister = (0xC0 | MC6803E_FLAG_Z | MC6803E_FLAG_N); //C' H'
+	p->flagRegister = (0xC0 | HD6303R_FLAG_Z | HD6303R_FLAG_N); //C' H'
 	passAllTests &= test_DAA_exec();
-	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)0, "FLAG_C was unset");
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & HD6303R_FLAG_C),(uint8_t)0, "FLAG_C was unset");
 	passAllTests &= CheckSame(p->accumulatorA, 0x24, "Result Correct?");
 	printBreak(".",54);
 
 	PrintH2("case10 DAA\n");
 	p->accumulatorA = 0x00;
-	p->flagRegister = (0xC0 | MC6803E_FLAG_N); //C' H'
+	p->flagRegister = (0xC0 | HD6303R_FLAG_N); //C' H'
 	passAllTests &= test_DAA_exec();
-	passAllTests &= CheckSame((uint8_t)(p->flagRegister & MC6803E_FLAG_C),(uint8_t)0, "FLAG_C was unset");
+	passAllTests &= CheckSame((uint8_t)(p->flagRegister & HD6303R_FLAG_C),(uint8_t)0, "FLAG_C was unset");
 	passAllTests &= CheckSame(p->accumulatorA, 0x00, "Result Correct?");
 
 	return (passAllTests | ((uint8_t)verified << 1));
@@ -1539,9 +1539,9 @@ bool test_DAA_exec()
 	p->indexRegister = 0xDADA;
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x19);
-	ALU_MC6803E_Execute(p, 0x19);
+	ALU_HD6303R_Execute(p, 0x19);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -1551,14 +1551,14 @@ bool test_DAA_exec()
 
 //Flag Checks	
 	if (curr.accumulatorA & 0x80) 																// N: Set if the MSB of the result is "1", cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
 
 	if (curr.accumulatorA == 0x00) 																// Z: Set if all bits of the accumulator are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 
 	return passAllTests;
 }
@@ -1584,7 +1584,7 @@ uint8_t test_ABA()
 	PrintH2("Flag H ABA\n");
 	p->accumulatorA = 0x0F;
 	p->accumulatorB = 0x0F;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_H);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_H);
 	passAllTests &= test_ABA_exec();
 	passAllTests &= CheckSame(p->accumulatorA, 0x1E, "Result Correct?");
 	printBreak(".",54);
@@ -1592,7 +1592,7 @@ uint8_t test_ABA()
 	PrintH2("Flag N ABA\n");
 	p->accumulatorA = 0x0F;
 	p->accumulatorB = 0x80;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_N);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_N);
 	passAllTests &= test_ABA_exec();
 	passAllTests &= CheckSame(p->accumulatorA, 0x8F, "Result Correct?");
 	printBreak(".",54);
@@ -1600,7 +1600,7 @@ uint8_t test_ABA()
 	PrintH2("Flag Z ABA\n");
 	p->accumulatorA = 0x00;
 	p->accumulatorB = 0x00;
-	p->flagRegister = (0xFF & ~MC6803E_FLAG_Z);
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_Z);
 	passAllTests &= test_ABA_exec();
 	passAllTests &= CheckSame(p->accumulatorA, 0x00, "Result Correct?");
 	printBreak(".",54);
@@ -1608,7 +1608,7 @@ uint8_t test_ABA()
 	PrintH2("Flag V/C ABA\n");
 	p->accumulatorA = 0x81;
 	p->accumulatorB = 0x82;
-	p->flagRegister = (0xFF & ~(MC6803E_FLAG_V|MC6803E_FLAG_C));
+	p->flagRegister = (0xFF & ~(HD6303R_FLAG_V|HD6303R_FLAG_C));
 	passAllTests &= test_ABA_exec();
 	passAllTests &= CheckSame(p->accumulatorA, 0x03, "Result Correct?");
 	printBreak(".",54);
@@ -1616,7 +1616,7 @@ uint8_t test_ABA()
 	PrintH2("Flag V/N ABA\n");
 	p->accumulatorA = 0x40;
 	p->accumulatorB = 0x40;
-	p->flagRegister = (0xFF & ~(MC6803E_FLAG_V|MC6803E_FLAG_N));
+	p->flagRegister = (0xFF & ~(HD6303R_FLAG_V|HD6303R_FLAG_N));
 	passAllTests &= test_ABA_exec();
 	passAllTests &= CheckSame(p->accumulatorA, 0x80, "Result Correct?");
 
@@ -1628,9 +1628,9 @@ bool test_ABA_exec()
 	bool passAllTests = true;
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x1B);
-	ALU_MC6803E_Execute(p, 0x1B);
+	ALU_HD6303R_Execute(p, 0x1B);
 	MPU_State curr = getMPUState();
-	printf("Executed Mnemonic [%s]\n",ALU_MC6803E_GetCurrentMneunomic(p));
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
 	passAllTests &= checkPC(prev.pc, curr.pc, 1);
@@ -1648,31 +1648,31 @@ bool test_ABA_exec()
 	bool R7 = result & 0x80;
 
 	if (A3 & B3 | B3 & !R3 | !R3 & A3) 															// H: Set if a carry from bit3 is generated
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_H);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H);
 
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_I); 		//I: Not affected
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected
 	
 	if (R7)
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);		//N: Set if the result's MSB is "1"
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);		//N: Set if the result's MSB is "1"
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_N);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
 
 	if (result == 0x0000)			 															//Z: Set if all bits of the result are cleared
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_Z);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
 
 	if (A7 & B7 & !R7 | !A7 & !B7 & R7)															// V: Set if the result overflows
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_V);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
 
 	if (A7 & B7 | B7 & !R7 | !R7 & A7) 															// C: Set if a carry from the MSB is generated cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, MC6803E_FLAG_C);
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 
 	return passAllTests;
 }

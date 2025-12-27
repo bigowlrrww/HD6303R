@@ -1,15 +1,15 @@
 
 /*
 	MC6803
-	This code creates a MC6803E_MPU_ instance, and then loads a ram image from a file.
+	This code creates a HD6303R_MPU_ instance, and then loads a ram image from a file.
 	It will then call the code in RAM, until the next instruction is 0x00 (EOC), it will then exit.
 */
 
-#include "MC6803_TEST.h"
+#include "HD6303_TEST.h"
 
 int main(int argc, char * argv[])
 {
-	MC6803E_MPU * p = MC6803E_MPU_Alloc();
+	HD6303R_MPU * p = HD6303R_MPU_Alloc();
 	char * ram_file = "RAM.6803";
 	char * rom_file = "ROM.6803";
 	
@@ -101,13 +101,13 @@ int main(int argc, char * argv[])
 	
 	// The run loop.
 	uint8_t instruction;
-	while ((instruction = ALU_MC6803E_Fetch(p))) {	// Fetch a byte from the ALU.
-		ALU_MC6803E_Execute(p, instruction);		// Execute the instruction.
+	while ((instruction = ALU_HD6303R_Fetch(p))) {	// Fetch a byte from the ALU.
+		ALU_HD6303R_Execute(p, instruction);		// Execute the instruction.
 		
 		if((StepThroughEmulation == 1) && (PrintRegisters == 0)) {
-			printf("%s", ALU_MC6803E_GetCurrentMneunomic(p));
+			printf("%s", ALU_HD6303R_GetCurrentMneunomic(p));
 		} else {
-			ALU_MC6803E_PrintCurrentMneunomic(p);
+			ALU_HD6303R_PrintCurrentMneunomic(p);
 		}
 		
 		if(DelayExecution == 1) {
@@ -115,7 +115,7 @@ int main(int argc, char * argv[])
 		}
 		
 		if(PrintRegisters == 1) {
-			MC6803E_MPU_PrintRegisters(p); 	// Print the state of the registers.
+			HD6303R_MPU_PrintRegisters(p); 	// Print the state of the registers.
 		}
 		printf("\n");
 		
@@ -144,7 +144,7 @@ int main(int argc, char * argv[])
 	}
 	
 	// Clean up.
-	MC6803E_MPU_Free(p);
+	HD6303R_MPU_Free(p);
 	
 	return 0;
 }
