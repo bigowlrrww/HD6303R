@@ -1,5 +1,6 @@
 
 #include "MC6803E_ALU.h"
+#include <stdbool.h>
 
 // Cheeky overload to debug easier
 #define ALU_MC6803E_SetCurrentMneunomicWithPayload(p, instr, x) _Generic((x), \
@@ -142,6 +143,9 @@ MC6803E_API uint16_t ALU_MC6803E_Execute(MC6803E_MPU * p, uint8_t instruction)
 			break;
 		case 0x38: // PULX Inherent
 			ALU_MC6803E_PULX(p);
+			break;
+		case 0x1A:
+			ALU_MC6803E_SLP(p);
 			break;
 		case 0x1B: // ABA Inherent
 			ALU_MC6803E_ABA(p);
@@ -445,6 +449,9 @@ MC6803E_API uint16_t ALU_MC6803E_Execute(MC6803E_MPU * p, uint8_t instruction)
 		case 0x17: // TBA Inherent
 			ALU_MC6803E_TBA(p);
 			break;
+		case 0x18: // XGDX Inherent
+			ALU_MC6803E_XGDX(p);
+			break;
 		case 0x6D: // TST Index
 		case 0x7D: // TST Extended
 			ALU_MC6803E_TST(p);
@@ -555,6 +562,8 @@ MC6803E_API uint16_t ALU_MC6803E_Execute(MC6803E_MPU * p, uint8_t instruction)
 			break;
 		default:
 			printf("Unknown instruction (%X) at PC -> %X.\n", instruction, p->pc);
+			ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+			ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 			return 0xFFFF; //INVALID PC LOCATION Intentionally
 			break;
 	}
@@ -982,6 +991,27 @@ void ALU_MC6803E_PULX(MC6803E_MPU * p)
 	
 }
 
+// NOT IMPLEMENTED
+/*
+		void ALU_MC6803E_SLP(MC6803E_MPU * p)
+		Boolean:	A + B -> A
+		Flags:		H N Z V C
+*/
+void ALU_MC6803E_SLP(MC6803E_MPU * p)
+{
+	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
+
+	switch (instruction) {
+		case 0x1A: // SLP Inherent
+			ALU_MC6803E_SetCurrentMneunomic(p, "SLP");
+			break;
+		default:
+			break;
+	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
+}
+
 /*
 		void ALU_MC6803E_ABA(MC6803E_MPU * p)
 		Boolean:	A + B -> A
@@ -992,6 +1022,13 @@ void ALU_MC6803E_ABA(MC6803E_MPU * p)
 	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
 	uint16_t result = (p->accumulatorA + p->accumulatorB);
 
+	bool A3 = p->accumulatorA & 0x08;
+	bool B3 = p->accumulatorB & 0x08;
+	bool R3 = result & 0x08;
+	bool A7 = p->accumulatorA & 0x80;
+	bool B7 = p->accumulatorB & 0x80;
+	bool R7 = result & 0x80;
+
 	switch (instruction) {
 		case 0x1B: // ABA Inherent
 			ALU_MC6803E_SetCurrentMneunomic(p, "ABA");
@@ -1001,13 +1038,13 @@ void ALU_MC6803E_ABA(MC6803E_MPU * p)
 		default:
 			break;
 	}
-	
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_H, (p->accumulatorA & 0x10));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
+
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_H, (A3 & B3 | B3 & !R3 | !R3 & A3));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (R7));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (A7 & B7 & !R7 | !A7 & !B7 & R7));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (A7 & B7 | B7 & !R7 | !R7 & A7));
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_VERIFIED);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
@@ -1681,7 +1718,7 @@ void ALU_MC6803E_CBA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, ((p->accumulatorA & ~p->accumulatorB & ~result) | (~p->accumulatorA & p->accumulatorB & result))&0x80);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((~p->accumulatorA & p->accumulatorB)|(p->accumulatorB&result)|(result&~p->accumulatorA))&0x80);
 
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_VERIFIED);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
@@ -1966,29 +2003,33 @@ void ALU_MC6803E_COMB(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
-// NOT IMPLEMENTED
 /*
 		void ALU_MC6803E_DAA(MC6803E_MPU * p)
 		Boolean:	BCD(Ah) + BCD(Al) -> A
-		Flags:		N Z V C
+		Flags:		N Z C
 */
 void ALU_MC6803E_DAA(MC6803E_MPU * p)
 {
 	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
-	uint8_t unsigned_payload = (uint8_t)MemoryRead(p, (p->pc+1));
-	int8_t signed_payload = (int8_t)MemoryRead(p, (p->pc+1));
-	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
-	uint16_t direct_address = (uint16_t)unsigned_payload;
+	uint8_t adj = 0;
 
 	switch (instruction) {
 		case 0x19: // DAA Inherent
 			ALU_MC6803E_SetCurrentMneunomic(p, "DAA");
+
+			if ((p->accumulatorA & 0x0F) > 9 || ALU_MC6803E_GetFlag(p, MC6803E_FLAG_H)) adj += 0x06;
+			if ((p->accumulatorA > 0x99) || ALU_MC6803E_GetFlag(p,MC6803E_FLAG_C)) adj += 0x60;
+			p->accumulatorA = p->accumulatorA + adj;
 			break;
 		default:
 			break;
 	}
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, p->accumulatorA & 0x80);
+	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, adj & 0x60);
+
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
@@ -3012,7 +3053,7 @@ void ALU_MC6803E_SBA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, ((p->accumulatorA & ~p->accumulatorB & ~result) | (~p->accumulatorA & p->accumulatorB & result))&0x80);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((~p->accumulatorA & p->accumulatorB)|(p->accumulatorB&result)|(result&~p->accumulatorA))&0x80);
 	p->accumulatorA = result;
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_VERIFIED);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
@@ -3372,6 +3413,32 @@ void ALU_MC6803E_TBA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_VERIFIED);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
+
+/*
+		void ALU_MC6803E_XGDX(MC6803E_MPU * p)
+		Boolean:	D <-> IX
+		Flags:		None
+*/
+void ALU_MC6803E_XGDX(MC6803E_MPU * p)
+{
+	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
+	uint16_t Swap1 = *p->accumulatorD;
+	uint16_t Swap2 = p->indexRegister;
+
+	switch (instruction) {
+		case 0x18: // XGDX Inherent
+			ALU_MC6803E_SetCurrentMneunomic(p, "XGDX");
+			*p->accumulatorD = Swap2;
+			p->indexRegister = Swap1;
+			break;
+		default:
+			break;
+	}
+	
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
+}
+
 
 // NOT IMPLEMENTED
 /*
