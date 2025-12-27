@@ -12,37 +12,32 @@ endif
 LIBDIR = ..
 
 # Library
-TARGET-libMC6803E = libMC6803E.a
-OBJS-libMC6803E   = $(LIBDIR)/Image.o \
-					$(LIBDIR)/MC6803E_ALU.o \
-					$(LIBDIR)/MC6803E_Memory.o \
-					$(LIBDIR)/MC6803E_Core.o
-
-# Files to copy
-OBJS-copyLocal = 
+TARGET-libHD6303R = libHD6303R.a
+OBJS-libHD6303R   = $(LIBDIR)/HD6303R_ALU.o \
+					$(LIBDIR)/HD6303R_Memory.o \
+					$(LIBDIR)/HD6303R_Core.o
 
 # Test program
-TARGET-test = MC6803_UNIT
-OBJS-test   = MC6803_UNIT.o \
+TARGET-test = HD6303_UNIT
+OBJS-test   = HD6303_UNIT.o \
 			  Tests.o \
 			  ItemList.o
 
-all: $(TARGET-libMC6803E) $(TARGET-test)
+all: $(TARGET-libHD6303R) $(TARGET-test)
 
 # Build static library
-$(TARGET-libMC6803E): $(OBJS-libMC6803E)
-	$(AR) rcs $@ $(OBJS-libMC6803E)
-	$(CP) $(LIBDIR)\libMC6803E.h libMC6803E.h
-	$(CP) $(LIBDIR)\Image.h Image.h
+$(TARGET-libHD6303R): $(OBJS-libHD6303R) 
+	$(CP) $(LIBDIR)\libHD6303R.h libHD6303R.h
 	$(CP) $(LIBDIR)\ROM.6803 ROM.6803
+	$(AR) rcs $@ $(OBJS-libHD6303R)
 
 # Compile library object files
 $(LIBDIR)/%.o: $(LIBDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Build test program
-$(TARGET-test): $(OBJS-test) $(TARGET-libMC6803E)
-	$(CC) $(CFLAGS) $(OBJS-test) $(TARGET-libMC6803E) -o $@
+$(TARGET-test): $(OBJS-test) $(TARGET-libHD6303R)
+	$(CC) $(CFLAGS) $(OBJS-test) $(TARGET-libHD6303R) -o $@
 
 # Compile object files
 %.o: %.c
@@ -53,4 +48,4 @@ clean:
 	if exist *.o del /Q *.o
 	if exist *.a del /Q *.a
 	if exist $(TARGET-test).exe del /Q $(TARGET-test).exe
-	if exist libMC6803E.h del /Q libMC6803E.h
+	if exist libHD6303R.h del /Q libHD6303R.h

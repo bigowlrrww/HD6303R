@@ -5,7 +5,7 @@
                 "name": "Debug with GDB",
                 "type": "cppdbg",
                 "request": "launch",
-                "program": "${workspaceFolder}/MC6803_TEST.exe", // Replace with your executable's path
+                "program": "${workspaceFolder}/HD6303_TEST.exe", // Replace with your executable's path
                 "args": [],
                 "stopAtEntry": true,
                 "cwd": "${workspaceFolder}",
@@ -25,7 +25,7 @@
                 "name": "Debug Unit Tests",
                 "type": "cppdbg",
                 "request": "launch",
-                "program": "${workspaceFolder}/UnitTests/MC6803_UNIT.exe",
+                "program": "${workspaceFolder}/UnitTests/HD6303_UNIT.exe",
                 "args": [],
                 "stopAtEntry": false,
                 "cwd": "${workspaceFolder}",
