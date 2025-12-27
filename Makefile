@@ -8,8 +8,10 @@ TARGET-libHD6303R = libHD6303R.a
 OBJS-libHD6303R   = Image.o HD6303R_ALU.o HD6303R_Memory.o HD6303R_Core.o
 
 # Test program
-TARGET-test = MC6803_TEST
-OBJS-test   = MC6803_TEST.o
+TARGET-test = HD6303_TEST
+OBJS-test   = HD6303_TEST.o
+
+library: $(TARGET-libHD6303R)
 
 all: $(TARGET-libHD6303R) $(TARGET-test)
 
