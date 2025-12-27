@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <unistd.h>
-#include <libMC6803E.h>
+#include <libHD6303R.h>
 #include "Tests.h"
 
 typedef struct _MPU_State {

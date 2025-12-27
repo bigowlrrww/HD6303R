@@ -1,5 +1,5 @@
 #include "Tests.h"
-#include "libMC6803E.h"
+#include "libHD6303R.h"
 
 bool Verbose = false;
 
@@ -43,21 +43,21 @@ const char* flagToStr(uint8_t flag)
 {
     switch(flag)
     {
-    case(MC6803E_FLAG_C):
+    case(HD6303R_FLAG_C):
         return "FLAG_C";
-    case(MC6803E_FLAG_V):
+    case(HD6303R_FLAG_V):
         return "FLAG_V";
-    case(MC6803E_FLAG_Z):
+    case(HD6303R_FLAG_Z):
         return "FLAG_Z";
-    case(MC6803E_FLAG_N):
+    case(HD6303R_FLAG_N):
         return "FLAG_N";
-    case(MC6803E_FLAG_I):
+    case(HD6303R_FLAG_I):
         return "FLAG_I";
-    case(MC6803E_FLAG_H):
+    case(HD6303R_FLAG_H):
         return "FLAG_H";
-    case(MC6803E_FLAG_VERIFIED):
+    case(HD6303R_FLAG_VERIFIED):
         return "FLAG_VERIFIED";
-    case(MC6803E_FLAG_IMP):
+    case(HD6303R_FLAG_IMP):
         return "FLAG_IMP";
     };
     return "BadFLAG";
@@ -171,19 +171,19 @@ bool checkPC(uint16_t a, uint16_t b, uint8_t expectedStep)
 bool checkImplemented(uint8_t flags)
 {
     printf("Function Implemented");
-    if (flags & MC6803E_FLAG_IMP) return PASS();
+    if (flags & HD6303R_FLAG_IMP) return PASS();
     else return FAIL();
 }
 bool checkVerified(uint8_t flags)
 {
     printf("Function Verified");
-    if (flags & MC6803E_FLAG_VERIFIED) return PASS();
+    if (flags & HD6303R_FLAG_VERIFIED) return PASS();
     else return FAIL_S();
 }
 
 /**
  * This should be called like:
- * verifyUnknownMnemonic(ALU_MC6803E_Execute(p, 0x00));
+ * verifyUnknownMnemonic(ALU_HD6303R_Execute(p, 0x00));
  */
 bool verifyUnknownMnemonic(uint16_t ExecResult)
 {

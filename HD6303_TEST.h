@@ -10,8 +10,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <unistd.h>
-#include <libMC6803E.h>
-#include "Image.h"
+#include <libHD6303R.h>
 
 uint8_t * loadFile(char *, unsigned int);
 int GetResponse(char char_true, char char_false, int default_resp, char * request);
