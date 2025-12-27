@@ -143,6 +143,9 @@ MC6803E_API uint16_t ALU_MC6803E_Execute(MC6803E_MPU * p, uint8_t instruction)
 		case 0x38: // PULX Inherent
 			ALU_MC6803E_PULX(p);
 			break;
+		case 0x1A:
+			ALU_MC6803E_SLP(p);
+			break;
 		case 0x1B: // ABA Inherent
 			ALU_MC6803E_ABA(p);
 			break;
@@ -985,6 +988,27 @@ void ALU_MC6803E_PULX(MC6803E_MPU * p)
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 	
+}
+
+// NOT IMPLEMENTED
+/*
+		void ALU_MC6803E_SLP(MC6803E_MPU * p)
+		Boolean:	A + B -> A
+		Flags:		H N Z V C
+*/
+void ALU_MC6803E_SLP(MC6803E_MPU * p)
+{
+	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
+
+	switch (instruction) {
+		case 0x1A: // ABA Inherent
+			ALU_MC6803E_SetCurrentMneunomic(p, "SLP");
+			break;
+		default:
+			break;
+	}
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_IMP);
 }
 
 /*
