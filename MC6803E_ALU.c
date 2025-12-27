@@ -1,5 +1,6 @@
 
 #include "MC6803E_ALU.h"
+#include <stdbool.h>
 
 // Cheeky overload to debug easier
 #define ALU_MC6803E_SetCurrentMneunomicWithPayload(p, instr, x) _Generic((x), \
@@ -1021,6 +1022,13 @@ void ALU_MC6803E_ABA(MC6803E_MPU * p)
 	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
 	uint16_t result = (p->accumulatorA + p->accumulatorB);
 
+	bool A3 = p->accumulatorA & 0x08;
+	bool B3 = p->accumulatorB & 0x08;
+	bool R3 = result & 0x08;
+	bool A7 = p->accumulatorA & 0x80;
+	bool B7 = p->accumulatorB & 0x80;
+	bool R7 = result & 0x80;
+
 	switch (instruction) {
 		case 0x1B: // ABA Inherent
 			ALU_MC6803E_SetCurrentMneunomic(p, "ABA");
@@ -1030,12 +1038,12 @@ void ALU_MC6803E_ABA(MC6803E_MPU * p)
 		default:
 			break;
 	}
-	
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_H, (p->accumulatorA & 0x10));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (p->accumulatorA & 0x80));
+
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_H, (A3 & B3 | B3 & !R3 | !R3 & A3));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_N, (R7));
 	ALU_MC6803E_SetFlagIfZero(p, MC6803E_FLAG_Z, p->accumulatorA);
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (result > 0xff));
-	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((result & (uint16_t)0x100))>>8);
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, (A7 & B7 & !R7 | !A7 & !B7 & R7));
+	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, (A7 & B7 | B7 & !R7 | !R7 & A7));
 	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
