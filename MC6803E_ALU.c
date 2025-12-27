@@ -1002,7 +1002,7 @@ void ALU_MC6803E_SLP(MC6803E_MPU * p)
 	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
 
 	switch (instruction) {
-		case 0x1A: // ABA Inherent
+		case 0x1A: // SLP Inherent
 			ALU_MC6803E_SetCurrentMneunomic(p, "SLP");
 			break;
 		default:
