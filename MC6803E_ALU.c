@@ -3053,7 +3053,7 @@ void ALU_MC6803E_SBA(MC6803E_MPU * p)
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_V, ((p->accumulatorA & ~p->accumulatorB & ~result) | (~p->accumulatorA & p->accumulatorB & result))&0x80);
 	ALU_MC6803E_SetFlagIfNonZero(p, MC6803E_FLAG_C, ((~p->accumulatorA & p->accumulatorB)|(p->accumulatorB&result)|(result&~p->accumulatorA))&0x80);
 	p->accumulatorA = result;
-	ALU_MC6803E_UnsetFlag(p, MC6803E_FLAG_VERIFIED);
+	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_VERIFIED);
 	ALU_MC6803E_SetFlag(p, MC6803E_FLAG_IMP);
 }
 
