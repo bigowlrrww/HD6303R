@@ -3865,7 +3865,6 @@ void ALU_HD6303R_BMI(HD6303R_MPU * p)
 	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
 }
 
-// NOT IMPLEMENTED
 /*
 		void ALU_HD6303R_BNE(HD6303R_MPU * p)
 		Branch Test:	Z = 0
@@ -3882,12 +3881,14 @@ void ALU_HD6303R_BNE(HD6303R_MPU * p)
 		case 0x26: // BNE Immediate
 			ALU_HD6303R_SetCurrentMneunomicWithPayload(p, "BNE #$%02X", unsigned_payload);
 			ALU_HD6303R_IncrementPC(p, 1);
+			if (ALU_HD6303R_GetFlag(p, HD6303R_FLAG_Z) == 0)
+				p->pc += signed_payload;
 			break;
 		default:
 			break;
 	}
 	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
