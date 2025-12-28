@@ -9,3 +9,4 @@ MC6803_TEST.exe
 *.exe
 *.o
 UnitTests/libHD6303R.a
+libHD6303R.a
