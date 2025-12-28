@@ -81,4 +81,6 @@ uint8_t test_BRN();
 bool test_BRN_exec(int8_t Rel);
 uint8_t test_BHI();
 bool test_BHI_exec(int8_t Rel);
+uint8_t test_BLS();
+bool test_BLS_exec(int8_t Rel);
 #endif
