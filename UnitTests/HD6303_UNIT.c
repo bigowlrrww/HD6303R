@@ -239,7 +239,7 @@ bool test_NOP_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
@@ -308,7 +308,7 @@ bool test_LSRD_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckRSH(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -404,7 +404,7 @@ bool test_ASLD_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckLSH(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -474,7 +474,7 @@ bool test_TAP_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
 	passAllTests &= CheckSame(prev.accumulatorA, curr.flagRegister | 0xC0, "AccuA -> CCR"); //Ensure that the top 2 are set, they should be in the processor.
 
@@ -528,7 +528,7 @@ bool test_TPA_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
 	passAllTests &= CheckSame((uint8_t)(prev.flagRegister | 0xC0), curr.accumulatorA, "CC is loaded in Accu A"); //Ensure that the top 2 are set, they should be in the processor.
 	passAllTests &= CheckSame((uint8_t)(curr.accumulatorA & 0xC0), (uint8_t)0xC0, "Upper bits set in Accu A");
@@ -580,7 +580,7 @@ bool test_INX_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
@@ -652,7 +652,7 @@ bool test_DEX_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
@@ -714,7 +714,7 @@ bool test_CLV_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
@@ -771,7 +771,7 @@ bool test_SEV_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
@@ -828,7 +828,7 @@ bool test_CLC_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
@@ -885,7 +885,7 @@ bool test_SEC_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
@@ -942,7 +942,7 @@ bool test_CLI_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
@@ -999,7 +999,7 @@ bool test_SEI_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
@@ -1096,7 +1096,7 @@ bool test_SBA_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
@@ -1210,7 +1210,7 @@ bool test_CBA_exec()
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	uint8_t result = (prev.accumulatorA - prev.accumulatorB);
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
@@ -1297,7 +1297,7 @@ bool test_TAB_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorB, "AccuA -> AccuB"); //Ensure that the top 2 are set, they should be in the processor.
 
@@ -1373,7 +1373,7 @@ bool test_TBA_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorA, "AccuB -> AccuA"); //Ensure that the top 2 are set, they should be in the processor.
 
@@ -1434,7 +1434,7 @@ bool test_XGDX_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(curr.accumulatorD, prev.indexRegister, "AccuD == prevIX");
 	passAllTests &= CheckSame(curr.indexRegister, prev.accumulatorD, "IX == prevAccuD");
@@ -1545,7 +1545,7 @@ bool test_DAA_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.indexRegister, curr.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -1634,7 +1634,7 @@ bool test_ABA_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckAddition(prev.accumulatorA, prev.accumulatorB, curr.accumulatorA, "AccA+AccB");
@@ -1712,7 +1712,7 @@ bool test_BRA_exec(int8_t Rel)
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
