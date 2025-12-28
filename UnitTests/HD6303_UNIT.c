@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x19) DAA", test_DAA());
 	PrepareForNextTest();
-	addItem(&list, "(0x2B) ABA", test_ABA());
+	addItem(&list, "(0x1B) ABA", test_ABA());
 	PrepareForNextTest();
 	addItem(&list, "(0x1C)", test_Unknown(0x1C));
 	PrepareForNextTest();
