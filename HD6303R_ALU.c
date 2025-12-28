@@ -3793,7 +3793,6 @@ void ALU_HD6303R_BLE(HD6303R_MPU * p)
 	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
 }
 
-// NOT IMPLEMENTED
 /*
 		void ALU_HD6303R_BLS(HD6303R_MPU * p)
 		Branch Test:	C + Z = 1
@@ -3803,19 +3802,19 @@ void ALU_HD6303R_BLS(HD6303R_MPU * p)
 	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
 	uint8_t unsigned_payload = (uint8_t)MemoryRead(p, (p->pc+1));
 	int8_t signed_payload = (int8_t)MemoryRead(p, (p->pc+1));
-	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
-	uint16_t direct_address = (uint16_t)unsigned_payload;
 
 	switch (instruction) {
 		case 0x23: // BLS Immediate
 			ALU_HD6303R_SetCurrentMneunomicWithPayload(p, "BLS #$%02X", unsigned_payload);
 			ALU_HD6303R_IncrementPC(p, 1);
+			if ((ALU_HD6303R_GetFlag(p, HD6303R_FLAG_C) | ALU_HD6303R_GetFlag(p, HD6303R_FLAG_Z)) != 0)
+				p->pc += signed_payload;
 			break;
 		default:
 			break;
 	}
 	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
