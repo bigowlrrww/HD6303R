@@ -27,7 +27,7 @@ all: $(TARGET-libHD6303R) $(TARGET-test)
 
 # Build static library
 $(TARGET-libHD6303R): $(OBJS-libHD6303R) 
-	$(CP) $(LIBDIR)\libHD6303R.h libHD6303R.h
+	$(CP) $(LIBDIR)\include\libHD6303R.h libHD6303R.h
 	$(CP) $(LIBDIR)\ROM.6803 ROM.6803
 	$(AR) rcs $@ $(OBJS-libHD6303R)
 
