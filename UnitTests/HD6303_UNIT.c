@@ -1080,7 +1080,7 @@ uint8_t test_SBA()
 	p->flagRegister = (0xFF & ~(HD6303R_FLAG_N|HD6303R_FLAG_V|HD6303R_FLAG_C));
 	passAllTests &= test_SBA_exec();
 
-	return passAllTests;
+	return (passAllTests | ((uint8_t)verified << 1));
 }
 
 bool test_SBA_exec()
@@ -1193,7 +1193,7 @@ uint8_t test_CBA()
 	p->flagRegister = (0xFF & ~(HD6303R_FLAG_N|HD6303R_FLAG_V|HD6303R_FLAG_C));
 	passAllTests &= test_CBA_exec();
 
-	return passAllTests;
+	return (passAllTests | ((uint8_t)verified << 1));
 }
 
 bool test_CBA_exec()
