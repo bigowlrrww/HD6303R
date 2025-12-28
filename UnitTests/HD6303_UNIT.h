@@ -91,4 +91,6 @@ uint8_t test_BNE();
 bool test_BNE_exec(int8_t Rel);
 uint8_t test_BEQ();
 bool test_BEQ_exec(int8_t Rel);
+uint8_t test_BVC();
+bool test_BVC_exec(int8_t Rel);
 #endif
