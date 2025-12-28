@@ -93,4 +93,6 @@ uint8_t test_BEQ();
 bool test_BEQ_exec(int8_t Rel);
 uint8_t test_BVC();
 bool test_BVC_exec(int8_t Rel);
+uint8_t test_BVS();
+bool test_BVS_exec(int8_t Rel);
 #endif
