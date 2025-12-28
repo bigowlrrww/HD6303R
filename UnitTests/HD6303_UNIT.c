@@ -83,6 +83,8 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x19) DAA", test_DAA());
 	PrepareForNextTest();
+	addItem(&list, "(0x1A) SLP", 0x7); //Not implemented, or tested atm. Involves interrupts
+	PrepareForNextTest();
 	addItem(&list, "(0x1B) ABA", test_ABA());
 	PrepareForNextTest();
 	addItem(&list, "(0x1C)", test_Unknown(0x1C));
@@ -139,8 +141,10 @@ int main(int argc, char *argv[])
 	{
 		printf("%s:", list.items[i].name);
 		if (!(list.items[i].flag & 0x02)) NOT_VERIFIED();
-		if (list.items[i].flag & 0x01)
+		if ((list.items[i].flag & 0x01) && !(list.items[i].flag & 0x04))
 			PASS();
+		else if (list.items[i].flag & 0x04)
+			WARN();
 		else
 			FAIL();
 		AllPass &= list.items[i].flag;
