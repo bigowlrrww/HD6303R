@@ -2375,7 +2375,7 @@ uint8_t test_BMI()
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
-	PrintH2("N' Jump BMI\n");
+	PrintH2("N' No Jump BMI\n");
 	p->flagRegister = 0xC0;
 	passAllTests &= test_BMI_exec(0x10);
 	printBreak(".",54);
