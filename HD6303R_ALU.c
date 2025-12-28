@@ -3520,7 +3520,6 @@ void ALU_HD6303R_TSTB(HD6303R_MPU * p)
 	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
 }
 
-// NOT IMPLEMENTED
 /*
 		void ALU_HD6303R_BRA(HD6303R_MPU * p)
 		Branch Test:	None
@@ -3537,12 +3536,13 @@ void ALU_HD6303R_BRA(HD6303R_MPU * p)
 		case 0x20: // BRA Immediate
 			ALU_HD6303R_SetCurrentMneunomicWithPayload(p, "BRA #$%02X", unsigned_payload);
 			ALU_HD6303R_IncrementPC(p, 1);
+			p->pc += signed_payload;
 			break;
 		default:
 			break;
 	}
 	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
