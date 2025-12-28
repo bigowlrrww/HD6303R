@@ -3578,8 +3578,6 @@ void ALU_HD6303R_BCC(HD6303R_MPU * p)
 	uint8_t instruction = (uint8_t)MemoryRead(p, p->pc);
 	uint8_t unsigned_payload = (uint8_t)MemoryRead(p, (p->pc+1));
 	int8_t signed_payload = (int8_t)MemoryRead(p, (p->pc+1));
-	uint16_t unsigned_payload_double = uint16_From_uint8s(MemoryRead(p, (p->pc+1)), MemoryRead(p, (p->pc+2)));
-	uint16_t direct_address = (uint16_t)unsigned_payload;
 
 	switch (instruction) {
 		case 0x24: // BCC Immediate
