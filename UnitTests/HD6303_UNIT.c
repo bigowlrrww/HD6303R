@@ -144,7 +144,10 @@ int main(int argc, char *argv[])
 		if ((list.items[i].flag & 0x01) && !(list.items[i].flag & 0x04))
 			PASS();
 		else if (list.items[i].flag & 0x04)
-			WARN();
+		{
+			printf("\033[50G"); 
+			printf("\e[33mNOT TESTED\e[0m\n");
+		}
 		else
 			FAIL();
 		AllPass &= list.items[i].flag;
