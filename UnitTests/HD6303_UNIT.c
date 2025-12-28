@@ -1796,17 +1796,17 @@ uint8_t test_BHI()
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 	
-	PrintH2("C Z' NoJump BHI\n");
+	PrintH2("C Z' No Jump BHI\n");
 	p->flagRegister = 0xC0 | HD6303R_FLAG_C;
 	passAllTests &= test_BHI_exec(0x10);
 	printBreak(".",54);
 
-	PrintH2("C' Z NoJump BHI\n");
+	PrintH2("C' Z No Jump BHI\n");
 	p->flagRegister = 0xC0 | HD6303R_FLAG_Z;
 	passAllTests &= test_BHI_exec(0x10);
 	printBreak(".",54);
 
-	PrintH2("C' Z' NoJump BHI\n");
+	PrintH2("C' Z' No Jump BHI\n");
 	p->flagRegister = 0xC0 | HD6303R_FLAG_C | HD6303R_FLAG_Z;
 	passAllTests &= test_BHI_exec(0x10);
 	printBreak(".",54);
@@ -1886,10 +1886,9 @@ uint8_t test_BLS()
 	p->flagRegister = 0xC0 | HD6303R_FLAG_C | HD6303R_FLAG_Z;
 	passAllTests &= test_BLS_exec(0xF7);
 
-	PrintH2("C' Z' NoJump BLS\n");
+	PrintH2("C' Z' No Jump BLS\n");
 	p->flagRegister = 0xC0;
 	passAllTests &= test_BLS_exec(0x10);
-	printBreak(".",54);
 
 	return (passAllTests | ((uint8_t)verified << 1));
 }
