@@ -75,4 +75,6 @@ uint8_t test_DAA();
 bool test_DAA_exec();
 uint8_t test_ABA();
 bool test_ABA_exec();
+uint8_t test_BRA();
+bool test_BRA_exec(int8_t Rel);
 #endif
