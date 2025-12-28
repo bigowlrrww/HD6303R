@@ -1687,16 +1687,16 @@ uint8_t test_BRA()
 	bool passAllTests = true;
 	bool verified = false;
 
-	PrintH2("Rel 0 NOP\n");
+	PrintH2("Rel 0 BRA\n");
 	passAllTests &= test_BRA_exec(0x00);
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
-	PrintH2("Rel 8 NOP\n");
+	PrintH2("Rel 8 BRA\n");
 	passAllTests &= test_BRA_exec(0x08);
 	printBreak(".",54);
 
-	PrintH2("Rel -9 NOP\n");
+	PrintH2("Rel -9 BRA\n");
 	passAllTests &= test_BRA_exec(0xF7);
 
 	return (passAllTests | ((uint8_t)verified << 1));
@@ -1707,6 +1707,7 @@ bool test_BRA_exec(int8_t Rel)
 	bool passAllTests = true;
 	MPU_State prev = getMPUState();
 	MemoryWrite(p,p->pc,0x20);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
 	ALU_HD6303R_Execute(p, 0x20);
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
