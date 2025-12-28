@@ -8,3 +8,4 @@ MC6803E_Memory.o
 MC6803_TEST.exe
 *.exe
 *.o
+UnitTests/libHD6303R.a
