@@ -240,7 +240,7 @@ bool test_NOP_exec()
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -310,7 +310,7 @@ bool test_LSRD_exec()
 
 	checkImplemented(curr.flagRegister);
 
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckRSH(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -406,7 +406,7 @@ bool test_ASLD_exec()
 
 	checkImplemented(curr.flagRegister);
 
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckLSH(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -478,7 +478,7 @@ bool test_TAP_exec()
 
 	passAllTests &= CheckSame(prev.accumulatorA, curr.flagRegister | 0xC0, "AccuA -> CCR"); //Ensure that the top 2 are set, they should be in the processor.
 
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -532,7 +532,7 @@ bool test_TPA_exec()
 
 	passAllTests &= CheckSame((uint8_t)(prev.flagRegister | 0xC0), curr.accumulatorA, "CC is loaded in Accu A"); //Ensure that the top 2 are set, they should be in the processor.
 	passAllTests &= CheckSame((uint8_t)(curr.accumulatorA & 0xC0), (uint8_t)0xC0, "Upper bits set in Accu A");
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -581,7 +581,7 @@ bool test_INX_exec()
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -653,7 +653,7 @@ bool test_DEX_exec()
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -715,7 +715,7 @@ bool test_CLV_exec()
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -772,7 +772,7 @@ bool test_SEV_exec()
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -829,7 +829,7 @@ bool test_CLC_exec()
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -886,7 +886,7 @@ bool test_SEC_exec()
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -943,7 +943,7 @@ bool test_CLI_exec()
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -1000,7 +1000,7 @@ bool test_SEI_exec()
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -1098,7 +1098,7 @@ bool test_SBA_exec()
 
 	checkImplemented(curr.flagRegister);
 
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
@@ -1212,7 +1212,7 @@ bool test_CBA_exec()
 	uint8_t result = (prev.accumulatorA - prev.accumulatorB);
 	checkImplemented(curr.flagRegister);
 
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
@@ -1301,7 +1301,7 @@ bool test_TAB_exec()
 
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorB, "AccuA -> AccuB"); //Ensure that the top 2 are set, they should be in the processor.
 
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -1377,7 +1377,7 @@ bool test_TBA_exec()
 
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorA, "AccuB -> AccuA"); //Ensure that the top 2 are set, they should be in the processor.
 
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -1435,7 +1435,7 @@ bool test_XGDX_exec()
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(curr.accumulatorD, prev.indexRegister, "AccuD == prevIX");
 	passAllTests &= CheckSame(curr.indexRegister, prev.accumulatorD, "IX == prevAccuD");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -1546,7 +1546,7 @@ bool test_DAA_exec()
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.indexRegister, curr.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "AccB");
@@ -1635,7 +1635,7 @@ bool test_ABA_exec()
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckAddition(prev.accumulatorA, prev.accumulatorB, curr.accumulatorA, "AccA+AccB");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -1713,7 +1713,7 @@ bool test_BRA_exec(int8_t Rel)
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 2 + Rel);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
