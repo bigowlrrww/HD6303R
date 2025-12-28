@@ -3569,7 +3569,6 @@ void ALU_HD6303R_BRN(HD6303R_MPU * p)
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
-// NOT IMPLEMENTED
 /*
 		void ALU_HD6303R_BCC(HD6303R_MPU * p)
 		Branch Test:	C = 0
@@ -3586,12 +3585,14 @@ void ALU_HD6303R_BCC(HD6303R_MPU * p)
 		case 0x24: // BCC Immediate
 			ALU_HD6303R_SetCurrentMneunomicWithPayload(p, "BCC #$%02X", unsigned_payload);
 			ALU_HD6303R_IncrementPC(p, 1);
+			if (ALU_HD6303R_GetFlag(p, HD6303R_FLAG_C) == 0)
+				p->pc += signed_payload;
 			break;
 		default:
 			break;
 	}
 	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
