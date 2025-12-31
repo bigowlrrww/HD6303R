@@ -149,6 +149,8 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x3A) ABX", test_ABX());
 	PrepareForNextTest();
+	addItem(&list, "(0x3B) RTI", test_RTI());
+	PrepareForNextTest();
 	addItem(&list, "(0x41)", test_Unknown(0x41));
 	PrepareForNextTest();
 	addItem(&list, "(0x42)", test_Unknown(0x42));
@@ -3363,6 +3365,57 @@ bool test_ABX_exec()
 
 	//Flag Checks
 	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_RTI()
+{
+	PrintH1("Testing RTI\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("Case 0 RTI\n");
+	p->accumulatorB = 0xAB;
+	p->accumulatorA = 0xCD;
+	p->indexRegister = 0x0010;
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
+	passAllTests &= test_RTI_exec();
+	verified = checkVerified(p->flagRegister);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_RTI_exec()
+{
+	bool passAllTests = true;
+//Setup Stack for RTI Test
+	MemoryWrite(p, 0x1000, 0xC2); //CC
+	MemoryWrite(p, 0x1001, 0x12); //ACCB
+	MemoryWrite(p, 0x1002, 0x34); //ACCA
+	MemoryWrite(p, 0x1003, 0xDE); //IXH
+	MemoryWrite(p, 0x1004, 0xAD); //IXL
+	MemoryWrite(p, 0x1005, 0xBE); //PCH
+	MemoryWrite(p, 0x1006, 0xEF); //PCL
+	p->stackPointer = 0xFFF;
+
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x3B);
+	ALU_HD6303R_Execute(p, 0x3B);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckSame(curr.accumulatorA, 0x34, "Accumulator A");
+	passAllTests &= CheckSame(curr.accumulatorB, 0x12, "Accumulator B");
+	passAllTests &= CheckSame(curr.indexRegister, 0xDEAD, "Index");
+	passAllTests &= CheckSame(curr.pc, 0xBEEF, "PC");
+	passAllTests &= CheckAddition(prev.stackPointer, 7, curr.stackPointer, "SP + 7 = SP");
+
+	//Flag Checks
+	passAllTests &= CheckSame((uint8_t)(0xC2 & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
 
 	return passAllTests;
 }
