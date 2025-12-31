@@ -2840,8 +2840,8 @@ void ALU_HD6303R_PULB(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x33: // PULB Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "PULB");
+			p->stackPointer++;
 			p->accumulatorB = MemoryRead(p, p->stackPointer);
-			p->stackPointer--;
 			break;
 		default:
 			break;
