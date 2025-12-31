@@ -131,6 +131,8 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x31) INS", test_INS());
 	PrepareForNextTest();
+	addItem(&list, "(0x32) PULA", test_PULA());
+	PrepareForNextTest();
 	addItem(&list, "(0x41)", test_Unknown(0x41));
 	PrepareForNextTest();
 	addItem(&list, "(0x42)", test_Unknown(0x42));
@@ -2853,7 +2855,61 @@ bool test_INS_exec()
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
-	passAllTests &= CheckSame(prev.indexRegister, curr.indexRegister, "Stack Pointer");
+	passAllTests &= CheckSame(prev.indexRegister, curr.indexRegister, "Index");
+	passAllTests &= CheckAddition(prev.stackPointer, 1, curr.stackPointer, "SP+1=SP");
+
+	//Flag Checks
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_PULA()
+{
+	PrintH1("Testing PULA\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("Case 0 PULA\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x0010;
+	MemoryWrite(p, 0x0010, 0xDE);
+	MemoryWrite(p, 0x0011, 0xAD);
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
+	passAllTests &= test_PULA_exec();
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Case 1 PULA\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0xFFFF;
+	p->indexRegister = 0xABCD;
+	p->flagRegister = 0xFF;
+	MemoryWrite(p, 0x0000, 0xEF);
+	passAllTests &= test_PULA_exec();
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_PULA_exec()
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x32);
+	ALU_HD6303R_Execute(p, 0x32);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(curr.accumulatorA, MemoryRead(p, prev.stackPointer+1), "AccA = (SP+1)");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.indexRegister, curr.indexRegister, "Index");
 	passAllTests &= CheckAddition(prev.stackPointer, 1, curr.stackPointer, "SP+1=SP");
 
 	//Flag Checks
