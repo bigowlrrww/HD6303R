@@ -4061,12 +4061,29 @@ void ALU_HD6303R_RTI(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x3B: // RTI Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "RTI");
+			p->stackPointer++;
+			p->flagRegister = MemoryRead(p, p->stackPointer);
+			p->stackPointer++;
+			p->accumulatorB = MemoryRead(p, p->stackPointer);
+			p->stackPointer++;
+			p->accumulatorA = MemoryRead(p, p->stackPointer);
+			p->stackPointer++;
+			p->indexRegister = (uint16_t)MemoryRead(p, p->stackPointer);
+			p->indexRegister = ((p->indexRegister << 8) & 0xff00);
+			p->stackPointer++;
+			p->indexRegister = (p->indexRegister | (uint16_t)MemoryRead(p, p->stackPointer));
+			p->stackPointer++;
+			p->pc = (uint16_t)MemoryRead(p, p->stackPointer);
+			p->pc = ((p->pc << 8) & 0xff00);
+			p->stackPointer++;
+			p->pc = (p->pc | (uint16_t)MemoryRead(p, p->stackPointer));
+			p->pc--; //Decrement to avoid the return 1 forward of where it should be
 			break;
 		default:
 			break;
 	}
 	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
 /*
