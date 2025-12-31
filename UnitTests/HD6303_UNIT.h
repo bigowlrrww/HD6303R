@@ -113,6 +113,7 @@ uint8_t test_INS();
 bool test_INS_exec();
 uint8_t test_PULA();
 bool test_PULA_exec();
-
+uint8_t test_PULB();
+bool test_PULB_exec();
 
 #endif
