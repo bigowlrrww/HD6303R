@@ -2818,8 +2818,8 @@ void ALU_HD6303R_PULA(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x32: // PULA Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "PULA");
+			p->stackPointer++;
 			p->accumulatorA = MemoryRead(p, p->stackPointer);
-			p->stackPointer--;
 			break;
 		default:
 			break;
