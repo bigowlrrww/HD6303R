@@ -4069,7 +4069,6 @@ void ALU_HD6303R_RTI(HD6303R_MPU * p)
 	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
 }
 
-// NOT IMPLEMENTED
 /*
 		void ALU_HD6303R_RTS(HD6303R_MPU * p)
 		Boolean:	
@@ -4086,12 +4085,18 @@ void ALU_HD6303R_RTS(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x39: // RTS Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "RTS");
+			p->stackPointer++;
+			p->pc = (uint16_t)MemoryRead(p, p->stackPointer);
+			p->pc = ((p->pc << 8) & 0xff00);
+			p->stackPointer++;
+			p->pc = (p->pc | (uint16_t)MemoryRead(p, p->stackPointer));
+			p->pc--; //Decrement to avoid the return 1 forward of where it should be
 			break;
 		default:
 			break;
 	}
 	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
