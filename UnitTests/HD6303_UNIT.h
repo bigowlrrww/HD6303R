@@ -107,5 +107,7 @@ uint8_t test_BGT();
 bool test_BGT_exec(int8_t Rel);
 uint8_t test_BLE();
 bool test_BLE_exec(int8_t Rel);
+uint8_t test_TSX();
+bool test_TSX_exec();
 
 #endif
