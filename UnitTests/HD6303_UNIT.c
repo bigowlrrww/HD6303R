@@ -143,6 +143,8 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x37) PSHB", test_PSHB());
 	PrepareForNextTest();
+	addItem(&list, "(0x38) PULX", test_PULX());
+	PrepareForNextTest();
 	addItem(&list, "(0x41)", test_Unknown(0x41));
 	PrepareForNextTest();
 	addItem(&list, "(0x42)", test_Unknown(0x42));
@@ -3189,6 +3191,61 @@ bool test_PSHB_exec()
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.indexRegister, curr.indexRegister, "Index");
 	passAllTests &= CheckSubtraction(prev.stackPointer, 1, curr.stackPointer, "SP-1=SP");
+
+	//Flag Checks
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_PULX()
+{
+	PrintH1("Testing PULX\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("Case 0 PULX\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x0010;
+	MemoryWrite(p, 0x0010, 0xDE);
+	MemoryWrite(p, 0x0011, 0xAD);
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
+	passAllTests &= test_PULX_exec();
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Case 1 PULX\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0xFFFF;
+	p->indexRegister = 0xABCD;
+	p->flagRegister = 0xFF;
+	MemoryWrite(p, 0x0000, 0xEF);
+	passAllTests &= test_PULX_exec();
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_PULX_exec()
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x38);
+	ALU_HD6303R_Execute(p, 0x38);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame((uint8_t)((curr.indexRegister&0xFF00)>>8), MemoryRead(p, prev.stackPointer+1), "IXH = (SP+1)");
+	passAllTests &= CheckSame((uint8_t)(curr.indexRegister&0xFF), MemoryRead(p, prev.stackPointer+2), "IXL = (SP+2)");
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckAddition(prev.stackPointer, 2, curr.stackPointer, "SP+2=SP");
 
 	//Flag Checks
 	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
