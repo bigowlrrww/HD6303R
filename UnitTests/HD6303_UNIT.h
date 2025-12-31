@@ -125,5 +125,7 @@ uint8_t test_PSHB();
 bool test_PSHB_exec();
 uint8_t test_PULX();
 bool test_PULX_exec();
+uint8_t test_RTS();
+bool test_RTS_exec();
 
 #endif
