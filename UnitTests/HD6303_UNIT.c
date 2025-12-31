@@ -135,6 +135,8 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x33) PULB", test_PULB());
 	PrepareForNextTest();
+	addItem(&list, "(0x34) DES", test_DES());
+	PrepareForNextTest();
 	addItem(&list, "(0x41)", test_Unknown(0x41));
 	PrepareForNextTest();
 	addItem(&list, "(0x42)", test_Unknown(0x42));
@@ -2967,6 +2969,58 @@ bool test_PULB_exec()
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.indexRegister, curr.indexRegister, "Index");
 	passAllTests &= CheckAddition(prev.stackPointer, 1, curr.stackPointer, "SP+1=SP");
+
+	//Flag Checks
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_DES()
+{
+	PrintH1("Testing DES\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("SP=0x0010 DES\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x0010;
+	p->indexRegister = 0x0001;
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
+	passAllTests &= test_DES_exec();
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("SP=0x0000 DES\n");
+	p->accumulatorB = 0x12;
+	p->accumulatorA = 0x34;
+	p->stackPointer = 0x0000;
+	p->indexRegister = 0xABCD;
+	p->flagRegister = 0xFF;
+	passAllTests &= test_DES_exec();
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_DES_exec()
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x34);
+	ALU_HD6303R_Execute(p, 0x34);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, curr.indexRegister, "Index");
+	passAllTests &= CheckSubtraction(prev.stackPointer, 1, curr.stackPointer, "SP-1=SP");
 
 	//Flag Checks
 	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
