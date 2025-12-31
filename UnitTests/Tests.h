@@ -53,7 +53,7 @@ bool CheckAdd16(uint16_t a, uint16_t b, uint16_t result, const char *str);
 bool CheckSub8(uint8_t a, uint8_t b, uint8_t result, const char *str);
 bool CheckSub16(uint16_t a, uint16_t b, uint16_t result, const char *str);
 
-bool checkPC(uint16_t a, uint16_t b, uint8_t expectedStep);
+bool CheckPC(uint16_t a, uint16_t b, int expectedStep);
 
 bool checkImplemented(uint8_t flags);
 bool checkVerified(uint8_t flags);

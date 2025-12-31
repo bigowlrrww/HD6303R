@@ -160,10 +160,10 @@ bool CheckSub16(uint16_t a, uint16_t b, uint16_t result, const char *str)
     else return FAIL();
 }
 
-bool checkPC(uint16_t a, uint16_t b, uint8_t expectedStep)
+bool CheckPC(uint16_t a, uint16_t b, int expectedStep)
 {
-    printf("PC incremented correctly");
-    if (Verbose) printf(" [0x%04X==0x%04X]", a, b);
+    printf("PC set correctly");
+    if (Verbose) printf(" [0x%04X+0x%04X==0x%04X]", a, expectedStep, b);
     if (b - a == expectedStep) return PASS();
     else return FAIL();
 }
