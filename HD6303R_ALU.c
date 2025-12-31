@@ -2770,8 +2770,8 @@ void ALU_HD6303R_PSHA(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x36: // PSHA Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "PSHA");
-			p->stackPointer++;
 			MemoryWrite(p, p->stackPointer, p->accumulatorA);
+			p->stackPointer--;
 			break;
 		default:
 			break;
