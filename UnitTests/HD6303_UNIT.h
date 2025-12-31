@@ -101,5 +101,7 @@ uint8_t test_BMI();
 bool test_BMI_exec(int8_t Rel);
 uint8_t test_BGE();
 bool test_BGE_exec(int8_t Rel);
+uint8_t test_BLT();
+bool test_BLT_exec(int8_t Rel);
 
 #endif
