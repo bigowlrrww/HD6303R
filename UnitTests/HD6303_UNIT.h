@@ -121,5 +121,7 @@ uint8_t test_TXS();
 bool test_TXS_exec();
 uint8_t test_PSHA();
 bool test_PSHA_exec();
+uint8_t test_PSHB();
+bool test_PSHB_exec();
 
 #endif
