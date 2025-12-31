@@ -117,5 +117,7 @@ uint8_t test_PULB();
 bool test_PULB_exec();
 uint8_t test_DES();
 bool test_DES_exec();
+uint8_t test_TXS();
+bool test_TXS_exec();
 
 #endif
