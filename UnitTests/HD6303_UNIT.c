@@ -2589,43 +2589,36 @@ uint8_t test_BGT()
 	PrintH2("Z N' V No Jump BGT\n");
 	p->flagRegister = 0xC0 | HD6303R_FLAG_Z | HD6303R_FLAG_V;
 	passAllTests &= test_BGT_exec(0x10);
-	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 	
 	PrintH2("Z N V' No Jump BGT\n");
 	p->flagRegister = 0xC0 | HD6303R_FLAG_Z | HD6303R_FLAG_N;
 	passAllTests &= test_BGT_exec(0x10);
-	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 	
 	PrintH2("Z N' V' No Jump BGT\n");
 	p->flagRegister = 0xC0 | HD6303R_FLAG_Z;
 	passAllTests &= test_BGT_exec(0x10);
-	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("Z' N V Jump BGT\n");
 	p->flagRegister = 0xC0 | HD6303R_FLAG_N | HD6303R_FLAG_V;
 	passAllTests &= test_BGT_exec(0x10);
-	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("Z' N' V No Jump BGT\n");
 	p->flagRegister = 0xC0 | HD6303R_FLAG_V;
 	passAllTests &= test_BGT_exec(0x10);
-	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 	
 	PrintH2("Z' N V' No Jump BGT\n");
 	p->flagRegister = 0xC0 | HD6303R_FLAG_N;
 	passAllTests &= test_BGT_exec(0x10);
-	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 	
 	PrintH2("Z' N' V' Jump BGT\n");
 	p->flagRegister = 0xC0;
 	passAllTests &= test_BGT_exec(0x10);
-	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("Rel 0 BGT\n");
