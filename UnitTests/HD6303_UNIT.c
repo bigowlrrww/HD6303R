@@ -2485,7 +2485,7 @@ bool test_BGE_exec(int8_t Rel)
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	passAllTests &= checkImplemented(curr.flagRegister);
-	if (!!(prev.flagRegister & (HD6303R_FLAG_N))^!!(prev.flagRegister & (HD6303R_FLAG_V)) == 0)
+	if ((!!(prev.flagRegister & (HD6303R_FLAG_N))^!!(prev.flagRegister & (HD6303R_FLAG_V))) == 0)
 		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
 	else
 		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
@@ -2556,7 +2556,7 @@ bool test_BLT_exec(int8_t Rel)
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	passAllTests &= checkImplemented(curr.flagRegister);
-	if (!!(prev.flagRegister & (HD6303R_FLAG_N))^!!(prev.flagRegister & (HD6303R_FLAG_V)) != 0)
+	if ((!!(prev.flagRegister & (HD6303R_FLAG_N))^!!(prev.flagRegister & (HD6303R_FLAG_V))) != 0)
 		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
 	else
 		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
