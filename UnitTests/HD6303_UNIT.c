@@ -83,7 +83,9 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x19) DAA", test_DAA());
 	PrepareForNextTest();
-	addItem(&list, "(0x2B) ABA", test_ABA());
+	addItem(&list, "(0x1A) SLP", 0x7); //Not implemented, or tested atm. Involves interrupts
+	PrepareForNextTest();
+	addItem(&list, "(0x1B) ABA", test_ABA());
 	PrepareForNextTest();
 	addItem(&list, "(0x1C)", test_Unknown(0x1C));
 	PrepareForNextTest();
@@ -92,6 +94,38 @@ int main(int argc, char *argv[])
 	addItem(&list, "(0x1E)", test_Unknown(0x1E));
 	PrepareForNextTest();
 	addItem(&list, "(0x1F)", test_Unknown(0x1F));
+	PrepareForNextTest();
+	addItem(&list, "(0x20) BRA", test_BRA());
+	PrepareForNextTest();
+	addItem(&list, "(0x21) BRN", test_BRN());
+	PrepareForNextTest();
+	addItem(&list, "(0x22) BHI", test_BHI());
+	PrepareForNextTest();
+	addItem(&list, "(0x23) BLS", test_BLS());
+	PrepareForNextTest();
+	addItem(&list, "(0x24) BCC", test_BCC());
+	PrepareForNextTest();
+	addItem(&list, "(0x25) BCS", test_BCS());
+	PrepareForNextTest();
+	addItem(&list, "(0x26) BNE", test_BNE());
+	PrepareForNextTest();
+	addItem(&list, "(0x27) BEQ", test_BEQ());
+	PrepareForNextTest();
+	addItem(&list, "(0x28) BVC", test_BVC());
+	PrepareForNextTest();
+	addItem(&list, "(0x29) BVS", test_BVS());
+	PrepareForNextTest();
+	addItem(&list, "(0x2A) BPL", test_BPL());
+	PrepareForNextTest();
+	addItem(&list, "(0x2B) BMI", test_BMI());
+	PrepareForNextTest();
+	addItem(&list, "(0x2C) BGE", test_BGE());
+	PrepareForNextTest();
+	addItem(&list, "(0x2D) BLT", test_BLT());
+	PrepareForNextTest();
+	addItem(&list, "(0x2E) BGT", test_BGT());
+	PrepareForNextTest();
+	addItem(&list, "(0x2F) BLE", test_BLE());
 	PrepareForNextTest();
 	addItem(&list, "(0x41)", test_Unknown(0x41));
 	PrepareForNextTest();
@@ -133,8 +167,13 @@ int main(int argc, char *argv[])
 	{
 		printf("%s:", list.items[i].name);
 		if (!(list.items[i].flag & 0x02)) NOT_VERIFIED();
-		if (list.items[i].flag & 0x01)
+		if ((list.items[i].flag & 0x01) && !(list.items[i].flag & 0x04))
 			PASS();
+		else if (list.items[i].flag & 0x04)
+		{
+			printf("\033[50G"); 
+			printf("\e[33mNOT TESTED\e[0m\n");
+		}
 		else
 			FAIL();
 		AllPass &= list.items[i].flag;
@@ -237,8 +276,8 @@ bool test_NOP_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -306,9 +345,9 @@ bool test_LSRD_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckRSH(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -402,9 +441,9 @@ bool test_ASLD_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckLSH(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -472,11 +511,11 @@ bool test_TAP_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
 	passAllTests &= CheckSame(prev.accumulatorA, curr.flagRegister | 0xC0, "AccuA -> CCR"); //Ensure that the top 2 are set, they should be in the processor.
 
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -526,11 +565,11 @@ bool test_TPA_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
 	passAllTests &= CheckSame((uint8_t)(prev.flagRegister | 0xC0), curr.accumulatorA, "CC is loaded in Accu A"); //Ensure that the top 2 are set, they should be in the processor.
 	passAllTests &= CheckSame((uint8_t)(curr.accumulatorA & 0xC0), (uint8_t)0xC0, "Upper bits set in Accu A");
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -578,8 +617,8 @@ bool test_INX_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -650,8 +689,8 @@ bool test_DEX_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -712,8 +751,8 @@ bool test_CLV_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -769,8 +808,8 @@ bool test_SEV_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -826,8 +865,8 @@ bool test_CLC_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -883,8 +922,8 @@ bool test_SEC_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -940,8 +979,8 @@ bool test_CLI_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -997,8 +1036,8 @@ bool test_SEI_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
@@ -1078,7 +1117,7 @@ uint8_t test_SBA()
 	p->flagRegister = (0xFF & ~(HD6303R_FLAG_N|HD6303R_FLAG_V|HD6303R_FLAG_C));
 	passAllTests &= test_SBA_exec();
 
-	return passAllTests;
+	return (passAllTests | ((uint8_t)verified << 1));
 }
 
 bool test_SBA_exec()
@@ -1094,9 +1133,9 @@ bool test_SBA_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
@@ -1191,7 +1230,7 @@ uint8_t test_CBA()
 	p->flagRegister = (0xFF & ~(HD6303R_FLAG_N|HD6303R_FLAG_V|HD6303R_FLAG_C));
 	passAllTests &= test_CBA_exec();
 
-	return passAllTests;
+	return (passAllTests | ((uint8_t)verified << 1));
 }
 
 bool test_CBA_exec()
@@ -1208,9 +1247,9 @@ bool test_CBA_exec()
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	uint8_t result = (prev.accumulatorA - prev.accumulatorB);
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
@@ -1295,11 +1334,11 @@ bool test_TAB_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorB, "AccuA -> AccuB"); //Ensure that the top 2 are set, they should be in the processor.
 
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -1371,11 +1410,11 @@ bool test_TBA_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
+	passAllTests &= checkImplemented(curr.flagRegister);
 
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorA, "AccuB -> AccuA"); //Ensure that the top 2 are set, they should be in the processor.
 
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -1432,8 +1471,8 @@ bool test_XGDX_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(curr.accumulatorD, prev.indexRegister, "AccuD == prevIX");
 	passAllTests &= CheckSame(curr.indexRegister, prev.accumulatorD, "IX == prevAccuD");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -1543,8 +1582,8 @@ bool test_DAA_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.indexRegister, curr.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "AccB");
@@ -1632,8 +1671,8 @@ bool test_ABA_exec()
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
-	checkImplemented(curr.flagRegister);
-	passAllTests &= checkPC(prev.pc, curr.pc, 1);
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
 	passAllTests &= CheckAddition(prev.accumulatorA, prev.accumulatorB, curr.accumulatorA, "AccA+AccB");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
@@ -1673,6 +1712,1044 @@ bool test_ABA_exec()
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
+
+	return passAllTests;
+}
+
+uint8_t test_BRA()
+{
+	PrintH1("Testing BRA\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("Rel 0 BRA\n");
+	passAllTests &= test_BRA_exec(0x00);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BRA\n");
+	passAllTests &= test_BRA_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BRA\n");
+	passAllTests &= test_BRA_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BRA_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x20);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x20);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BRN()
+{
+	PrintH1("Testing BRN\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("Rel 0 BRN\n");
+	passAllTests &= test_BRN_exec(0x00);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BRN\n");
+	passAllTests &= test_BRN_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BRN\n");
+	passAllTests &= test_BRN_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BRN_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x21);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x21);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BHI()
+{
+	PrintH1("Testing BHI\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("Rel 0 BHI\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BHI_exec(0x00);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+	
+	PrintH2("C Z' No Jump BHI\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_C;
+	passAllTests &= test_BHI_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("C' Z No Jump BHI\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z;
+	passAllTests &= test_BHI_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("C' Z' No Jump BHI\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_C | HD6303R_FLAG_Z;
+	passAllTests &= test_BHI_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BHI\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BHI_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BHI\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BHI_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BHI_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x22);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x22);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	if ((prev.flagRegister & (HD6303R_FLAG_C | HD6303R_FLAG_Z)) == 0)
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	else
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BLS()
+{
+	PrintH1("Testing BLS\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("C Z' Jump BLS\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_C;
+	passAllTests &= test_BLS_exec(0x10);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("C' Z Jump BLS\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z;
+	passAllTests &= test_BLS_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("C Z Jump BLS\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_C | HD6303R_FLAG_Z;
+	passAllTests &= test_BLS_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Rel 0 BLS\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_C | HD6303R_FLAG_Z;
+	passAllTests &= test_BLS_exec(0x00);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BLS\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_C | HD6303R_FLAG_Z;
+	passAllTests &= test_BLS_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BLS\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_C | HD6303R_FLAG_Z;
+	passAllTests &= test_BLS_exec(0xF7);
+
+	PrintH2("C' Z' No Jump BLS\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BLS_exec(0x10);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BLS_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x23);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x23);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	if ((prev.flagRegister & (HD6303R_FLAG_C | HD6303R_FLAG_Z)) != 0)
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	else
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BCC()
+{
+	PrintH1("Testing BCC\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("C No Jump BCC\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_C;
+	passAllTests &= test_BCC_exec(0x10);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("C' Jump BCC\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BCC_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Rel 0 BCC\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BCC_exec(0x00);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BCC\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BCC_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BCC\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BCC_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BCC_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x24);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x24);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	if ((prev.flagRegister & (HD6303R_FLAG_C)) == 0)
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	else
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BCS()
+{
+	PrintH1("Testing BCS\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("C Jump BCS\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_C;
+	passAllTests &= test_BCS_exec(0x10);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("C' No Jump BCS\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BCS_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Rel 0 BCS\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_C;
+	passAllTests &= test_BCS_exec(0x00);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BCS\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_C;
+	passAllTests &= test_BCS_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BCS\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_C;
+	passAllTests &= test_BCS_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BCS_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x25);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x25);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	if ((prev.flagRegister & (HD6303R_FLAG_C)) != 0)
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	else
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BNE()
+{
+	PrintH1("Testing BNE\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("Z No Jump BNE\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z;
+	passAllTests &= test_BNE_exec(0x10);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Z' Jump BNE\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BNE_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Rel 0 BNE\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BNE_exec(0x00);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BNE\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BNE_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BNE\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BNE_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BNE_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x26);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x26);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	if ((prev.flagRegister & (HD6303R_FLAG_Z)) == 0)
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	else
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BEQ()
+{
+	PrintH1("Testing BEQ\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("Z Jump BEQ\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z;
+	passAllTests &= test_BEQ_exec(0x10);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Z' No Jump BEQ\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BEQ_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Rel 0 BEQ\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z;
+	passAllTests &= test_BEQ_exec(0x00);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BEQ\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z;
+	passAllTests &= test_BEQ_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BEQ\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z;
+	passAllTests &= test_BEQ_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BEQ_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x27);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x27);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	if ((prev.flagRegister & (HD6303R_FLAG_Z)) != 0)
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	else
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BVC()
+{
+	PrintH1("Testing BVC\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("V No Jump BVC\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_V;
+	passAllTests &= test_BVC_exec(0x10);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("V' Jump BVC\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BVC_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Rel 0 BVC\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BVC_exec(0x00);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BVC\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BVC_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BVC\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BVC_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BVC_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x28);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x28);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	if ((prev.flagRegister & (HD6303R_FLAG_V)) == 0)
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	else
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BVS()
+{
+	PrintH1("Testing BVS\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("V Jump BVS\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_V;
+	passAllTests &= test_BVS_exec(0x10);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("V' No Jump BVS\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BVS_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Rel 0 BVS\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_V;
+	passAllTests &= test_BVS_exec(0x00);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BVS\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_V;
+	passAllTests &= test_BVS_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BVS\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_V;
+	passAllTests &= test_BVS_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BVS_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x29);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x29);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	if ((prev.flagRegister & (HD6303R_FLAG_V)) != 0)
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	else
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BPL()
+{
+	PrintH1("Testing BPL\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("N No Jump BPL\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N;
+	passAllTests &= test_BPL_exec(0x10);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("N' Jump BPL\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BPL_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Rel 0 BPL\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BPL_exec(0x00);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BPL\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BPL_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BPL\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BPL_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BPL_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x2A);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x2A);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	if ((prev.flagRegister & (HD6303R_FLAG_N)) == 0)
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	else
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BMI()
+{
+	PrintH1("Testing BMI\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("N Jump BMI\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N;
+	passAllTests &= test_BMI_exec(0x10);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("N' No Jump BMI\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BMI_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Rel 0 BMI\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N;
+	passAllTests &= test_BMI_exec(0x00);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BMI\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N;
+	passAllTests &= test_BMI_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BMI\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N;
+	passAllTests &= test_BMI_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BMI_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x2B);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x2B);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	if ((prev.flagRegister & (HD6303R_FLAG_N)) != 0)
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	else
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BGE()
+{
+	PrintH1("Testing BGE\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("N V Jump BGE\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N | HD6303R_FLAG_V;
+	passAllTests &= test_BGE_exec(0x10);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("N' V No Jump BGE\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_V;
+	passAllTests &= test_BGE_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("N V' No Jump BGE\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N;
+	passAllTests &= test_BGE_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("N' V' Jump BGE\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BGE_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Rel 0 BGE\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BGE_exec(0x00);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BGE\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BGE_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BGE\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BGE_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BGE_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x2C);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x2C);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	if ((!!(prev.flagRegister & (HD6303R_FLAG_N))^!!(prev.flagRegister & (HD6303R_FLAG_V))) == 0)
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	else
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BLT()
+{
+	PrintH1("Testing BLT\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("N V No Jump BLT\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N | HD6303R_FLAG_V;
+	passAllTests &= test_BLT_exec(0x10);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("N' V Jump BLT\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_V;
+	passAllTests &= test_BLT_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("N V' Jump BLT\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N;
+	passAllTests &= test_BLT_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("N' V' No Jump BLT\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BLT_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Rel 0 BLT\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_V;
+	passAllTests &= test_BLT_exec(0x00);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BLT\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_V;
+	passAllTests &= test_BLT_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BLT\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_V;
+	passAllTests &= test_BLT_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BLT_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x2D);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x2D);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	if ((!!(prev.flagRegister & (HD6303R_FLAG_N))^!!(prev.flagRegister & (HD6303R_FLAG_V))) != 0)
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	else
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BGT()
+{
+	PrintH1("Testing BGT\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("Z N V No Jump BGT\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z | HD6303R_FLAG_N | HD6303R_FLAG_V;
+	passAllTests &= test_BGT_exec(0x10);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Z N' V No Jump BGT\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z | HD6303R_FLAG_V;
+	passAllTests &= test_BGT_exec(0x10);
+	printBreak(".",54);
+	
+	PrintH2("Z N V' No Jump BGT\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z | HD6303R_FLAG_N;
+	passAllTests &= test_BGT_exec(0x10);
+	printBreak(".",54);
+	
+	PrintH2("Z N' V' No Jump BGT\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z;
+	passAllTests &= test_BGT_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Z' N V Jump BGT\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N | HD6303R_FLAG_V;
+	passAllTests &= test_BGT_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Z' N' V No Jump BGT\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_V;
+	passAllTests &= test_BGT_exec(0x10);
+	printBreak(".",54);
+	
+	PrintH2("Z' N V' No Jump BGT\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N;
+	passAllTests &= test_BGT_exec(0x10);
+	printBreak(".",54);
+	
+	PrintH2("Z' N' V' Jump BGT\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BGT_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Rel 0 BGT\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BGT_exec(0x00);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BGT\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BGT_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BGT\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BGT_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BGT_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x2E);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x2E);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	if ((!!(prev.flagRegister & (HD6303R_FLAG_Z)) | !!(prev.flagRegister & (HD6303R_FLAG_N))^!!(prev.flagRegister & (HD6303R_FLAG_V))) == 0)
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	else
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_BLE()
+{
+	PrintH1("Testing BLE\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("Z N V Jump BLE\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z | HD6303R_FLAG_N | HD6303R_FLAG_V;
+	passAllTests &= test_BLE_exec(0x10);
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Z N' V Jump BLE\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z | HD6303R_FLAG_V;
+	passAllTests &= test_BLE_exec(0x10);
+	printBreak(".",54);
+	
+	PrintH2("Z N V' Jump BLE\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z | HD6303R_FLAG_N;
+	passAllTests &= test_BLE_exec(0x10);
+	printBreak(".",54);
+	
+	PrintH2("Z N' V' Jump BLE\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_Z;
+	passAllTests &= test_BLE_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Z' N V No Jump BLE\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N | HD6303R_FLAG_V;
+	passAllTests &= test_BLE_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Z' N' V Jump BLE\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_V;
+	passAllTests &= test_BLE_exec(0x10);
+	printBreak(".",54);
+	
+	PrintH2("Z' N V' Jump BLE\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N;
+	passAllTests &= test_BLE_exec(0x10);
+	printBreak(".",54);
+	
+	PrintH2("Z' N' V' No Jump BLE\n");
+	p->flagRegister = 0xC0;
+	passAllTests &= test_BLE_exec(0x10);
+	printBreak(".",54);
+
+	PrintH2("Rel 0 BLE\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N;
+	passAllTests &= test_BLE_exec(0x00);
+	printBreak(".",54);
+
+	PrintH2("Rel 8 BLE\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N;
+	passAllTests &= test_BLE_exec(0x08);
+	printBreak(".",54);
+
+	PrintH2("Rel -9 BLE\n");
+	p->flagRegister = 0xC0 | HD6303R_FLAG_N;
+	passAllTests &= test_BLE_exec(0xF7);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_BLE_exec(int8_t Rel)
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x2F);
+	MemoryWrite(p,p->pc+1,(uint8_t)Rel);
+	ALU_HD6303R_Execute(p, 0x2F);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	if ((!!(prev.flagRegister & (HD6303R_FLAG_Z)) | !!(prev.flagRegister & (HD6303R_FLAG_N))^!!(prev.flagRegister & (HD6303R_FLAG_V))) != 0)
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2 + Rel);
+	else
+		passAllTests &= CheckPC(prev.pc, curr.pc, 2);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
 
 	return passAllTests;
 }
