@@ -119,5 +119,7 @@ uint8_t test_DES();
 bool test_DES_exec();
 uint8_t test_TXS();
 bool test_TXS_exec();
+uint8_t test_PSHA();
+bool test_PSHA_exec();
 
 #endif
