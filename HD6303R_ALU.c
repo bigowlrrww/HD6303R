@@ -2792,8 +2792,8 @@ void ALU_HD6303R_PSHB(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x37: // PSHB Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "PSHB");
-			p->stackPointer++;
 			MemoryWrite(p, p->stackPointer, p->accumulatorB);
+			p->stackPointer--;
 			break;
 		default:
 			break;
