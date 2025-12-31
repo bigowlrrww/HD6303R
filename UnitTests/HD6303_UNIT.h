@@ -127,5 +127,7 @@ uint8_t test_PULX();
 bool test_PULX_exec();
 uint8_t test_RTS();
 bool test_RTS_exec();
+uint8_t test_ABX();
+bool test_ABX_exec();
 
 #endif
