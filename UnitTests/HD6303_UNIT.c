@@ -412,8 +412,8 @@ uint8_t test_ASLD()
 
 	PrintH2("Carry Not Set ASLD\n");
 	*p->accumulatorD = 0x7AD7;
-	p->flagRegister &= ~(HD6303R_FLAG_N | HD6303R_FLAG_C);
-	p->flagRegister |= HD6303R_FLAG_Z | HD6303R_FLAG_V;
+	p->flagRegister &= ~(HD6303R_FLAG_N | HD6303R_FLAG_V);
+	p->flagRegister |= HD6303R_FLAG_Z | HD6303R_FLAG_C;
 	passAllTests &= test_ASLD_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
@@ -427,7 +427,7 @@ uint8_t test_ASLD()
 
 	PrintH2("Clear ASLD\n");
 	*p->accumulatorD = 0x8000;
-	p->flagRegister |= HD6303R_FLAG_V;
+	p->flagRegister &= ~(HD6303R_FLAG_V | HD6303R_FLAG_C);
 	passAllTests &= test_ASLD_exec();
 	printBreak(".",54);
 
@@ -439,15 +439,16 @@ uint8_t test_ASLD()
 	printBreak(".",54);
 
 	PrintH2("N is set ASLD\n");
-	*p->accumulatorD = 0x8000;
-	p->flagRegister &= ~(HD6303R_FLAG_Z );
-	p->flagRegister |= HD6303R_FLAG_C | HD6303R_FLAG_N| HD6303R_FLAG_V;
+	*p->accumulatorD = 0x4000;
+	p->flagRegister &= ~(HD6303R_FLAG_N | HD6303R_FLAG_V);
+	p->flagRegister |= HD6303R_FLAG_Z | HD6303R_FLAG_C;
 	passAllTests &= test_ASLD_exec();
 	printBreak(".",54);
 
 	PrintH2("lower set shift ASLD\n");
 	*p->accumulatorD = 0xFFFF;
-	p->flagRegister |= HD6303R_FLAG_V;
+	p->flagRegister &= ~(HD6303R_FLAG_N);
+	p->flagRegister |= HD6303R_FLAG_V | HD6303R_FLAG_Z;
 	passAllTests &= test_ASLD_exec();
 	passAllTests &= CheckSame(*(p->accumulatorD),0xFFFE, "Zero always shift into LSBit");
 
@@ -1090,8 +1091,8 @@ uint8_t test_SBA()
 	bool verified = false;
 
 	PrintH2("No Flags set SBA\n");
-	p->accumulatorA = 0x12;
-	p->accumulatorB = 0x34;
+	p->accumulatorA = 0x40;
+	p->accumulatorB = 0x20;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = 0xFF;
