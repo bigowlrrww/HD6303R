@@ -2566,7 +2566,9 @@ void ALU_HD6303R_MUL(HD6303R_MPU * p)
 			break;
 		default:
 			break;
-	}
+		}
+
+	ALU_HD6303R_SetFlagIfNonZero(p, HD6303R_FLAG_C, *p->accumulatorD & 0x80);//R7 == 1?
 	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
