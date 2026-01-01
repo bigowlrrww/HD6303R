@@ -131,5 +131,7 @@ uint8_t test_ABX();
 bool test_ABX_exec();
 uint8_t test_RTI();
 bool test_RTI_exec();
+uint8_t test_PSHX();
+bool test_PSHX_exec();
 
 #endif

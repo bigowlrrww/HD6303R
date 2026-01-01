@@ -151,6 +151,8 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x3B) RTI", test_RTI());
 	PrepareForNextTest();
+	addItem(&list, "(0x3C) PSHX", test_PSHX());
+	PrepareForNextTest();
 	addItem(&list, "(0x41)", test_Unknown(0x41));
 	PrepareForNextTest();
 	addItem(&list, "(0x42)", test_Unknown(0x42));
@@ -3416,6 +3418,51 @@ bool test_RTI_exec()
 
 	//Flag Checks
 	passAllTests &= CheckSame((uint8_t)(0xC2 & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_PSHX()
+{
+	PrintH1("Testing PSHX\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("Case 0 PSHX\n");
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
+	p->stackPointer = 0x009F;
+	MemoryWrite(p, 0x00A0, 0xDE);
+	MemoryWrite(p, 0x00A1, 0xAD);
+	p->indexRegister = 0xBEEF;
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
+	passAllTests &= test_PSHX_exec();
+	verified = checkVerified(p->flagRegister);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_PSHX_exec()
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x3C);
+	ALU_HD6303R_Execute(p, 0x3C);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(MemoryRead(p, curr.stackPointer+1), (uint8_t)((curr.indexRegister&0xFF00)>>8), "(SP+1) = IXH");
+	passAllTests &= CheckSame(MemoryRead(p, curr.stackPointer+2), (uint8_t)(curr.indexRegister&0xFF), "(SP+2) = IXL");
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSubtraction(prev.stackPointer, 2, curr.stackPointer, "SP-2=SP");
+
+	//Flag Checks
+	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
 
 	return passAllTests;
 }
