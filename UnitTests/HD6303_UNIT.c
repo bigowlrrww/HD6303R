@@ -153,6 +153,8 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x3C) PSHX", test_PSHX());
 	PrepareForNextTest();
+	addItem(&list, "(0x3D) MUL", test_MUL());
+	PrepareForNextTest();
 	addItem(&list, "(0x41)", test_Unknown(0x41));
 	PrepareForNextTest();
 	addItem(&list, "(0x42)", test_Unknown(0x42));
@@ -3464,6 +3466,64 @@ bool test_PSHX_exec()
 
 	//Flag Checks
 	passAllTests &= CheckSame((uint8_t)(prev.flagRegister & 0x3F), (uint8_t)(curr.flagRegister & 0x3F), "Flags");
+
+	return passAllTests;
+}
+
+uint8_t test_MUL()
+{
+	PrintH1("Testing MUL\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("Carry Not Set MUL\n");
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x02;
+	p->flagRegister = 0xFF;
+	passAllTests &= test_MUL_exec();
+	passAllTests &= CheckSame(*p->accumulatorD, 0x0024, "AccD == 0x0024");
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Carry Set MUL\n");
+	p->accumulatorA = 0x40;
+	p->accumulatorB = 0x02;
+	p->flagRegister = (0xFF & ~HD6303R_FLAG_C);
+	passAllTests &= test_MUL_exec();
+	passAllTests &= CheckSame(*p->accumulatorD, 0x0080, "AccD == 0x0080");
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_MUL_exec()
+{
+	bool passAllTests = true;
+
+	p->stackPointer = 0x009F;
+	p->indexRegister = 0xBEEF;
+
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x3D);
+	ALU_HD6303R_Execute(p, 0x3D);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
+
+//Flag Checks	
+	//Flag Checks
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);		//N: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);		//Z: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);		//V: Not affected.
+	if (curr.accumulatorD & 0x80) 																//C: Set if the result's bit 7 is "1".
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 
 	return passAllTests;
 }

@@ -133,5 +133,7 @@ uint8_t test_RTI();
 bool test_RTI_exec();
 uint8_t test_PSHX();
 bool test_PSHX_exec();
+uint8_t test_MUL();
+bool test_MUL_exec();
 
 #endif
