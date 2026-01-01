@@ -283,8 +283,8 @@ uint8_t test_NOP()
 	printBreak(".",54);
 
 	PrintH2("Case Values set NOP\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -615,8 +615,8 @@ uint8_t test_INX()
 	printBreak(".",54);
 
 	PrintH2("Values set INX\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -624,8 +624,8 @@ uint8_t test_INX()
 	printBreak(".",54);
 
 	PrintH2("INX rolls over\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xFFFF;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_Z);
@@ -676,8 +676,8 @@ uint8_t test_DEX()
 	bool verified = false;
 
 	PrintH2("index -> zero DEX\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_Z);
@@ -687,8 +687,8 @@ uint8_t test_DEX()
 
 
 	PrintH2("Values set DEX\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -696,8 +696,8 @@ uint8_t test_DEX()
 	printBreak(".",54);
 
 	PrintH2("DEX rolls over\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0000;
 	p->flagRegister = 0xFF;
@@ -748,8 +748,8 @@ uint8_t test_CLV()
 	bool verified = false;
 
 	PrintH2("V not set CLV (WARN is good)\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
@@ -758,8 +758,8 @@ uint8_t test_CLV()
 	printBreak(".",54);
 
 	PrintH2("V already set CLV\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -805,8 +805,8 @@ uint8_t test_SEV()
 	bool verified = false;
 
 	PrintH2("V not set SEV\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
@@ -815,8 +815,8 @@ uint8_t test_SEV()
 	printBreak(".",54);
 
 	PrintH2("V already set SEV (WARN is good)\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -862,8 +862,8 @@ uint8_t test_CLC()
 	bool verified = false;
 
 	PrintH2("C not set CLC (WARN is good)\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_C);
@@ -872,8 +872,8 @@ uint8_t test_CLC()
 	printBreak(".",54);
 
 	PrintH2("C already set CLC\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -919,8 +919,8 @@ uint8_t test_SEC()
 	bool verified = false;
 
 	PrintH2("C Not set SEC\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_C);
@@ -929,8 +929,8 @@ uint8_t test_SEC()
 	printBreak(".",54);
 
 	PrintH2("C already set SEC (WARN is good)\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -976,8 +976,8 @@ uint8_t test_CLI()
 	bool verified = false;
 
 	PrintH2("I not set CLI (WARN is good)\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_I);
@@ -986,8 +986,8 @@ uint8_t test_CLI()
 	printBreak(".",54);
 
 	PrintH2("I already set CLI\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -1033,8 +1033,8 @@ uint8_t test_SEI()
 	bool verified = false;
 
 	PrintH2("I Not set SEI\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_I);
@@ -1043,8 +1043,8 @@ uint8_t test_SEI()
 	printBreak(".",54);
 
 	PrintH2("I already set SEI (WARN is good)\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -1090,8 +1090,8 @@ uint8_t test_SBA()
 	bool verified = false;
 
 	PrintH2("No Flags set SBA\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = 0xFF;
@@ -1100,8 +1100,8 @@ uint8_t test_SBA()
 	printBreak(".",54);
 
 	PrintH2("Z Set SBA\n");
-	p->accumulatorB = 0x22;
 	p->accumulatorA = 0x22;
+	p->accumulatorB = 0x22;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_Z);
@@ -1109,8 +1109,8 @@ uint8_t test_SBA()
 	printBreak(".",54);
 
 	PrintH2("N Set SBA\n");
-	p->accumulatorB = 0x01;
 	p->accumulatorA = 0x81;
+	p->accumulatorB = 0x01;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_N);
@@ -1118,8 +1118,8 @@ uint8_t test_SBA()
 	printBreak(".",54);
 
 	PrintH2("C Set SBA\n");
-	p->accumulatorB = 0x82;
 	p->accumulatorA = 0x01;
+	p->accumulatorB = 0x82;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_C);
@@ -1127,8 +1127,8 @@ uint8_t test_SBA()
 	printBreak(".",54);
 
 	PrintH2("V Set SBA\n");
-	p->accumulatorB = 0x01;
 	p->accumulatorA = 0x80;
+	p->accumulatorB = 0x01;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
@@ -1136,8 +1136,8 @@ uint8_t test_SBA()
 	printBreak(".",54);
 
 	PrintH2("N/V/C Set SBA\n");
-	p->accumulatorB = 0x80;
 	p->accumulatorA = 0x01;
+	p->accumulatorB = 0x80;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~(HD6303R_FLAG_N|HD6303R_FLAG_V|HD6303R_FLAG_C));
@@ -1203,8 +1203,8 @@ uint8_t test_CBA()
 	bool verified = false;
 
 	PrintH2("No Flags set CBA\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = 0xFF;
@@ -1213,8 +1213,8 @@ uint8_t test_CBA()
 	printBreak(".",54);
 
 	PrintH2("Z Set CBA\n");
-	p->accumulatorB = 0x22;
 	p->accumulatorA = 0x22;
+	p->accumulatorB = 0x22;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_Z);
@@ -1222,8 +1222,8 @@ uint8_t test_CBA()
 	printBreak(".",54);
 
 	PrintH2("N Set CBA\n");
-	p->accumulatorB = 0x01;
 	p->accumulatorA = 0x81;
+	p->accumulatorB = 0x01;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_N);
@@ -1231,8 +1231,8 @@ uint8_t test_CBA()
 	printBreak(".",54);
 
 	PrintH2("C Set CBA\n");
-	p->accumulatorB = 0x82;
 	p->accumulatorA = 0x01;
+	p->accumulatorB = 0x82;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_C);
@@ -1240,8 +1240,8 @@ uint8_t test_CBA()
 	printBreak(".",54);
 
 	PrintH2("V Set CBA\n");
-	p->accumulatorB = 0x01;
 	p->accumulatorA = 0x80;
+	p->accumulatorB = 0x01;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
@@ -1249,8 +1249,8 @@ uint8_t test_CBA()
 	printBreak(".",54);
 
 	PrintH2("N/V/C Set CBA\n");
-	p->accumulatorB = 0x80;
 	p->accumulatorA = 0x01;
+	p->accumulatorB = 0x80;
 	p->stackPointer = 0x5678;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~(HD6303R_FLAG_N|HD6303R_FLAG_V|HD6303R_FLAG_C));
@@ -1395,16 +1395,16 @@ uint8_t test_TBA()
 	bool verified = false;
 
 	PrintH2("0xE5 TBA\n");
-	p->accumulatorB = 0xE5;
 	p->accumulatorA = 0xDA;
+	p->accumulatorB = 0xE5;
 	p->flagRegister = (0xc0 | HD6303R_FLAG_Z | HD6303R_FLAG_V);
 	passAllTests &= test_TBA_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
 
 	PrintH2("0xDA TBA\n");
-	p->accumulatorB = 0xDA;
 	p->accumulatorA = 0xE5;
+	p->accumulatorB = 0xDA;
 	p->flagRegister = (0xc0 | HD6303R_FLAG_Z | HD6303R_FLAG_V);
 	passAllTests &= test_TBA_exec();
 	printBreak(".",54);
@@ -2789,8 +2789,8 @@ uint8_t test_TSX()
 	bool verified = false;
 
 	PrintH2("SP=0x0010 TSX\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x0010;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
@@ -2799,8 +2799,8 @@ uint8_t test_TSX()
 	printBreak(".",54);
 
 	PrintH2("SP=0x3FF2 TSX\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x3FF2;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -2841,8 +2841,8 @@ uint8_t test_INS()
 	bool verified = false;
 
 	PrintH2("SP=0x0010 INS\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x0010;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
@@ -2851,8 +2851,8 @@ uint8_t test_INS()
 	printBreak(".",54);
 
 	PrintH2("SP=0xFFFF INS\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0xFFFF;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -2893,8 +2893,8 @@ uint8_t test_PULA()
 	bool verified = false;
 
 	PrintH2("Case 0 PULA\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x0010;
 	MemoryWrite(p, 0x0010, 0xDE);
 	MemoryWrite(p, 0x0011, 0xAD);
@@ -2905,8 +2905,8 @@ uint8_t test_PULA()
 	printBreak(".",54);
 
 	PrintH2("Case 1 PULA\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0xFFFF;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -2947,8 +2947,8 @@ uint8_t test_PULB()
 	bool verified = false;
 
 	PrintH2("Case 0 PULB\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x0010;
 	MemoryWrite(p, 0x0010, 0xDE);
 	MemoryWrite(p, 0x0011, 0xAD);
@@ -2959,8 +2959,8 @@ uint8_t test_PULB()
 	printBreak(".",54);
 
 	PrintH2("Case 1 PULB\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0xFFFF;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -3001,8 +3001,8 @@ uint8_t test_DES()
 	bool verified = false;
 
 	PrintH2("SP=0x0010 DES\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x0010;
 	p->indexRegister = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
@@ -3011,8 +3011,8 @@ uint8_t test_DES()
 	printBreak(".",54);
 
 	PrintH2("SP=0x0000 DES\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x0000;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -3053,8 +3053,8 @@ uint8_t test_TXS()
 	bool verified = false;
 
 	PrintH2("IX=0x0010 TXS\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->indexRegister = 0x0010;
 	p->stackPointer = 0x0001;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
@@ -3063,8 +3063,8 @@ uint8_t test_TXS()
 	printBreak(".",54);
 
 	PrintH2("IX=0x3FF2 TXS\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->indexRegister = 0x3FF2;
 	p->stackPointer = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -3105,8 +3105,8 @@ uint8_t test_PSHA()
 	bool verified = false;
 
 	PrintH2("Case 0 PSHA\n");
-	p->accumulatorB = 0x12;
 	p->accumulatorA = 0xFF;
+	p->accumulatorB = 0x12;
 	p->stackPointer = 0x0010;
 	MemoryWrite(p, 0x0010, 0xDE);
 	MemoryWrite(p, 0x0011, 0xAD);
@@ -3117,8 +3117,8 @@ uint8_t test_PSHA()
 	printBreak(".",54);
 
 	PrintH2("Case 1 PSHA\n");
-	p->accumulatorB = 0x12;
 	p->accumulatorA = 0xFF;
+	p->accumulatorB = 0x12;
 	p->stackPointer = 0x0000;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -3160,8 +3160,8 @@ uint8_t test_PSHB()
 	bool verified = false;
 
 	PrintH2("Case 0 PSHB\n");
-	p->accumulatorB = 0x12;
 	p->accumulatorA = 0xFF;
+	p->accumulatorB = 0x12;
 	p->stackPointer = 0x0010;
 	MemoryWrite(p, 0x0010, 0xDE);
 	MemoryWrite(p, 0x0011, 0xAD);
@@ -3172,8 +3172,8 @@ uint8_t test_PSHB()
 	printBreak(".",54);
 
 	PrintH2("Case 1 PSHB\n");
-	p->accumulatorB = 0x12;
 	p->accumulatorA = 0xFF;
+	p->accumulatorB = 0x12;
 	p->stackPointer = 0x0000;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -3215,8 +3215,8 @@ uint8_t test_PULX()
 	bool verified = false;
 
 	PrintH2("Case 0 PULX\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x0010;
 	MemoryWrite(p, 0x0010, 0xDE);
 	MemoryWrite(p, 0x0011, 0xAD);
@@ -3227,8 +3227,8 @@ uint8_t test_PULX()
 	printBreak(".",54);
 
 	PrintH2("Case 1 PULX\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0xFFFF;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -3270,8 +3270,8 @@ uint8_t test_RTS()
 	bool verified = false;
 
 	PrintH2("Case 0 RTS\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0x0010;
 	MemoryWrite(p, 0x0010, 0xDE);
 	MemoryWrite(p, 0x0011, 0xAD);
@@ -3282,8 +3282,8 @@ uint8_t test_RTS()
 	printBreak(".",54);
 
 	PrintH2("Case 1 RTS\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0xFFFF;
 	p->indexRegister = 0xABCD;
 	p->flagRegister = 0xFF;
@@ -3325,8 +3325,8 @@ uint8_t test_ABX()
 	bool verified = false;
 
 	PrintH2("Case 0 ABX\n");
-	p->accumulatorB = 0x12;
-	p->accumulatorA = 0x34;
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
 	p->stackPointer = 0xABCD;
 	p->indexRegister = 0x0010;
 	MemoryWrite(p, 0x0010, 0xDE);
@@ -3338,8 +3338,8 @@ uint8_t test_ABX()
 	printBreak(".",54);
 
 	PrintH2("Case 1 ABX\n");
-	p->accumulatorB = 0xF9;
 	p->accumulatorA = 0x34;
+	p->accumulatorB = 0xF9;
 	p->stackPointer = 0xABCD;
 	p->indexRegister = 0xFFFF;
 	p->flagRegister = 0xFF;
@@ -3380,8 +3380,8 @@ uint8_t test_RTI()
 	bool verified = false;
 
 	PrintH2("Case 0 RTI\n");
-	p->accumulatorB = 0xAB;
-	p->accumulatorA = 0xCD;
+	p->accumulatorA = 0xAB;
+	p->accumulatorB = 0xCD;
 	p->indexRegister = 0x0010;
 	p->flagRegister = (0xFF & ~HD6303R_FLAG_V);
 	passAllTests &= test_RTI_exec();

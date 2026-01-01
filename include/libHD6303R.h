@@ -11,8 +11,8 @@ extern "C" {
 typedef struct _HD6303R_MPU {
 	uint16_t pc;
 	uint8_t flagRegister;
-	uint8_t accumulatorA;
 	uint8_t accumulatorB;
+	uint8_t accumulatorA;
 	uint16_t * accumulatorD;
 	uint16_t indexRegister;
 	uint16_t stackPointer;
