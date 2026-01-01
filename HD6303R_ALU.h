@@ -25,8 +25,8 @@ uint16_t	ALU_HD6303R_IncrementPC(HD6303R_MPU *, uint16_t);
 uint8_t 	ALU_HD6303R_GetFlag(HD6303R_MPU *, uint8_t);
 uint8_t 	ALU_HD6303R_SetFlag(HD6303R_MPU *, uint8_t);
 uint8_t 	ALU_HD6303R_UnsetFlag(HD6303R_MPU *, uint8_t);
-uint8_t 	ALU_HD6303R_SetFlagIfNonZero(HD6303R_MPU *, uint8_t, uint8_t);
-uint8_t 	ALU_HD6303R_SetFlagIfZero(HD6303R_MPU *, uint8_t, uint8_t);
+uint8_t 	ALU_HD6303R_SetFlagIfNonZero(HD6303R_MPU *, uint8_t, uint16_t);
+uint8_t 	ALU_HD6303R_SetFlagIfZero(HD6303R_MPU *, uint8_t, uint16_t);
 
 // The flags.
 #define HD6303R_FLAG_C	(uint8_t)(0x1 << 0)

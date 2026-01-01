@@ -78,9 +78,9 @@ uint8_t ALU_HD6303R_SetFlag(HD6303R_MPU * p, uint8_t flag)
 	{ return (p->flagRegister = (p->flagRegister | flag)); }
 uint8_t ALU_HD6303R_UnsetFlag(HD6303R_MPU * p, uint8_t flag)
 	{ return (p->flagRegister = (p->flagRegister & ~flag)); }
-uint8_t ALU_HD6303R_SetFlagIfZero(HD6303R_MPU * p, uint8_t flag, uint8_t val)
+uint8_t ALU_HD6303R_SetFlagIfZero(HD6303R_MPU * p, uint8_t flag, uint16_t val)
 	{ if(val == 0) { return ALU_HD6303R_SetFlag(p, flag); } else { return ALU_HD6303R_UnsetFlag(p, flag); } }
-uint8_t ALU_HD6303R_SetFlagIfNonZero(HD6303R_MPU * p, uint8_t flag, uint8_t val)
+uint8_t ALU_HD6303R_SetFlagIfNonZero(HD6303R_MPU * p, uint8_t flag, uint16_t val)
 	{ if(val != 0) { return ALU_HD6303R_SetFlag(p, flag); } else { return ALU_HD6303R_UnsetFlag(p, flag); } }
 
 /*
