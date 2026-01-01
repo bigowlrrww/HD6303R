@@ -950,13 +950,15 @@ void ALU_HD6303R_PSHX(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x3C: // PSHX Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "PSHX");
-			p->indexRegister = ((p->indexRegister & 0xff00) | MemoryRead(p, p->stackPointer));
+			MemoryWrite(p, p->stackPointer, (uint8_t)(p->indexRegister & 0xFF));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, ((p->indexRegister & 0xFF00)>>8));
+			p->stackPointer--;
 			break;
 		default:
 			break;
 	}
-	
-	p->stackPointer--;
+
 	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
