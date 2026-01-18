@@ -4137,12 +4137,32 @@ void ALU_HD6303R_SWI(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x3F: // SWI Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "SWI");
+			p->pc++;
+			MemoryWrite(p, p->stackPointer, (uint8_t)(p->pc & 0xFF));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, ((p->pc & 0xFF00)>>8));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, (uint8_t)(p->indexRegister & 0xFF));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, ((p->indexRegister & 0xFF00)>>8));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, p->accumulatorA);
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, p->accumulatorB);
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, p->flagRegister | 0xC0); //Set b6 b7 per documentation
+			p->stackPointer--;
+			p->pc--; //dec so things don't break;
+
+			ALU_HD6303R_SetFlag(p, HD6303R_FLAG_I); //Set I
+			p->pc = ((uint16_t)(MemoryRead(p, 0xFFFA) << 8) | (uint16_t)(MemoryRead(p, 0xFFFB))); // JUMP to SWI addr
+			p->pc--; //dec because auto inc after this function. This makes the correct location execute on next clock.
 			break;
 		default:
 			break;
 	}
 	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
