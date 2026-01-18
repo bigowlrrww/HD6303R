@@ -4162,6 +4162,22 @@ void ALU_HD6303R_WAI(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x3E: // WAI Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "WAI");
+			p->pc++;
+			MemoryWrite(p, p->stackPointer, (uint8_t)(p->pc & 0xFF));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, ((p->pc & 0xFF00)>>8));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, (uint8_t)(p->indexRegister & 0xFF));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, ((p->indexRegister & 0xFF00)>>8));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, p->accumulatorA);
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, p->accumulatorB);
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, p->flagRegister | 0xC0); //Set b6 b7 per documentation);
+			p->stackPointer--;
+			p->pc--; //dec so things don't break;
 			break;
 		default:
 			break;
