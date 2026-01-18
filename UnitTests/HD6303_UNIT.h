@@ -135,5 +135,7 @@ uint8_t test_PSHX();
 bool test_PSHX_exec();
 uint8_t test_MUL();
 bool test_MUL_exec();
+uint8_t test_SWI();
+bool test_SWI_exec();
 
 #endif

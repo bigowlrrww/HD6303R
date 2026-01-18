@@ -155,6 +155,10 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x3D) MUL", test_MUL());
 	PrepareForNextTest();
+	addItem(&list, "(0x3E) WAI", 0x7); //Not implemented, or tested atm. Involves interrupts
+	PrepareForNextTest();
+	addItem(&list, "(0x3F) SWI", test_SWI());
+	PrepareForNextTest();
 	addItem(&list, "(0x41)", test_Unknown(0x41));
 	PrepareForNextTest();
 	addItem(&list, "(0x42)", test_Unknown(0x42));
@@ -3524,6 +3528,64 @@ bool test_MUL_exec()
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
+
+	return passAllTests;
+}
+
+uint8_t test_SWI()
+{
+	PrintH1("Testing SWI\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("Carry Not Set SWI\n");
+	p->accumulatorA = 0x12;
+	p->accumulatorB = 0x34;
+	p->indexRegister = 0xDEAD;
+	p->pc = 0xBEEE;
+	p->flagRegister = 0xFE & ~HD6303R_FLAG_I;
+	MemoryWrite(p, 0xFFFA, 0x5E);
+	MemoryWrite(p, 0xFFFB, 0xED); // SWI vector 0x5EED
+	passAllTests &= test_SWI_exec();
+	passAllTests &= CheckSame(p->pc, 0x5EED, "PC == SWIV");
+	passAllTests &= CheckSame(MemoryRead(p, p->stackPointer+1), 0xFE &~HD6303R_FLAG_I, "SP+1 = CCR");
+	passAllTests &= CheckSame(MemoryRead(p, p->stackPointer+2), 0x34, "SP+2 = ACCB");
+	passAllTests &= CheckSame(MemoryRead(p, p->stackPointer+3), 0x12, "SP+3 = ACCA");
+	passAllTests &= CheckSame(MemoryRead(p, p->stackPointer+4), 0xDE, "SP+4 = IXH");
+	passAllTests &= CheckSame(MemoryRead(p, p->stackPointer+5), 0xAD, "SP+5 = IXL");
+	passAllTests &= CheckSame(MemoryRead(p, p->stackPointer+6), 0xBE, "SP+6 = PCH");
+	passAllTests &= CheckSame(MemoryRead(p, p->stackPointer+7), 0xEF, "SP+7 = PCL");
+
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_SWI_exec()
+{
+	bool passAllTests = true;
+
+	p->stackPointer = 0x009F;
+
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x3F);
+	ALU_HD6303R_Execute(p, 0x3F);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= checkImplemented(curr.flagRegister);
+
+//Flag Checks	
+	//Flag Checks
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
+	passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Always Set.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);		//N: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);		//Z: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);		//V: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);		//C: Not affected.
 
 	return passAllTests;
 }
