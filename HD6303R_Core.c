@@ -15,7 +15,7 @@ HD6303R_API HD6303R_MPU * HD6303R_MPU_Alloc(void)
 	
 	// accumulatorD is a pointer to the beginning of accumulatorA.
 	// accumulator is 16 bits, so it's value is that of the double accumulator (AB).
-	p->accumulatorD = (uint16_t *)&p->accumulatorA;
+	p->accumulatorD = (uint16_t *)&p->accumulatorB;
 	
 	p->indexRegister = (uint16_t)0x0000;
 	p->stackPointer = (uint16_t)0x0000;

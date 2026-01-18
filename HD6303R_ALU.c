@@ -78,9 +78,9 @@ uint8_t ALU_HD6303R_SetFlag(HD6303R_MPU * p, uint8_t flag)
 	{ return (p->flagRegister = (p->flagRegister | flag)); }
 uint8_t ALU_HD6303R_UnsetFlag(HD6303R_MPU * p, uint8_t flag)
 	{ return (p->flagRegister = (p->flagRegister & ~flag)); }
-uint8_t ALU_HD6303R_SetFlagIfZero(HD6303R_MPU * p, uint8_t flag, uint8_t val)
+uint8_t ALU_HD6303R_SetFlagIfZero(HD6303R_MPU * p, uint8_t flag, uint16_t val)
 	{ if(val == 0) { return ALU_HD6303R_SetFlag(p, flag); } else { return ALU_HD6303R_UnsetFlag(p, flag); } }
-uint8_t ALU_HD6303R_SetFlagIfNonZero(HD6303R_MPU * p, uint8_t flag, uint8_t val)
+uint8_t ALU_HD6303R_SetFlagIfNonZero(HD6303R_MPU * p, uint8_t flag, uint16_t val)
 	{ if(val != 0) { return ALU_HD6303R_SetFlag(p, flag); } else { return ALU_HD6303R_UnsetFlag(p, flag); } }
 
 /*
@@ -665,7 +665,7 @@ void ALU_HD6303R_DES(HD6303R_MPU * p)
 		default:
 			break;
 	}
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
@@ -709,7 +709,7 @@ void ALU_HD6303R_INS(HD6303R_MPU * p)
 		default:
 			break;
 	}
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
@@ -913,7 +913,7 @@ void ALU_HD6303R_TXS(HD6303R_MPU * p)
 		default:
 			break;
 	}
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
@@ -934,7 +934,7 @@ void ALU_HD6303R_TSX(HD6303R_MPU * p)
 		default:
 			break;
 	}
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
@@ -950,14 +950,16 @@ void ALU_HD6303R_PSHX(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x3C: // PSHX Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "PSHX");
-			p->indexRegister = ((p->indexRegister & 0xff00) | MemoryRead(p, p->stackPointer));
+			MemoryWrite(p, p->stackPointer, (uint8_t)(p->indexRegister & 0xFF));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, ((p->indexRegister & 0xFF00)>>8));
+			p->stackPointer--;
 			break;
 		default:
 			break;
 	}
-	
-	p->stackPointer--;
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
+
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
@@ -986,7 +988,7 @@ void ALU_HD6303R_PULX(HD6303R_MPU * p)
 		default:
 			break;
 	}
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 	
 }
@@ -1065,7 +1067,7 @@ void ALU_HD6303R_ABX(HD6303R_MPU * p)
 		default:
 			break;
 	}
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
@@ -2564,8 +2566,10 @@ void ALU_HD6303R_MUL(HD6303R_MPU * p)
 			break;
 		default:
 			break;
-	}
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
+		}
+
+	ALU_HD6303R_SetFlagIfNonZero(p, HD6303R_FLAG_C, *p->accumulatorD & 0x80);//R7 == 1?
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
@@ -2770,13 +2774,13 @@ void ALU_HD6303R_PSHA(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x36: // PSHA Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "PSHA");
-			p->stackPointer++;
 			MemoryWrite(p, p->stackPointer, p->accumulatorA);
+			p->stackPointer--;
 			break;
 		default:
 			break;
 	}
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
@@ -2792,13 +2796,13 @@ void ALU_HD6303R_PSHB(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x37: // PSHB Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "PSHB");
-			p->stackPointer++;
 			MemoryWrite(p, p->stackPointer, p->accumulatorB);
+			p->stackPointer--;
 			break;
 		default:
 			break;
 	}
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
@@ -2818,13 +2822,13 @@ void ALU_HD6303R_PULA(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x32: // PULA Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "PULA");
+			p->stackPointer++;
 			p->accumulatorA = MemoryRead(p, p->stackPointer);
-			p->stackPointer--;
 			break;
 		default:
 			break;
 	}
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
@@ -2840,13 +2844,13 @@ void ALU_HD6303R_PULB(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x33: // PULB Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "PULB");
+			p->stackPointer++;
 			p->accumulatorB = MemoryRead(p, p->stackPointer);
-			p->stackPointer--;
 			break;
 		default:
 			break;
 	}
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
@@ -4061,15 +4065,31 @@ void ALU_HD6303R_RTI(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x3B: // RTI Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "RTI");
+			p->stackPointer++;
+			p->flagRegister = MemoryRead(p, p->stackPointer);
+			p->stackPointer++;
+			p->accumulatorB = MemoryRead(p, p->stackPointer);
+			p->stackPointer++;
+			p->accumulatorA = MemoryRead(p, p->stackPointer);
+			p->stackPointer++;
+			p->indexRegister = (uint16_t)MemoryRead(p, p->stackPointer);
+			p->indexRegister = ((p->indexRegister << 8) & 0xff00);
+			p->stackPointer++;
+			p->indexRegister = (p->indexRegister | (uint16_t)MemoryRead(p, p->stackPointer));
+			p->stackPointer++;
+			p->pc = (uint16_t)MemoryRead(p, p->stackPointer);
+			p->pc = ((p->pc << 8) & 0xff00);
+			p->stackPointer++;
+			p->pc = (p->pc | (uint16_t)MemoryRead(p, p->stackPointer));
+			p->pc--; //Decrement to avoid the return 1 forward of where it should be
 			break;
 		default:
 			break;
 	}
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
-// NOT IMPLEMENTED
 /*
 		void ALU_HD6303R_RTS(HD6303R_MPU * p)
 		Boolean:	
@@ -4086,12 +4106,18 @@ void ALU_HD6303R_RTS(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x39: // RTS Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "RTS");
+			p->stackPointer++;
+			p->pc = (uint16_t)MemoryRead(p, p->stackPointer);
+			p->pc = ((p->pc << 8) & 0xff00);
+			p->stackPointer++;
+			p->pc = (p->pc | (uint16_t)MemoryRead(p, p->stackPointer));
+			p->pc--; //Decrement to avoid the return 1 forward of where it should be
 			break;
 		default:
 			break;
 	}
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -4111,12 +4137,32 @@ void ALU_HD6303R_SWI(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x3F: // SWI Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "SWI");
+			p->pc++;
+			MemoryWrite(p, p->stackPointer, (uint8_t)(p->pc & 0xFF));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, ((p->pc & 0xFF00)>>8));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, (uint8_t)(p->indexRegister & 0xFF));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, ((p->indexRegister & 0xFF00)>>8));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, p->accumulatorA);
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, p->accumulatorB);
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, p->flagRegister | 0xC0); //Set b6 b7 per documentation
+			p->stackPointer--;
+			p->pc--; //dec so things don't break;
+
+			ALU_HD6303R_SetFlag(p, HD6303R_FLAG_I); //Set I
+			p->pc = ((uint16_t)(MemoryRead(p, 0xFFFA) << 8) | (uint16_t)(MemoryRead(p, 0xFFFB))); // JUMP to SWI addr
+			p->pc--; //dec because auto inc after this function. This makes the correct location execute on next clock.
 			break;
 		default:
 			break;
 	}
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
@@ -4136,6 +4182,22 @@ void ALU_HD6303R_WAI(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x3E: // WAI Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "WAI");
+			p->pc++;
+			MemoryWrite(p, p->stackPointer, (uint8_t)(p->pc & 0xFF));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, ((p->pc & 0xFF00)>>8));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, (uint8_t)(p->indexRegister & 0xFF));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, ((p->indexRegister & 0xFF00)>>8));
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, p->accumulatorA);
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, p->accumulatorB);
+			p->stackPointer--;
+			MemoryWrite(p, p->stackPointer, p->flagRegister | 0xC0); //Set b6 b7 per documentation);
+			p->stackPointer--;
+			p->pc--; //dec so things don't break;
 			break;
 		default:
 			break;
