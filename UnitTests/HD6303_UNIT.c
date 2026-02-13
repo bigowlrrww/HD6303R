@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
 	PrintH1("Testing Summary: \n");
 	printBreak("=",70);
 	bool AllPass = true;
-	for (size_t i = 0; i < list.size; i++)
+	for (int i = 0; i < list.size; i++)
 	{
 		printf("%s:", list.items[i].name);
 		if (!(list.items[i].flag & 0x02)) NOT_VERIFIED();
@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
 		AllPass &= list.items[i].flag;
 	}
 	printBreak("-",70);
-	printf("Tested %d of 255 OPCODES\n", list.size);
+	printf("Tested %d of 255 OPCODES\n", (int)list.size);
 	if (AllPass) printf("\e[32mAll Passed Yay :)\e[0m\n");
 	else printf("\e[31mNot all tests Passed :(\e[0m\n");
 
