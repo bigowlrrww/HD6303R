@@ -5,12 +5,17 @@
                 "name": "Debug with GDB",
                 "type": "cppdbg",
                 "request": "launch",
-                "program": "${workspaceFolder}/HD6303_TEST.exe", // Replace with your executable's path
+                "windows": {"program": "${workspaceFolder}/HD6303_TEST.exe"},
+                "linux": {
+                    "program": "${workspaceFolder}/HD6303_TEST",
+                    "miDebuggerPath": "/usr/bin/gdb",
+                    "externalConsole": false
+                },
                 "args": [],
                 "stopAtEntry": true,
                 "cwd": "${workspaceFolder}",
                 "environment": [],
-                "externalConsole": true, // Set to true if you want a separate console window
+                "externalConsole": true,
                 "MIMode": "gdb",
                 "miDebuggerPath": "gdb.exe", // Or the full path to gdb.exe if not in PATH
                 "setupCommands": [
@@ -25,15 +30,22 @@
                 "name": "Debug Unit Tests",
                 "type": "cppdbg",
                 "request": "launch",
-                "program": "${workspaceFolder}/UnitTests/HD6303_UNIT.exe",
+                "windows": {
+                    "program": "${workspaceFolder}/UnitTests/HD6303_UNIT.exe",
+                    "console": "integratedTerminal",
+                    "miDebuggerPath": "gdb.exe"
+                },
+                "linux":{
+                    "program": "${workspaceFolder}/UnitTests/HD6303_UNIT",
+                    "miDebuggerPath": "/usr/bin/gdb"
+                },
                 "args": [],
                 "stopAtEntry": false,
                 "cwd": "${workspaceFolder}",
                 "environment": [],
                 "preLaunchTask": "Build Unit Tests",
-                "console": "integratedTerminal",
+                "externalConsole": true,
                 "MIMode": "gdb",
-                "miDebuggerPath": "gdb.exe"
             }
         ]
     }

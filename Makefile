@@ -29,6 +29,12 @@ $(TARGET-test): $(OBJS-test) $(TARGET-libHD6303R)
 
 # Clean
 clean:
+ifeq ($(OS),Windows_NT)
 	if exist *.o del /Q *.o
 	if exist *.a del /Q *.a
 	if exist $(TARGET-test).exe del /Q $(TARGET-test).exe
+else
+	rm -f *.o
+	rm -f *.a
+	rm -f $(TARGET-test)
+endif
