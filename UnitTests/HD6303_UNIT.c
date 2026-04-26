@@ -1622,16 +1622,15 @@ bool test_DAA_exec()
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "AccB");
 
 //Flag Checks	
-	if (curr.accumulatorA & 0x80) 																// N: Set if the MSB of the result is "1", cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		// H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		// I: Not affected.
+	passAllTests &= CheckNFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorA); // N: Set if most significant bit of the result is set; cleared otherwise.
+	passAllTests &= CheckZFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorA); // Z: Set if all bits of the result are cleared; cleared otherwise.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V); 		// V: Not affected.
+	if ((prev.accumulatorA > 0x99) || (prev.flagRegister & HD6303R_FLAG_C))						// C: Flag set or cleared as shown in Instruction Set table
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
-
-	if (curr.accumulatorA == 0x00) 																// Z: Set if all bits of the accumulator are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 	return passAllTests;
 }
 
