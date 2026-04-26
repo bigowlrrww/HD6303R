@@ -4,7 +4,8 @@
         {
             "label": "Build (TEST)",
             "type": "shell",
-            "command": "mingw32-make",
+            "windows": {"command": "mingw32-make"},
+            "linux":{"command": "make"},
             "args": [],
             "group": {
                 "kind": "build",
@@ -20,7 +21,8 @@
         {
             "label": "Clean (TEST)",
             "type": "shell",
-            "command": "mingw32-make",
+            "windows": {"command": "mingw32-make"},
+            "linux":{"command": "make"},
             "args": [
                 "clean"
             ],
@@ -33,7 +35,8 @@
         {
             "label": "Clean Unit Tests",
             "type": "shell",
-            "command": "mingw32-make",
+            "windows": {"command": "mingw32-make"},
+            "linux":{"command": "make"},
             "args": [
                 "clean"
             ],
@@ -49,7 +52,8 @@
         {
             "label": "Build Unit Tests",
             "type": "shell",
-            "command": "mingw32-make",
+            "windows": {"command": "mingw32-make"},
+            "linux":{"command": "make"},
             "args": [],
             "group": {
                 "kind": "build",

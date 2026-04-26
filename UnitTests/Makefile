@@ -4,9 +4,9 @@ CFLAGS  = -I. -O0 -g
 RM      = rm -f
 
 ifeq ($(OS),Windows_NT)
-    CP = copy /Y
+	CP = copy /Y
 else
-    CP = cp
+	CP = cp
 endif
 
 LIBDIR = ..
@@ -27,8 +27,8 @@ all: $(TARGET-libHD6303R) $(TARGET-test)
 
 # Build static library
 $(TARGET-libHD6303R): $(OBJS-libHD6303R) 
-	$(CP) $(LIBDIR)\include\libHD6303R.h libHD6303R.h
-	$(CP) $(LIBDIR)\ROM.6803 ROM.6803
+	$(CP) $(LIBDIR)/include/libHD6303R.h libHD6303R.h
+	$(CP) $(LIBDIR)/ROM.6803 ROM.6803
 	$(AR) rcs $@ $(OBJS-libHD6303R)
 
 # Compile library object files
@@ -45,7 +45,15 @@ $(TARGET-test): $(OBJS-test) $(TARGET-libHD6303R)
 
 # Clean
 clean:
+ifeq ($(OS),Windows_NT)
 	if exist *.o del /Q *.o
 	if exist *.a del /Q *.a
 	if exist $(TARGET-test).exe del /Q $(TARGET-test).exe
 	if exist libHD6303R.h del /Q libHD6303R.h
+else
+	rm -f *.o
+	rm -f *.a
+	rm -f $(TARGET-test)
+	rm -f libHD6303R.h
+endif
+
