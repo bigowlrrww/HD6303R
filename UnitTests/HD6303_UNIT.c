@@ -159,6 +159,8 @@ int main(int argc, char *argv[])
 	PrepareForNextTest();
 	addItem(&list, "(0x3F) SWI", test_SWI());
 	PrepareForNextTest();
+	addItem(&list, "(0x40) NEG ACCA", test_NEG_ACCA());
+	PrepareForNextTest();
 	addItem(&list, "(0x41)", test_Unknown(0x41));
 	PrepareForNextTest();
 	addItem(&list, "(0x42)", test_Unknown(0x42));
@@ -3586,5 +3588,48 @@ bool test_SWI_exec()
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);		//V: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);		//C: Not affected.
 
+	return passAllTests;
+}
+
+uint8_t test_NEG_ACCA()
+{
+	PrintH1("Testing NEG ACCA\n");
+	printBreak("-",70);
+
+	bool passAllTests = true;
+	bool verified = false;
+
+	PrintH2("Case Pos\n");
+	passAllTests &= test_NEG_ACCA_exec();
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	return (passAllTests | ((uint8_t)verified << 1));
+}
+
+bool test_NEG_ACCA_exec()
+{
+	bool passAllTests = true;
+	MPU_State prev = getMPUState();
+	MemoryWrite(p,p->pc,0x01);
+	ALU_HD6303R_Execute(p, 0x01);
+	MPU_State curr = getMPUState();
+	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
+
+	passAllTests &= passAllTests &= checkImplemented(curr.flagRegister);
+	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
+	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
+	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
+	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
+	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
+
+	//Flag Checks
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		// H: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		// I: Not affected.
+	passAllTests &= CheckNFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorA); // N: Set if most significant bit of the result is set; cleared otherwise.
+	passAllTests &= CheckZFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorA); // Z: Set if all bits of the result are cleared; cleared otherwise.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);		// V: Not affected.
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);		// C: Not affected.
 	return passAllTests;
 }

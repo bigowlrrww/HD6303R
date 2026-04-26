@@ -137,5 +137,7 @@ uint8_t test_MUL();
 bool test_MUL_exec();
 uint8_t test_SWI();
 bool test_SWI_exec();
+uint8_t test_NEG_ACCA();
+bool test_NEG_ACCA_exec();
 
 #endif
