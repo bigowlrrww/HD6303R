@@ -389,15 +389,10 @@ bool test_LSRD_exec()
 //Flag Checks
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected.
-
 	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N); 		//N: Cleared
+	passAllTests &= CheckZFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorD); //Z: Set if all bits of the result are cleared; cleared otherwise.
 
-	if (curr.accumulatorD == 0x0000) 															//Z: if all bits are cleared; cleared otherwise
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-
-	if (!!(curr.flagRegister & HD6303R_FLAG_N)^!!(curr.flagRegister& HD6303R_FLAG_C)) 			// V: Set if, after the completion of the shift operation, N xor C == 1?
+	if (!!(curr.flagRegister & HD6303R_FLAG_N)^!!(curr.flagRegister& HD6303R_FLAG_C)) 			//V: Set if, after the completion of the shift operation, N xor C == 1?
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
@@ -486,16 +481,8 @@ bool test_ASLD_exec()
 //Flag Checks
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected.
-
-	if (curr.accumulatorD & 0x8000)																//N: Set if most significant bit of the result is set; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
-
-	if (curr.accumulatorD == 0x0000) 															//Z: Set if all bits of the result are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
+	passAllTests &= CheckNFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorD); //N: Set if most significant bit of the result is set; cleared otherwise.
+	passAllTests &= CheckZFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorD); //Z: Set if all bits of the result are cleared; cleared otherwise.
 
 	if (!!(curr.flagRegister & HD6303R_FLAG_N)^!!(curr.flagRegister& HD6303R_FLAG_C)) 			//V: Set if, after the completion of the shift operation, N xor C == 1?
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
@@ -664,12 +651,7 @@ bool test_INX_exec()
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);		//N: Not affected.
-
-	if (curr.indexRegister == 0x0000) 															//Z: Set if all bits of the result are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-
+	passAllTests &= CheckZFlagDefault(prev.flagRegister, curr.flagRegister, curr.indexRegister);//Z: Set if all bits of the result are cleared; cleared otherwise.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);		//V: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);		//C: Not affected.
 
@@ -736,12 +718,7 @@ bool test_DEX_exec()
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);		//N: Not affected.
-
-	if (curr.indexRegister == 0x0000) 															//Z: Set if all bits of the result are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-
+	passAllTests &= CheckZFlagDefault(prev.flagRegister, curr.flagRegister, curr.indexRegister);//Z: Set if all bits of the result are cleared; cleared otherwise.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);		//V: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);		//C: Not affected.
 
@@ -1179,16 +1156,8 @@ bool test_SBA_exec()
 //Flag Checks
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		// H: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		// I: Not affected.
-
-	if (curr.accumulatorA & 0x80) 																// N: Set if most significant bit of the result is set; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
-
-	if (curr.accumulatorA == 0x00) 																// Z: Set if all bits of the result are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
+	passAllTests &= CheckNFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorA); //N: Set if most significant bit of the result is set; cleared otherwise.
+	passAllTests &= CheckZFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorA); //Z: Set if all bits of the result are cleared; cleared otherwise.
 
 	if (__check_sub_overflow(prev.accumulatorA, prev.accumulatorB)) 					// V: Set if there was two’s complement overflow as a result of the operation.
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
@@ -1295,23 +1264,15 @@ bool test_CBA_exec()
 //Flag Checks
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		// H: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		// I: Not affected.
+	passAllTests &= CheckNFlagDefault(prev.flagRegister, curr.flagRegister, result); 			// N: Set if most significant bit of the result is set; cleared otherwise.
+	passAllTests &= CheckZFlagDefault(prev.flagRegister, curr.flagRegister, result); 			// Z: Set if all bits of the result are cleared; cleared otherwise.
 
-	if (result & 0x80) 																// N: Set if most significant bit of the result is set; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
-
-	if (result == 0x00) 																// Z: Set if all bits of the result are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-
-	if (__check_sub_overflow(prev.accumulatorA, prev.accumulatorB)) 					// V: Set if there was two’s complement overflow as a result of the operation.
+	if (__check_sub_overflow(prev.accumulatorA, prev.accumulatorB)) 							// V: Set if there was two’s complement overflow as a result of the operation.
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
 
-	if (__check_sub_carry(prev.accumulatorA,prev.accumulatorB)) 										// C: Carry is set if the absolute value of accumulator B plus previous Carry is larger than the absolute value of accumulator A; reset otherwise.
+	if (__check_sub_carry(prev.accumulatorA,prev.accumulatorB)) 								// C: Carry is set if the absolute value of accumulator B plus previous Carry is larger than the absolute value of accumulator A; reset otherwise.
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
@@ -1381,17 +1342,8 @@ bool test_TAB_exec()
 //Flag Checks
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		// H: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		// I: Not affected.
-
-	if (curr.accumulatorB & 0x80) 																			// N: Set if the most significant bit of the contents of the accumulator is set; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
-
-	if (curr.accumulatorB == 0x00) 																		// Z: Set if all bits of the accumulator are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-
+	passAllTests &= CheckNFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorB); // N: Set if most significant bit of the result is set; cleared otherwise.
+	passAllTests &= CheckZFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorB); // Z: Set if all bits of the result are cleared; cleared otherwise.
 	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V); 		// V: Cleared.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C); 		// C: Not affected.
 }
@@ -1457,17 +1409,8 @@ bool test_TBA_exec()
 //Flag Checks
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		// H: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		// I: Not affected.
-
-	if (curr.accumulatorA & 0x80) 																			// N: Set if the most significant bit of the contents of the accumulator is set; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
-
-	if (curr.accumulatorA == 0x00) 																		// Z: Set if all bits of the accumulator are cleared; cleared otherwise.
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-
+	passAllTests &= CheckNFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorA); // N: Set if most significant bit of the result is set; cleared otherwise.
+	passAllTests &= CheckZFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorA); // Z: Set if all bits of the result are cleared; cleared otherwise.
 	passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V); 		// V: Cleared.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C); 		// C: Not affected.
 }
@@ -1725,17 +1668,9 @@ bool test_ABA_exec()
 	else
 		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H);
 
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected
-	
-	if (R7)
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);		//N: Set if the result's MSB is "1"
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_N);
-
-	if (result == 0x0000)			 															//Z: Set if all bits of the result are cleared
-		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
-	else
-		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_Z);
+	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		// I: Not affected
+	passAllTests &= CheckNFlagDefault(prev.flagRegister, curr.flagRegister, result); 			// N: Set if most significant bit of the result is set; cleared otherwise.
+	passAllTests &= CheckZFlagDefault(prev.flagRegister, curr.flagRegister, result); 			// Z: Set if all bits of the result are cleared; cleared otherwise.
 
 	if (A7 & B7 & !R7 | !A7 & !B7 & R7)															// V: Set if the result overflows
 		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
@@ -3518,7 +3453,6 @@ bool test_MUL_exec()
 	passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
 
-//Flag Checks	
 	//Flag Checks
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Not affected.
@@ -3579,7 +3513,6 @@ bool test_SWI_exec()
 
 	passAllTests &= checkImplemented(curr.flagRegister);
 
-//Flag Checks	
 	//Flag Checks
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_H); 		//H: Not affected.
 	passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		//I: Always Set.
