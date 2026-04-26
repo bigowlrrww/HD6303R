@@ -28,6 +28,18 @@
     uint16_t: CheckSub16 \
 )(a,b,result,d)
 
+// Checks to see if the Z flag was set on a zero result
+#define CheckZFlagDefault(prev, curr, result) _Generic((result), \
+    uint8_t: CheckZFlagForZero8, \
+    uint16_t: CheckZFlagForZero16 \
+)(prev, curr, result)
+
+// Checks to see if the N flag was set on a negative result
+#define CheckNFlagDefault(prev, curr, result) _Generic((result), \
+    uint8_t: CheckNFlag8, \
+    uint16_t: CheckNFlag16 \
+)(prev, curr, result)
+
 void EnVerbose();
 bool PASS();
 bool WARN();
@@ -62,3 +74,9 @@ bool verifyUnknownMnemonic(uint16_t ExecResult);
 bool CheckFlagSet(uint8_t a, uint8_t b, uint8_t flag);
 bool CheckFlagUnset(uint8_t a, uint8_t b, uint8_t flag);
 bool CheckFlagSame(uint8_t a, uint8_t b, uint8_t flag);
+
+bool CheckZFlagForZero8(uint8_t prev, uint8_t curr, uint8_t result);
+bool CheckZFlagForZero16(uint8_t prev, uint8_t curr, uint16_t result);
+
+bool CheckNFlag8(uint8_t prev, uint8_t curr, uint8_t result);
+bool CheckNFlag16(uint8_t prev, uint8_t curr, uint16_t result);

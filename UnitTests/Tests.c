@@ -216,3 +216,27 @@ bool CheckFlagSame(uint8_t a, uint8_t b, uint8_t flag)
     if ((a & flag)==(b & flag)) return PASS();
     else return FAIL();
 }
+
+bool CheckZFlagForZero8(uint8_t prev, uint8_t curr, uint8_t result)
+{
+    if (result == 0x00) return CheckFlagSet(prev,curr,HD6303R_FLAG_Z);
+    else                return CheckFlagUnset(prev,curr,HD6303R_FLAG_Z);
+}
+
+bool CheckZFlagForZero16(uint8_t prev, uint8_t curr, uint16_t result)
+{
+    if (result == 0x0000) return CheckFlagSet(prev,curr,HD6303R_FLAG_Z);
+    else                  return CheckFlagUnset(prev,curr,HD6303R_FLAG_Z);
+}
+
+bool CheckNFlag8(uint8_t prev, uint8_t curr, uint8_t result)
+{
+    if (result & 0x80) CheckFlagSet(prev, curr, HD6303R_FLAG_N);
+    else               CheckFlagUnset(prev, curr, HD6303R_FLAG_N);
+}
+
+bool CheckNFlag16(uint8_t prev, uint8_t curr, uint16_t result)
+{
+    if (result & 0x8000) CheckFlagSet(prev, curr, HD6303R_FLAG_N);
+    else                 CheckFlagUnset(prev, curr, HD6303R_FLAG_N);
+}
