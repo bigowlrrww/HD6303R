@@ -3494,7 +3494,6 @@ uint8_t test_SWI()
 	passAllTests &= CheckSame(MemoryRead(p, p->stackPointer+7), 0xEF, "SP+7 = PCL");
 
 	verified = checkVerified(p->flagRegister);
-	printBreak(".",54);
 
 	return (passAllTests | ((uint8_t)verified << 1));
 }
@@ -3532,10 +3531,32 @@ uint8_t test_NEG_ACCA()
 	bool passAllTests = true;
 	bool verified = false;
 
-	PrintH2("Case Pos\n");
+	PrintH2("Case 0\n");
+	p->accumulatorA = 0x0;
+	p->flagRegister = HD6303R_FLAG_N | HD6303R_FLAG_V | HD6303R_FLAG_C;
 	passAllTests &= test_NEG_ACCA_exec();
 	verified = checkVerified(p->flagRegister);
 	printBreak(".",54);
+
+	PrintH2("Case -128\n");
+	p->accumulatorA = 0x80;
+	p->flagRegister = HD6303R_FLAG_Z;
+	passAllTests &= test_NEG_ACCA_exec();
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Case 15\n");
+	p->accumulatorA = 0x15;
+	p->flagRegister = HD6303R_FLAG_Z | HD6303R_FLAG_V | HD6303R_FLAG_C;
+	passAllTests &= test_NEG_ACCA_exec();
+	verified = checkVerified(p->flagRegister);
+	printBreak(".",54);
+
+	PrintH2("Case -12\n");
+	p->accumulatorA = 0xF4;
+	p->flagRegister = HD6303R_FLAG_Z | HD6303R_FLAG_N | HD6303R_FLAG_V | HD6303R_FLAG_C;
+	passAllTests &= test_NEG_ACCA_exec();
+	verified = checkVerified(p->flagRegister);
 
 	return (passAllTests | ((uint8_t)verified << 1));
 }
@@ -3544,16 +3565,15 @@ bool test_NEG_ACCA_exec()
 {
 	bool passAllTests = true;
 	MPU_State prev = getMPUState();
-	MemoryWrite(p,p->pc,0x01);
-	ALU_HD6303R_Execute(p, 0x01);
+	MemoryWrite(p,p->pc,0x40);
+	ALU_HD6303R_Execute(p, 0x40);
 	MPU_State curr = getMPUState();
 	printf("Executed Mnemonic [%s]\n",ALU_HD6303R_GetCurrentMneunomic(p));
 
 	passAllTests &= passAllTests &= checkImplemented(curr.flagRegister);
 	passAllTests &= CheckPC(prev.pc, curr.pc, 1);
-	passAllTests &= CheckSame(prev.accumulatorA, curr.accumulatorA, "Accumulator A");
+	passAllTests &= CheckSub8(0, prev.accumulatorA, (~prev.accumulatorA)+1, "Accumulator A");
 	passAllTests &= CheckSame(prev.accumulatorB, curr.accumulatorB, "Accumulator B");
-	passAllTests &= CheckSame(prev.accumulatorD, curr.accumulatorD, "Accumulator D");
 	passAllTests &= CheckSame(prev.indexRegister, prev.indexRegister, "Index");
 	passAllTests &= CheckSame(prev.stackPointer, curr.stackPointer, "Stack Pointer");
 
@@ -3562,7 +3582,14 @@ bool test_NEG_ACCA_exec()
 	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_I); 		// I: Not affected.
 	passAllTests &= CheckNFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorA); // N: Set if most significant bit of the result is set; cleared otherwise.
 	passAllTests &= CheckZFlagDefault(prev.flagRegister, curr.flagRegister, curr.accumulatorA); // Z: Set if all bits of the result are cleared; cleared otherwise.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);		// V: Not affected.
-	passAllTests &= CheckFlagSame(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);		// C: Not affected.
+	if (curr.accumulatorA == 0x80)																// V: Set if the result overflows; cleared otherwise. set only when the contents of AccA is $80;
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_V);
+	if (__builtin_parity(curr.accumulatorA) && prev.accumulatorA != 0)							// C: Set if a borrow is generated cleared otherwise. only when AccA is non zero.
+		passAllTests &= CheckFlagSet(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
+	else
+		passAllTests &= CheckFlagUnset(prev.flagRegister, curr.flagRegister, HD6303R_FLAG_C);
+
 	return passAllTests;
 }
