@@ -2620,12 +2620,29 @@ void ALU_HD6303R_NEGA(HD6303R_MPU * p)
 	switch (instruction) {
 		case 0x40: // NEGA Inherent
 			ALU_HD6303R_SetCurrentMneunomic(p, "NEGA");
+			if (p->accumulatorA != 0x80)
+				p->accumulatorA = -p->accumulatorA; // take the inverse of the AccA.
+			
 			break;
 		default:
 			break;
 	}
+	ALU_HD6303R_SetFlagIfNonZero(p, HD6303R_FLAG_N, p->accumulatorA & 0x80);
+	ALU_HD6303R_SetFlagIfZero(p, HD6303R_FLAG_Z, p->accumulatorA);
+	ALU_HD6303R_SetFlagIfNonZero(p, HD6303R_FLAG_V, p->accumulatorA == 0x80);
+	ALU_HD6303R_SetFlagIfNonZero(p, HD6303R_FLAG_C,
+								(((p->accumulatorA & 0x80) ? 1 : 0) ^
+								 ((p->accumulatorA & 0x40) ? 1 : 0) ^
+								 ((p->accumulatorA & 0x20) ? 1 : 0) ^
+								 ((p->accumulatorA & 0x10) ? 1 : 0) ^
+								 ((p->accumulatorA & 0x08) ? 1 : 0) ^
+								 ((p->accumulatorA & 0x04) ? 1 : 0) ^
+								 ((p->accumulatorA & 0x02) ? 1 : 0) ^
+								 ((p->accumulatorA & 0x01) ? 1 : 0)) && 
+								  p->accumulatorA != 0);
+
 	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_IMP);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
 // NOT IMPLEMENTED
