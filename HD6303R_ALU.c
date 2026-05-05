@@ -2641,7 +2641,7 @@ void ALU_HD6303R_NEGA(HD6303R_MPU * p)
 								 ((p->accumulatorA & 0x01) ? 1 : 0)) && 
 								  p->accumulatorA != 0);
 
-	ALU_HD6303R_UnsetFlag(p, HD6303R_FLAG_VERIFIED);
+	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_VERIFIED);
 	ALU_HD6303R_SetFlag(p, HD6303R_FLAG_IMP);
 }
 
